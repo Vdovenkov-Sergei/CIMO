@@ -7,6 +7,6 @@ from app.database import Base
 class SavedMovie(Base):
     __tablename__ = "saved_movies"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
-    movie_id: Mapped[int] = mapped_column(Integer, ForeignKey("movie.id"))
+    movie_id: Mapped[int] = mapped_column(Integer, ForeignKey("movies.id"))
