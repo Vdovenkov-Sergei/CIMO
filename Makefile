@@ -1,27 +1,26 @@
 # Edit if need
-APP_NAME = main
-CODE = app/ tests/ $(APP_NAME).py
+APP_MODULE = app.main
+SRC_CODE_DIR = app/
+POETRY_CMD = poetry run
+EXCLUDE = migrations
 
-# PEP8 - 79 symbols
-MAX_LINE_LENGTH = 120
-FAILS = 1
-
-.PHONY: format run test update lint clean
+.PHONY: format run test lint clean
 
 format:
-	black --line-length $(MAX_LINE_LENGTH) $(CODE)
+	$(POETRY_CMD) black $(SRC_CODE_DIR) --exclude=$(EXCLUDE)
+	$(POETRY_CMD) isort $(SRC_CODE_DIR) --skip=$(EXCLUDE)
 
 run:
-	poetry run uvicorn $(APP_NAME):app --reload
+	$(POETRY_CMD) uvicorn $(APP_MODULE):app --reload
 
 test:
-	poetry run pytest -k "$(TEST_NAME)" -m "$(MARKERS)" --maxfail=$(FAILS) -q --cov=app/ --cov-report=term-missing
-
-update:
-	poetry update
+	$(POETRY_CMD) pytest -k "$(TEST_NAME)" -m "$(MARKERS)" -q --cov=$(SRC_CODE_DIR) --cov-report=term-missing
 
 lint:
-	flake8 $(CODE) --max-line-length=$(MAX_LINE_LENGTH) --exclude=$(EXCLUDE) --verbose
+	$(POETRY_CMD) ruff check $(SRC_CODE_DIR) --exclude=$(EXCLUDE)
+	$(POETRY_CMD) mypy $(SRC_CODE_DIR) --exclude=$(EXCLUDE)
 
 clean:
-	rm -rf **/__pycache__ **/*.pyc **/*.pyo .coverage .pytest_cache
+	find . -type d -name "__pycache__" ! -path "./.venv/*" -exec rm -rf {} +
+	find . -type f \( -name "*.pyc" -o -name "*.pyo" -o -name "*.pyd" \) ! -path "./.venv/*" -delete
+	rm -rf .coverage .pytest_cache .mypy_cache .ruff_cache
