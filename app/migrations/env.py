@@ -12,10 +12,10 @@ sys.path.insert(0, abspath(dirname(dirname(dirname(__file__)))))
 from app.config import settings
 from app.database import Base
 from app.chats.models import Chat
-from app.favorites_movies.models import FavoriteMovie
+from app.viewed_movies.models import FavoriteMovie
 from app.messages.models import Message
 from app.movies.models import Movie
-from app.saved_movies.models import SavedMovie
+from app.watch_later_movies.models import SavedMovie
 from app.users.models import User
 
 # this is the Alembic Config object, which provides
