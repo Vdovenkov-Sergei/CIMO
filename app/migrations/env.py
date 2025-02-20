@@ -12,11 +12,15 @@ sys.path.insert(0, abspath(dirname(dirname(dirname(__file__)))))
 from app.config import settings
 from app.database import Base
 from app.chats.models import Chat
-from app.viewed_movies.models import FavoriteMovie
+from app.connection_requests.models import ConnectionRequest
 from app.messages.models import Message
 from app.movies.models import Movie
-from app.watch_later_movies.models import SavedMovie
+from app.session_movies.models import SessionMovie
+from app.sessions.models import Session
 from app.users.models import User
+from app.viewed_movies.models import ViewedMovie
+from app.watch_later_movies.models import WatchLaterMovie
+
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
