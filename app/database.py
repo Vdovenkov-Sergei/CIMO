@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from sqlalchemy import ARRAY, TIMESTAMP, BigInteger, Date, String, Text
+from sqlalchemy import ARRAY, TIMESTAMP, BigInteger, Date, Float, String, Text
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
@@ -14,6 +14,7 @@ async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
 class Base(DeclarativeBase):
     type_annotation_map = {
         int: BigInteger,
+        float: Float,
         str: String,
         datetime: TIMESTAMP(timezone=True),
         date: Date,
