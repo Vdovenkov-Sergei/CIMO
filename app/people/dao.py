@@ -1,5 +1,5 @@
 from app.dao.base import BaseDAO
-from app.movies.models import Person
+from app.people.models import Person
 
 
 class PersonDAO(BaseDAO):

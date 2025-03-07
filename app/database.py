@@ -1,6 +1,7 @@
+import uuid
 from datetime import date, datetime
 
-from sqlalchemy import ARRAY, TIMESTAMP, BigInteger, Date, Float, String, Text
+from sqlalchemy import ARRAY, TIMESTAMP, UUID, BigInteger, Date, Float, String, Text
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
@@ -19,4 +20,5 @@ class Base(DeclarativeBase):
         datetime: TIMESTAMP(timezone=True),
         date: Date,
         list[str]: ARRAY(Text),
+        uuid.UUID: UUID(as_uuid=True),
     }

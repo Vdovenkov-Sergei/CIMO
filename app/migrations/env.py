@@ -12,7 +12,6 @@ sys.path.insert(0, abspath(dirname(dirname(dirname(__file__)))))
 from app.config import settings
 from app.database import Base
 from app.chats.models import Chat
-from app.connection_requests.models import ConnectionRequest
 from app.messages.models import Message
 from app.movies.models import Movie
 from app.session_movies.models import SessionMovie
