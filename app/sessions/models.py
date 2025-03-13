@@ -3,7 +3,7 @@ from datetime import datetime
 from enum import Enum as PyEnum
 
 from sqlalchemy import Enum, ForeignKey, PrimaryKeyConstraint
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 
@@ -27,3 +27,5 @@ class Session(Base):
     )
 
     __table_args__ = (PrimaryKeyConstraint("id", "user_id", name="sessions_pkey"),)
+
+    user = relationship("User", back_populates="sessions")

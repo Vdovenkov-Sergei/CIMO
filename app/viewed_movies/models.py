@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import CheckConstraint, ForeignKey, PrimaryKeyConstraint, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 
@@ -18,3 +18,6 @@ class ViewedMovie(Base):
         CheckConstraint("review BETWEEN 1 AND 10", name="check_review_range"),
         PrimaryKeyConstraint("user_id", "movie_id", name="viewed_movies_pkey"),
     )
+
+    user = relationship("User", back_populates="viewed_movies")
+    movie = relationship("Movie", back_populates="viewed_by_users")

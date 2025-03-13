@@ -1,7 +1,7 @@
 from enum import Enum as PyEnum
 
 from sqlalchemy import Enum, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 
@@ -27,3 +27,6 @@ class Movie(Base):
     poster_url: Mapped[str] = mapped_column(nullable=False)
     genres: Mapped[list[str]] = mapped_column(nullable=True)
     countries: Mapped[list[str]] = mapped_column(nullable=True)
+
+    roles = relationship("MovieRole", back_populates="movie", cascade="all, delete-orphan")
+    viewed_by_users = relationship("ViewedMovie", back_populates="movie", cascade="all, delete-orphan")
