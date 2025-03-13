@@ -29,3 +29,7 @@ class Session(Base):
     __table_args__ = (PrimaryKeyConstraint("id", "user_id", name="sessions_pkey"),)
 
     user = relationship("User", back_populates="sessions")
+
+    def __repr__(self):
+        return f"<id(id={self.id}, user_id={self.user_id}, " \
+               f"created_at={self.created_at}, ended_at={self.ended_at}, status='{self.status}')>"

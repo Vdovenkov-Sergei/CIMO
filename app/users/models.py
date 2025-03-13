@@ -14,3 +14,6 @@ class User(Base):
     viewed_movies = relationship("ViewedMovie", back_populates="user", cascade="all, delete-orphan")
     watch_later_movies = relationship("WatchLaterMovie", back_populates="user", cascade="all, delete-orphan")
     sessions = relationship("Session", back_populates="user", cascade="all, delete-orphan")
+
+    def __repr__(self):
+        return f"<id(id={self.id}, user_name='{self.user_name}', email='{self.email}')>"

@@ -11,3 +11,6 @@ class Person(Base):
     photo_url: Mapped[str] = mapped_column(nullable=True)
 
     roles = relationship("MovieRole", back_populates="person", cascade="all, delete-orphan")
+
+    def __repr__(self):
+        return f"<id(id={self.id}, name='{self.name}', photo_url='{self.photo_url}')>"

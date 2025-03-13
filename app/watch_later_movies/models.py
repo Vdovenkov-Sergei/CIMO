@@ -17,3 +17,6 @@ class WatchLaterMovie(Base):
 
     user = relationship("User", back_populates="watch_later_movies")
     movie = relationship("Movie")
+
+    def __repr__(self):
+        return f"<user_id(id={self.user_id}, movie={self.movie_id}, created_at={self.created_at})>"

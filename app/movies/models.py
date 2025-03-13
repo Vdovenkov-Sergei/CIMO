@@ -30,3 +30,10 @@ class Movie(Base):
 
     roles = relationship("MovieRole", back_populates="movie", cascade="all, delete-orphan")
     viewed_by_users = relationship("ViewedMovie", back_populates="movie", cascade="all, delete-orphan")
+
+    def __repr__(self):
+        return f"<id(id={self.id}, type='{self.type}', name='{self.name}', " \
+               f"release_year={self.release_year}, description='{self.description}'," \
+               f"rating_kp={self.rating_kp}, rating_imdb={self.rating_imdb}," \
+               f"runtime={self.runtime}, age_rating={self.age_rating}, postgres_url='{self.poster_url}'," \
+               f"genres='{self.genres}', countries={self.countries})>"
