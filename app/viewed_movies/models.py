@@ -22,5 +22,5 @@ class ViewedMovie(Base):
     user = relationship("User", back_populates="viewed_movies")
     movie = relationship("Movie", back_populates="viewed_by_users")
 
-    def __repr__(self):
-        return f"<user_id(id={self.user_id}, movie={self.movie_id}, review={self.review}, created_at={self.created_at})>"
+    def __str__(self):
+        return f"Movie #{self.movie_id} with rating: {self.review}"

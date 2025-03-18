@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import ForeignKey, ForeignKeyConstraint, PrimaryKeyConstraint, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 
@@ -21,3 +21,9 @@ class SessionMovie(Base):
         ),
         PrimaryKeyConstraint("session_id", "user_id", "movie_id", name="session_movies_pkey"),
     )
+
+    movie = relationship("Movie", back_populates="session_movies")
+    session = relationship("Session", back_populates="session_movies")
+
+    def __str__(self):
+        return f"Movies: {self.movie_id}"

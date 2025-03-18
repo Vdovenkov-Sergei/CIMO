@@ -24,3 +24,6 @@ class MovieRole(Base):
 
     movie = relationship("Movie", back_populates="roles")
     person = relationship("Person", back_populates="roles")
+
+    def __str__(self):
+        return self.role.name

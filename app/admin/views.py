@@ -13,77 +13,59 @@ from app.watch_later_movies.models import WatchLaterMovie
 
 
 class ChatAdmin(ModelView, model=Chat):
-    column_list = Chat.__table__.columns.keys()
-    can_edit = False
-    can_create = False
+    column_list = [Chat.id, Chat.user, Chat.bot_name, Chat.messages, Chat.created_at]
+    icon = "fa-solid fa-comments"
 
 
 class MessageAdmin(ModelView, model=Message):
-    column_list = Message.__table__.columns.keys()
-    can_edit = False
-    can_create = False
+    column_list = [Message.chat, Message.sender, Message.created_at, Message.content]
+    icon = "fa-solid fa-message"
 
 
 class MovieRoleAdmin(ModelView, model=MovieRole):
-    column_list = MovieRole.__table__.columns.keys()
-    column_formatters = {
-        MovieRole.movie_id: lambda v, c, m, n: m.movie.name if m.movie else "Unknown movie",
-        MovieRole.person_id: lambda v, c, m, n: m.person.name if m.person else "Unknown actor"
-    }
-    form_excluded_columns = []
+    column_list = [MovieRole.movie, MovieRole.person, MovieRole.role]
+    icon = "fa-solid fa-address-card"
 
 
 class MovieAdmin(ModelView, model=Movie):
-    column_list = Movie.__table__.columns.keys()
-    column_searchable_list = [Movie.name]
-    column_sortable_list = [Movie.release_year, Movie.rating_kp, Movie.rating_imdb]
-    column_details_list = [Movie.roles, Movie.viewed_by_users]
-    form_excluded_columns = [Movie.viewed_by_users]
+    column_list = [Movie.name, Movie.type, Movie.release_year, Movie.age_rating,
+                   Movie.rating_kp, Movie.rating_imdb, Movie.description, Movie.roles,
+                   Movie.runtime, Movie.genres, Movie.countries, Movie.poster_url]
+    column_searchable_list = [Movie.name, Movie.release_year]
+    column_sortable_list = [Movie.name, Movie.release_year, Movie.rating_kp, Movie.rating_imdb]
+    icon = "fa-solid fa-video"
 
 
 class PersonAdmin(ModelView, model=Person):
-    column_list = Person.__table__.columns.keys()
+    column_list = [Person.name, Person.roles, Person.photo_url]
     column_searchable_list = [Person.name]
-    column_details_list = [Person.roles]
+    column_sortable_list = [Person.name]
+    icon = "fa-solid fa-user-tie"
 
 
 class SessionMovieAdmin(ModelView, model=SessionMovie):
-    column_list = SessionMovie.__table__.columns.keys()
-    can_edit = False
-    can_create = False
+    column_list = "__all__"
+    icon = "fa-solid fa-bookmark"
 
 
 class SessionAdmin(ModelView, model=Session):
-    column_list = Session.__table__.columns.keys()
-    can_edit = False
-    can_delete = False
-    can_create = False
+    column_list = "__all__"
+    icon = "fa-solid fa-handshake-simple"
 
 
 class UserAdmin(ModelView, model=User):
     column_list = [User.id, User.user_name, User.email]
     column_searchable_list = [User.user_name, User.email]
     column_sortable_list = [User.id, User.user_name]
-    column_details_list = [User.viewed_movies, User.watch_later_movies, User.sessions]
-    form_excluded_columns = [User.sessions]
-    can_delete = False
-    can_edit = False
-    can_create = False
+    column_details_list = [User.viewed_movies, User.watch_later_movies, User.sessions, User.chats]
+    icon = "fa-solid fa-circle-user"
 
 
 class ViewedMovieAdmin(ModelView, model=ViewedMovie):
-    column_list = ViewedMovie.__table__.columns.keys()
-    column_formatters = {
-        ViewedMovie.user_id: lambda v, c, m, n: m.user.user_name if m.user else "Unknown user",
-        ViewedMovie.movie_id: lambda v, c, m, n: m.movie.name if m.movie else "Unknown movie"
-    }
-    form_excluded_columns = [ViewedMovie.created_at]
+    column_list = [ViewedMovie.movie, ViewedMovie.user, ViewedMovie.review, ViewedMovie.created_at]
+    icon = "fa-solid fa-eye"
 
 
 class WatchLaterMovieAdmin(ModelView, model=WatchLaterMovie):
-    column_list = WatchLaterMovie.__table__.columns.keys()
-    column_formatters = {
-        WatchLaterMovie.user_id: lambda v, c, m, n: m.user.user_name if m.user else "Unknown user",
-        WatchLaterMovie.movie_id: lambda v, c, m, n: m.movie.name if m.movie else "Unknown movie"
-    }
-    form_excluded_columns = [WatchLaterMovie.created_at]
+    column_list = [WatchLaterMovie.movie, WatchLaterMovie.user, WatchLaterMovie.created_at]
+    icon = "fa-solid fa-clock"

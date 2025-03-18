@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum as PyEnum
 
 from sqlalchemy import Enum, ForeignKey, Text, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 
@@ -20,3 +20,8 @@ class Message(Base):
     created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
     sender: Mapped[SenderType] = mapped_column(Enum(SenderType), server_default=SenderType.BOT.value, nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
+
+    chat = relationship("Chat", back_populates="messages")
+
+    def __str__(self):
+        return self.content

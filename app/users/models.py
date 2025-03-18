@@ -11,9 +11,10 @@ class User(Base):
     email: Mapped[str] = mapped_column(unique=True, nullable=False)
     hashed_password: Mapped[str] = mapped_column(nullable=False)
 
+    chats = relationship("Chat", back_populates="user", cascade="all, delete-orphan")
     viewed_movies = relationship("ViewedMovie", back_populates="user", cascade="all, delete-orphan")
     watch_later_movies = relationship("WatchLaterMovie", back_populates="user", cascade="all, delete-orphan")
     sessions = relationship("Session", back_populates="user", cascade="all, delete-orphan")
 
-    def __repr__(self):
-        return f"<id(id={self.id}, user_name='{self.user_name}', email='{self.email}')>"
+    def __str__(self):
+        return self.user_name

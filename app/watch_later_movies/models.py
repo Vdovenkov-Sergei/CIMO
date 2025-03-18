@@ -16,7 +16,7 @@ class WatchLaterMovie(Base):
     __table_args__ = (PrimaryKeyConstraint("user_id", "movie_id", name="watch_later_movies_pkey"),)
 
     user = relationship("User", back_populates="watch_later_movies")
-    movie = relationship("Movie")
+    movie = relationship("Movie", back_populates="watch_later_movies")
 
-    def __repr__(self):
-        return f"<user_id(id={self.user_id}, movie={self.movie_id}, created_at={self.created_at})>"
+    def __str__(self):
+        return f"Movie #{self.movie_id}"

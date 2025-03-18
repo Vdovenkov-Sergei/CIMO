@@ -29,7 +29,7 @@ class Session(Base):
     __table_args__ = (PrimaryKeyConstraint("id", "user_id", name="sessions_pkey"),)
 
     user = relationship("User", back_populates="sessions")
+    session_movies = relationship("SessionMovie", back_populates="session", cascade="all, delete-orphan")
 
-    def __repr__(self):
-        return f"<id(id={self.id}, user_id={self.user_id}, " \
-               f"created_at={self.created_at}, ended_at={self.ended_at}, status='{self.status}')>"
+    def __str__(self):
+        return self.status
