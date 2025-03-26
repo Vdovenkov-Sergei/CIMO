@@ -9,8 +9,8 @@ from app.database import Base
 class ViewedMovie(Base):
     __tablename__ = "viewed_movies"
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    movie_id: Mapped[int] = mapped_column(ForeignKey("movies.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE"))
+    movie_id: Mapped[int] = mapped_column(ForeignKey("movies.id", ondelete="CASCADE", onupdate="CASCADE"))
     review: Mapped[int] = mapped_column(nullable=False)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
 
@@ -23,4 +23,4 @@ class ViewedMovie(Base):
     movie = relationship("Movie", back_populates="viewed_by_users")
 
     def __str__(self):
-        return f"Movie #{self.movie_id} with rating: {self.review}"
+        return f"Movie #{self.movie_id}, {self.review}/10"

@@ -19,7 +19,7 @@ class Session(Base):
     __tablename__ = "sessions"
 
     id: Mapped[uuid.UUID] = mapped_column()
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE"))
     created_at: Mapped[datetime] = mapped_column(nullable=True)
     ended_at: Mapped[datetime] = mapped_column(nullable=True)
     status: Mapped[SessionStatus] = mapped_column(
@@ -29,7 +29,12 @@ class Session(Base):
     __table_args__ = (PrimaryKeyConstraint("id", "user_id", name="sessions_pkey"),)
 
     user = relationship("User", back_populates="sessions")
-    session_movies = relationship("SessionMovie", back_populates="session", cascade="all, delete-orphan")
+    session_movies = relationship(
+        "SessionMovie",
+        back_populates="session",
+        cascade="all, delete-orphan",
+        primaryjoin="and_(Session.id == SessionMovie.session_id, Session.user_id == SessionMovie.user_id)"
+    )
 
     def __str__(self):
-        return self.status
+        return self.status.value

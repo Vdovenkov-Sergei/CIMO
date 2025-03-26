@@ -34,4 +34,4 @@ class Movie(Base):
     session_movies = relationship("SessionMovie", back_populates="movie", cascade="all, delete-orphan")
 
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.release_year})"

@@ -9,8 +9,8 @@ from app.database import Base
 class WatchLaterMovie(Base):
     __tablename__ = "watch_later_movies"
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    movie_id: Mapped[int] = mapped_column(ForeignKey("movies.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE"))
+    movie_id: Mapped[int] = mapped_column(ForeignKey("movies.id", ondelete="CASCADE", onupdate="CASCADE"))
     created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
 
     __table_args__ = (PrimaryKeyConstraint("user_id", "movie_id", name="watch_later_movies_pkey"),)

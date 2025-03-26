@@ -15,8 +15,8 @@ class RoleType(PyEnum):
 class MovieRole(Base):
     __tablename__ = "movie_roles"
 
-    movie_id: Mapped[int] = mapped_column(ForeignKey("movies.id"))
-    person_id: Mapped[int] = mapped_column(ForeignKey("people.id"))
+    movie_id: Mapped[int] = mapped_column(ForeignKey("movies.id", ondelete="CASCADE", onupdate="CASCADE"))
+    person_id: Mapped[int] = mapped_column(ForeignKey("people.id", ondelete="CASCADE", onupdate="CASCADE"))
     priority: Mapped[int] = mapped_column(nullable=False)
     role: Mapped[RoleType] = mapped_column(Enum(RoleType), nullable=False)
 
@@ -26,4 +26,4 @@ class MovieRole(Base):
     person = relationship("Person", back_populates="roles")
 
     def __str__(self):
-        return self.role.name
+        return self.role.value

@@ -10,12 +10,12 @@ class Chat(Base):
     __tablename__ = "chats"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, unique=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False, unique=True)
     bot_name: Mapped[str] = mapped_column(nullable=False)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
 
-    user = relationship("User", back_populates="chats")
+    user = relationship("User", back_populates="chat", uselist=False)
     messages = relationship("Message", back_populates="chat", cascade="all, delete-orphan")
 
     def __str__(self):
-        return f"Chat #{self.id}"
+        return f"Chat-bot #{self.id} {self.bot_name}"

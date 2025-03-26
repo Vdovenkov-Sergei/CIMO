@@ -10,7 +10,7 @@ class Person(Base):
     name: Mapped[str] = mapped_column(nullable=False)
     photo_url: Mapped[str] = mapped_column(nullable=True)
 
-    roles = relationship("MovieRole", back_populates="person")
+    roles = relationship("MovieRole", back_populates="person", cascade="all, delete-orphan")
 
     def __str__(self):
         return self.name
