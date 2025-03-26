@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from sqladmin import Admin
 
 from app.admin.views import UserAdmin, MovieAdmin, WatchLaterMovieAdmin, ViewedMovieAdmin, SessionAdmin, \
@@ -7,8 +8,10 @@ from app.database import engine
 
 
 app = FastAPI(title="CIMO")
-admin = Admin(app, engine)
 
+app.mount("/static", StaticFiles(directory="app/static"), "static")
+
+admin = Admin(app, engine, title="CIMO admin", logo_url="/static/images/CIMO.jpg")
 admin.add_view(ChatAdmin)
 admin.add_view(MessageAdmin)
 admin.add_view(MovieRoleAdmin)

@@ -35,7 +35,8 @@ def upgrade() -> None:
     op.alter_column('sessions', 'created_at',
                existing_type=sa.TIMESTAMP(timezone=True),
                nullable=True,
-               existing_server_default=sa.text('now()'))
+               existing_server_default=sa.text('now()'), 
+               server_default=None)
     op.drop_constraint('sessions_user_1_id_fkey', 'sessions', type_='foreignkey')
     op.drop_constraint('sessions_user_2_id_fkey', 'sessions', type_='foreignkey')
     op.create_foreign_key('sessions_user_id_fkey', 'sessions', 'users', ['user_id'], ['id'])
@@ -71,7 +72,7 @@ def downgrade() -> None:
     op.alter_column('sessions', 'created_at',
                existing_type=sa.TIMESTAMP(timezone=True),
                nullable=False,
-               existing_server_default=sa.text('now()'))
+               server_default=sa.text('now()'))
 
     op.drop_column('sessions', 'status')
     new_session_status.drop(op.get_bind())
