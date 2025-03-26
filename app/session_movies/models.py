@@ -20,8 +20,8 @@ class SessionMovie(Base):
             ["session_id", "user_id"],
             ["sessions.id", "sessions.user_id"],
             name="session_movies_session_user_id_fkey",
-            deferrable=True,
-            initially="DEFERRED",
+            ondelete="CASCADE",
+            onupdate="CASCADE",
         ),
         PrimaryKeyConstraint("session_id", "user_id", "movie_id", name="session_movies_pkey"),
     )
