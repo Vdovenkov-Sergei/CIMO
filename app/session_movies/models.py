@@ -30,8 +30,8 @@ class SessionMovie(Base):
     session = relationship(
         "Session",
         back_populates="session_movies",
-        primaryjoin="and_(Session.id == SessionMovie.session_id, Session.user_id == SessionMovie.user_id)"
+        primaryjoin="and_(Session.id == SessionMovie.session_id, Session.user_id == SessionMovie.user_id)",
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Movie #{self.movie_id}"

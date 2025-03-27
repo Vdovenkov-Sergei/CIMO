@@ -33,5 +33,5 @@ class Movie(Base):
     watch_later_movies = relationship("WatchLaterMovie", back_populates="movie", cascade="all, delete-orphan")
     session_movies = relationship("SessionMovie", back_populates="movie", cascade="all, delete-orphan")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.name} ({self.release_year})"

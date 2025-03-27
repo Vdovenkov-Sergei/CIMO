@@ -33,8 +33,8 @@ class Session(Base):
         "SessionMovie",
         back_populates="session",
         cascade="all, delete-orphan",
-        primaryjoin="and_(Session.id == SessionMovie.session_id, Session.user_id == SessionMovie.user_id)"
+        primaryjoin="and_(Session.id == SessionMovie.session_id, Session.user_id == SessionMovie.user_id)",
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.status.value

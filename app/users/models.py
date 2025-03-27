@@ -16,5 +16,5 @@ class User(Base):
     watch_later_movies = relationship("WatchLaterMovie", back_populates="user", cascade="all, delete-orphan")
     sessions = relationship("Session", back_populates="user", cascade="all, delete-orphan")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.user_name

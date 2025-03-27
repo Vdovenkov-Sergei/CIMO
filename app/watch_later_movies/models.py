@@ -18,5 +18,5 @@ class WatchLaterMovie(Base):
     user = relationship("User", back_populates="watch_later_movies")
     movie = relationship("Movie", back_populates="watch_later_movies")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Movie #{self.movie_id}"

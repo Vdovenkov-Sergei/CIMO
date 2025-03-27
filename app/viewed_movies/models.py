@@ -22,5 +22,5 @@ class ViewedMovie(Base):
     user = relationship("User", back_populates="viewed_movies")
     movie = relationship("Movie", back_populates="viewed_by_users")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Movie #{self.movie_id}, {self.review}/10"

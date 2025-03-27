@@ -1,3 +1,6 @@
+# type: ignore
+
+from markupsafe import Markup
 from sqladmin import ModelView
 
 from app.chats.models import Chat
@@ -10,13 +13,17 @@ from app.sessions.models import Session
 from app.users.models import User
 from app.viewed_movies.models import ViewedMovie
 from app.watch_later_movies.models import WatchLaterMovie
-from markupsafe import Markup
-
 
 PREFIX_MOVIE = "https://image.openmoviedb.com/kinopoisk-images"
 PREFIX_PERSON = "https://avatars.mds.yandex.net/get-kinopoisk-image"
-movie_url = lambda m: f"{PREFIX_MOVIE}/{m.poster_url}"
-person_url = lambda p: f"{PREFIX_PERSON}/{p.photo_url}"
+
+
+def movie_url(m: Movie) -> str:
+    return f"{PREFIX_MOVIE}/{m.poster_url}"
+
+
+def person_url(p: Person) -> str:
+    return f"{PREFIX_PERSON}/{p.photo_url}"
 
 
 class BaseAdmin(ModelView):
@@ -56,8 +63,18 @@ class MovieRoleAdmin(BaseAdmin, model=MovieRole):
 
 
 class MovieAdmin(BaseAdmin, model=Movie):
-    column_list = [Movie.id, Movie.name, Movie.type, Movie.release_year, Movie.age_rating,
-                   Movie.rating_kp, Movie.rating_imdb, Movie.runtime, Movie.genres, Movie.countries]
+    column_list = [
+        Movie.id,
+        Movie.name,
+        Movie.type,
+        Movie.release_year,
+        Movie.age_rating,
+        Movie.rating_kp,
+        Movie.rating_imdb,
+        Movie.runtime,
+        Movie.genres,
+        Movie.countries,
+    ]
     column_details_list = list(Movie.__table__.columns) + [Movie.roles]
     column_searchable_list = [Movie.id, Movie.name, Movie.release_year]
     column_default_sort = (Movie.id, False)
@@ -112,7 +129,11 @@ class UserAdmin(BaseAdmin, model=User):
 
 class SessionMovieAdmin(BaseAdmin, model=SessionMovie):
     column_list = [SessionMovie.session, SessionMovie.user_id, SessionMovie.movie, SessionMovie.created_at]
-    column_default_sort = [(SessionMovie.session_id, False), (SessionMovie.user_id, False), (SessionMovie.movie_id, False)]
+    column_default_sort = [
+        (SessionMovie.session_id, False),
+        (SessionMovie.user_id, False),
+        (SessionMovie.movie_id, False),
+    ]
     column_sortable_list = [SessionMovie.created_at]
     icon = "fa-solid fa-bookmark"
 

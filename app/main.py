@@ -1,11 +1,22 @@
+# type: ignore
+
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from sqladmin import Admin
 
-from app.admin.views import UserAdmin, MovieAdmin, WatchLaterMovieAdmin, ViewedMovieAdmin, SessionAdmin, \
-    SessionMovieAdmin, PersonAdmin, MovieRoleAdmin, MessageAdmin, ChatAdmin
+from app.admin.views import (
+    ChatAdmin,
+    MessageAdmin,
+    MovieAdmin,
+    MovieRoleAdmin,
+    PersonAdmin,
+    SessionAdmin,
+    SessionMovieAdmin,
+    UserAdmin,
+    ViewedMovieAdmin,
+    WatchLaterMovieAdmin,
+)
 from app.database import engine
-
 
 app = FastAPI(title="CIMO")
 

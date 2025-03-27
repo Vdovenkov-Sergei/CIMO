@@ -12,5 +12,5 @@ class Person(Base):
 
     roles = relationship("MovieRole", back_populates="person", cascade="all, delete-orphan")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name

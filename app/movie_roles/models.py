@@ -25,5 +25,5 @@ class MovieRole(Base):
     movie = relationship("Movie", back_populates="roles")
     person = relationship("Person", back_populates="roles")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.role.value

@@ -23,5 +23,5 @@ class Message(Base):
 
     chat = relationship("Chat", back_populates="messages")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Message {self.sender.value} #{self.id}"
