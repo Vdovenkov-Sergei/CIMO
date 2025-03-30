@@ -119,12 +119,17 @@ class SessionAdmin(BaseAdmin, model=Session):
 
 
 class UserAdmin(BaseAdmin, model=User):
-    column_list = [User.id, User.user_name, User.email]
-    column_sortable_list = [User.id, User.user_name, User.email]
+    column_list = [User.id, User.user_name, User.email, User.is_verified, User.created_at]
+    column_sortable_list = [User.id, User.user_name, User.email, User.created_at]
     column_searchable_list = [User.id, User.user_name, User.email]
     column_default_sort = (User.id, False)
     column_details_list = [User.viewed_movies, User.watch_later_movies, User.sessions, User.chat]
     icon = "fa-solid fa-circle-user"
+
+    column_formatters = {
+        "user_name": lambda m, a: m.user_name if m.user_name else "-",
+        "is_verified": lambda m, a: "Yes" if m.is_verified else "No",
+    }
 
 
 class SessionMovieAdmin(BaseAdmin, model=SessionMovie):

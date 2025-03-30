@@ -5,16 +5,17 @@ from jose import jwt, JWTError
 from app.config import settings
 from app.exceptions import IncorrectTokenFormatException, TokenExpiredException, TokenNotFoundException, UserIsNotPresentException
 from app.users.dao import UserDAO
+from app.users.models import User
 
 
-def get_token(request: Request):
+def get_token(request: Request) -> str:
     token = request.cookies.get("access_token")
     if not token:
         raise TokenNotFoundException
     return token
 
 
-async def get_current_user(token: str = Depends(get_token)):
+async def get_current_user(token: str = Depends(get_token)) -> User:
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, settings.ALGORITHM)
     except JWTError:
