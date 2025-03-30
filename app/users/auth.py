@@ -1,11 +1,10 @@
 from datetime import UTC, datetime, timedelta
-from typing import Optional
+from typing import Any, Optional
 from passlib.context import CryptContext
-from jose import jwt
-from pydantic import EmailStr
+from jose import JWTError, jwt
 
 from app.config import settings
-from app.exceptions import IncorrectEmailOrPasswordException, IncorrectUsernameOrPasswordException
+from app.exceptions import IncorrectLoginOrPasswordException, IncorrectTokenFormatException, TokenExpiredException, TokenNotFoundException
 from app.users.dao import UserDAO
 from app.users.models import User
 
@@ -28,15 +27,23 @@ def create_jwt_token(data: dict, expires_delta: timedelta) -> str:
     return jwt_token
 
 
-async def authenticate_by_email(email: EmailStr, password: str) -> Optional[User]:
-    user = await UserDAO.find_one_or_none(email=email)
-    if not user or not verify_password(password, user.hashed_password):
-        raise IncorrectEmailOrPasswordException
-    return user
+def check_jwt_token(token: Optional[str]) -> dict[str, Any]:
+    if not token:
+        raise TokenNotFoundException
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, settings.ALGORITHM)
+    except JWTError:
+        raise IncorrectTokenFormatException
+
+    expire = payload.get("exp")
+    if expire and expire < int(datetime.now(UTC).timestamp()):
+        raise TokenExpiredException
+    
+    return payload
 
 
-async def authenticate_by_username(user_name: str, password: str) -> Optional[User]:
-    user = await UserDAO.find_one_or_none(user_name=user_name)
+async def authenticate_user(login: str, password: str) -> Optional[User]:
+    user = await UserDAO.find_one_or_none(email=login) or await UserDAO.find_one_or_none(user_name=login)
     if not user or not verify_password(password, user.hashed_password):
-        raise IncorrectUsernameOrPasswordException
+        raise IncorrectLoginOrPasswordException
     return user

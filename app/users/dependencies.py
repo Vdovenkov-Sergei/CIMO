@@ -1,29 +1,13 @@
-from datetime import UTC, datetime
-from fastapi import Depends, Request
-from jose import jwt, JWTError
+from fastapi import Cookie
 
-from app.config import settings
-from app.exceptions import IncorrectTokenFormatException, TokenExpiredException, TokenNotFoundException, UserIsNotPresentException
+from app.exceptions import UserIsNotPresentException
+from app.users.auth import check_jwt_token
 from app.users.dao import UserDAO
 from app.users.models import User
 
 
-def get_token(request: Request) -> str:
-    token = request.cookies.get("access_token")
-    if not token:
-        raise TokenNotFoundException
-    return token
-
-
-async def get_current_user(token: str = Depends(get_token)) -> User:
-    try:
-        payload = jwt.decode(token, settings.SECRET_KEY, settings.ALGORITHM)
-    except JWTError:
-        raise IncorrectTokenFormatException
-
-    expire = payload.get("exp")
-    if expire and expire < int(datetime.now(UTC).timestamp()):
-        raise TokenExpiredException
+async def get_current_user(access_token: str = Cookie(None)) -> User:
+    payload = check_jwt_token(access_token)
     
     user_id = payload.get("sub")
     if not user_id:

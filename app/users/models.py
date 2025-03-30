@@ -1,6 +1,5 @@
 from datetime import datetime
 from sqlalchemy import func
-from sqlalchemy.sql import expression
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -12,7 +11,6 @@ class User(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     email: Mapped[str] = mapped_column(unique=True, nullable=False)
     hashed_password: Mapped[str] = mapped_column(nullable=False)
-    is_verified: Mapped[bool] = mapped_column(server_default=expression.false(), nullable=False)
     user_name: Mapped[str] = mapped_column(unique=True, nullable=True)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
 
@@ -22,4 +20,4 @@ class User(Base):
     sessions = relationship("Session", back_populates="user", cascade="all, delete-orphan")
 
     def __str__(self) -> str:
-        return self.user_name if self.user_name else self.email
+        return self.user_name or self.email
