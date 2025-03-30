@@ -1,10 +1,11 @@
 from email.message import EmailMessage
+
 from pydantic import EmailStr
 
 from app.config import settings
 
 
-def create_verification_template(email_to: EmailStr, code: str) -> str:
+def create_verification_template(email_to: EmailStr, code: str) -> EmailMessage:
     email = EmailMessage()
     email["Subject"] = "Подтверждение вашей регистрации"
     email["From"] = settings.SMTP_USER

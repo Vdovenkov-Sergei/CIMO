@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from sqlalchemy import func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -20,4 +21,4 @@ class User(Base):
     sessions = relationship("Session", back_populates="user", cascade="all, delete-orphan")
 
     def __str__(self) -> str:
-        return self.user_name or self.email
+        return self.user_name

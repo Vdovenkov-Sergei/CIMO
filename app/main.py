@@ -1,6 +1,5 @@
 # type: ignore
 
-from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from sqladmin import Admin
@@ -17,23 +16,17 @@ from app.admin.views import (
     ViewedMovieAdmin,
     WatchLaterMovieAdmin,
 )
-from app.database import engine
-from collections.abc import AsyncIterator
-
-from app.redis import redis_client
-from app.users.router import router_user, router_auth
+from app.database import engine, redis_client
+from app.users.router import router_auth, router_user
 
 
-@asynccontextmanager
-async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-    await redis_client.connect()
-    yield
+async def on_shutdown():
     await redis_client.close()
 
 
-app = FastAPI(title="CIMO", lifespan=lifespan)
-app.include_router(router_auth)
+app = FastAPI(title="CIMO", on_shutdown=[on_shutdown])
 app.include_router(router_user)
+app.include_router(router_auth)
 
 app.mount("/static", StaticFiles(directory="app/static"), "static")
 
