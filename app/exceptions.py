@@ -20,3 +20,22 @@ class IncorrectEmailOrPasswordException(ApiException):
 class IncorrectUsernameOrPasswordException(ApiException):
     status_code: int = status.HTTP_401_UNAUTHORIZED
     error_message: str = "Incorrect username or password"
+
+
+class TokenNotFoundException(ApiException):
+    status_code: int = status.HTTP_401_UNAUTHORIZED
+    error_message: str = "Access token not found"
+
+
+class IncorrectTokenFormatException(ApiException):
+    status_code: int = status.HTTP_401_UNAUTHORIZED
+    error_message: str = "Incorrect token format"
+
+
+class TokenExpiredException(ApiException):
+    status_code: int = status.HTTP_401_UNAUTHORIZED
+    error_message: str = "Access token expired"
+
+
+class UserIsNotPresentException(ApiException):
+    status_code: int = status.HTTP_401_UNAUTHORIZED
