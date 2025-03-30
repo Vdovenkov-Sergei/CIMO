@@ -1,11 +1,11 @@
 from datetime import UTC, datetime, timedelta
 from typing import Optional
-from fastapi import HTTPException
 from passlib.context import CryptContext
 from jose import jwt
 from pydantic import EmailStr
 
 from app.config import settings
+from app.exceptions import IncorrectEmailOrPasswordException, IncorrectUsernameOrPasswordException
 from app.users.dao import UserDAO
 from app.users.models import User
 
@@ -31,12 +31,12 @@ def create_jwt_token(data: dict, expires_delta: timedelta) -> str:
 async def authenticate_by_email(email: EmailStr, password: str) -> Optional[User]:
     user = await UserDAO.find_one_or_none(email=email)
     if not user or not verify_password(password, user.hashed_password):
-        raise HTTPException(status_code=401, detail="Incorrect email or password")
+        raise IncorrectEmailOrPasswordException
     return user
 
 
 async def authenticate_by_username(user_name: str, password: str) -> Optional[User]:
     user = await UserDAO.find_one_or_none(user_name=user_name)
     if not user or not verify_password(password, user.hashed_password):
-        raise HTTPException(status_code=401, detail="Incorrect username or password")
+        raise IncorrectUsernameOrPasswordException
     return user
