@@ -1,17 +1,23 @@
-# Edit if need
-APP_MODULE = app.main
+MAIN_APP = app.main:app
+CELERY_APP = app.tasks.celery:celery_app
 SRC_CODE_DIR = app/
 POETRY_CMD = poetry run
 EXCLUDE = migrations
 
-.PHONY: format run test lint clean
+.PHONY: format run celery flower test lint clean
 
 format:
 	$(POETRY_CMD) black $(SRC_CODE_DIR) --exclude=$(EXCLUDE)
 	$(POETRY_CMD) isort $(SRC_CODE_DIR) --skip=$(EXCLUDE)
 
 run:
-	$(POETRY_CMD) uvicorn $(APP_MODULE):app --reload
+	$(POETRY_CMD) uvicorn $(MAIN_APP) --reload
+
+celery:
+	$(POETRY_CMD) celery -A $(CELERY_APP) worker --loglevel=INFO --pool=solo
+
+flower:
+	$(POETRY_CMD) celery -A $(CELERY_APP) flower
 
 test:
 	$(POETRY_CMD) pytest -k "$(TEST_NAME)" -m "$(MARKERS)" -q --cov=$(SRC_CODE_DIR) --cov-report=term-missing
