@@ -38,7 +38,7 @@ class UserIsNotPresentException(ApiException):
 
 class EmailAlreadyExistsException(ApiException):
     status_code: int = status.HTTP_409_CONFLICT
-    error_message: str = "User with email='{email}' already exists"
+    error_message: str = "User with email='{email}' already exists or pending verification"
 
 
 class UsernameAlreadyExistsException(ApiException):
@@ -49,4 +49,11 @@ class UsernameAlreadyExistsException(ApiException):
 class UserNotFoundException(ApiException):
     status_code: int = status.HTTP_404_NOT_FOUND
     error_message: str = "User not found"
-    
+
+
+class InvalidVerificationCodeException(ApiException):
+    error_message: str = "Invalid verification code"
+
+
+class ExpiredVerificationCodeException(ApiException):
+    error_message: str = "Verification code expired"

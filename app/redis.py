@@ -22,6 +22,9 @@ class RedisClient:
 
     async def setex(self, key: str, time: int | timedelta, value: str) -> bool:
         return await self.redis.setex(key, time, value)
+    
+    async def delete(self, key: str) -> bool:
+        return await self.redis.delete(key)
 
 
 redis_client = RedisClient()

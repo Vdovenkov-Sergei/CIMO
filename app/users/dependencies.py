@@ -6,7 +6,7 @@ from app.users.dao import UserDAO
 from app.users.models import User
 
 
-async def get_current_user(access_token: str = Cookie(None)) -> User:
+async def get_current_user(access_token: str = Cookie(None, include_in_schema=False)) -> User:
     payload = check_jwt_token(access_token)
     
     user_id = payload.get("sub")

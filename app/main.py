@@ -1,3 +1,5 @@
+# type: ignore
+
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
@@ -19,7 +21,7 @@ from app.database import engine
 from collections.abc import AsyncIterator
 
 from app.redis import redis_client
-from app.users.router import router_users, router_auth
+from app.users.router import router_user, router_auth
 
 
 @asynccontextmanager
@@ -31,7 +33,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(title="CIMO", lifespan=lifespan)
 app.include_router(router_auth)
-app.include_router(router_users)
+app.include_router(router_user)
 
 app.mount("/static", StaticFiles(directory="app/static"), "static")
 
