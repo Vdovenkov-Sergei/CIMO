@@ -119,8 +119,8 @@ class SessionAdmin(BaseAdmin, model=Session):
 
 
 class UserAdmin(BaseAdmin, model=User):
-    column_list = [User.id, User.user_name, User.email]
-    column_sortable_list = [User.id, User.user_name, User.email]
+    column_list = [User.id, User.user_name, User.email, User.created_at]
+    column_sortable_list = [User.id, User.user_name, User.email, User.created_at]
     column_searchable_list = [User.id, User.user_name, User.email]
     column_default_sort = (User.id, False)
     column_details_list = [User.viewed_movies, User.watch_later_movies, User.sessions, User.chat]

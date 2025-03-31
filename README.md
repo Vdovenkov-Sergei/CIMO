@@ -1,4 +1,4 @@
-# Development of a web service for personalized movie selection
+# Development of a web application for personalized movie selection
 
 ## Creating a virtual environment
 
@@ -19,7 +19,8 @@ To create a new migration, follow these steps:
 
 - Run the command `alembic revision --autogenerate -m "<message>"` with some *message*. After that, new file is created in the folder **_migrations/versions_**.
 - To apply all current migrations, run the command `alembic upgrade head`.
-- To roll back the migration, run the command `alembic downgrade -1`
+- To roll back the migration, run the command `alembic downgrade -1`.
+
 
 ## Checking column properties in PostgreSQL table
 

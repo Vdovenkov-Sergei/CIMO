@@ -16,9 +16,17 @@ from app.admin.views import (
     ViewedMovieAdmin,
     WatchLaterMovieAdmin,
 )
-from app.database import engine
+from app.database import engine, redis_client
+from app.users.router import router_auth, router_user
 
-app = FastAPI(title="CIMO")
+
+async def on_shutdown():
+    await redis_client.close()
+
+
+app = FastAPI(title="CIMO", on_shutdown=[on_shutdown])
+app.include_router(router_user)
+app.include_router(router_auth)
 
 app.mount("/static", StaticFiles(directory="app/static"), "static")
 
