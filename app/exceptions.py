@@ -34,6 +34,7 @@ class TokenExpiredException(ApiException):
 
 class UserIsNotPresentException(ApiException):
     status_code: int = status.HTTP_401_UNAUTHORIZED
+    error_message: str = "User is not present"
 
 
 class EmailAlreadyExistsException(ApiException):
@@ -55,5 +56,21 @@ class InvalidVerificationCodeException(ApiException):
     error_message: str = "Invalid verification code"
 
 
-class ExpiredVerificationCodeException(ApiException):
+class VerificationCodeExpiredException(ApiException):
+    status_code: int = status.HTTP_410_GONE
     error_message: str = "Verification code expired"
+
+
+class MaxAttemptsEnterCodeException(ApiException):
+    status_code: int = status.HTTP_429_TOO_MANY_REQUESTS
+    error_message: str = "Max attempts to enter code exceeded"
+
+
+class MaxAttemptsSendCodeException(ApiException):
+    status_code: int = status.HTTP_429_TOO_MANY_REQUESTS
+    error_message: str = "Max attempts to send code exceeded"
+
+
+class MaxTimeVerifyEmailException(ApiException):
+    status_code: int = status.HTTP_403_FORBIDDEN
+    error_message: str = "Max time to verify email exceeded"

@@ -2,28 +2,23 @@ from datetime import UTC, datetime, timedelta
 from typing import Any, Optional
 
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from sqlalchemy import RowMapping
 
 from app.config import settings
+from app.database import redis_client
 from app.exceptions import (
     IncorrectLoginOrPasswordException,
     IncorrectTokenFormatException,
+    InvalidVerificationCodeException,
+    MaxAttemptsEnterCodeException,
     TokenExpiredException,
     TokenNotFoundException,
+    VerificationCodeExpiredException,
 )
 from app.users.dao import UserDAO
 from app.users.models import User
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-
-def get_password_hash(password: str) -> str:
-    return pwd_context.hash(password)  # type: ignore
-
-
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)  # type: ignore
+from app.users.schemas import SUserVerification
+from app.users.utils import ATTEMPTS_ENTER_KEY, CODE_VERIFY_KEY, MAX_ATTEMPTS_ENTER, Hashing
 
 
 def create_jwt_token(data: dict[str, Any], expires_delta: timedelta) -> str:
@@ -53,6 +48,23 @@ async def authenticate_user(login: str, password: str) -> RowMapping:
     user = await UserDAO.find_one_or_none(filters=[User.email == login]) or await UserDAO.find_one_or_none(
         filters=[User.user_name == login]
     )
-    if not user or not verify_password(password, user.hashed_password):
+    if not user or not Hashing.verify_password(password, user.hashed_password):
         raise IncorrectLoginOrPasswordException
     return user
+
+
+async def check_verification_code(user_data: SUserVerification) -> None:
+    email, code = user_data.email, user_data.code
+    attempts_key, code_key = ATTEMPTS_ENTER_KEY.format(email=email), CODE_VERIFY_KEY.format(email=email)
+
+    attempts = await redis_client.get(attempts_key)
+    stored_code = await redis_client.get(code_key)
+    if not stored_code:
+        raise VerificationCodeExpiredException
+    if attempts and int(attempts) >= MAX_ATTEMPTS_ENTER:
+        await redis_client.delete(code_key)
+        await redis_client.delete(attempts_key)
+        raise MaxAttemptsEnterCodeException
+    if stored_code != code:
+        await redis_client.incr(attempts_key)
+        raise InvalidVerificationCodeException

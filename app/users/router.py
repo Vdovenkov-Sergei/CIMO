@@ -1,63 +1,87 @@
-import random
-import string
 from datetime import timedelta
 
 from fastapi import APIRouter, Cookie, Depends, Response
+from pydantic import EmailStr
 
 from app.config import settings
 from app.database import redis_client
 from app.exceptions import (
     EmailAlreadyExistsException,
-    ExpiredVerificationCodeException,
-    InvalidVerificationCodeException,
+    MaxAttemptsSendCodeException,
+    MaxTimeVerifyEmailException,
     UsernameAlreadyExistsException,
     UserNotFoundException,
 )
-from app.tasks.tasks import send_verification_email
-from app.users.auth import authenticate_user, check_jwt_token, create_jwt_token, get_password_hash
+from app.users.auth import authenticate_user, check_jwt_token, check_verification_code, create_jwt_token
 from app.users.dao import UserDAO
 from app.users.dependencies import get_current_user
 from app.users.models import User
 from app.users.schemas import SUserAuth, SUserRegisterEmail, SUserRegisterUsername, SUserVerification
+from app.users.utils import (
+    ACCESS_TOKEN,
+    ATTEMPTS_ENTER_KEY,
+    ATTEMPTS_SEND_KEY,
+    CODE_VERIFY_KEY,
+    MAX_ATTEMPTS_SEND,
+    MAX_TIME_PENDING_VERIFICATION,
+    REFRESH_TOKEN,
+    TIME_PENDING_VERIFICATION,
+    USER_EMAIL_KEY,
+    Hashing,
+    send_verification_code,
+)
 
 router_auth = APIRouter(prefix="/auth", tags=["Authentication"])
 router_user = APIRouter(prefix="/users", tags=["User"])
-VERIFICATION_CODE_LENGTH = 6
-PENDING_VERIFICATION_MINUTES = 3
 
 
 @router_auth.post("/register/email")
 async def register_email(user_data: SUserRegisterEmail) -> dict[str, str]:
     email = user_data.email
-    existing_user = await UserDAO.find_one_or_none(filters=[User.email == email]) or await redis_client.get(
-        f"user_email_{email}"
-    )
+    email_key, attempts_key = USER_EMAIL_KEY.format(email=email), ATTEMPTS_SEND_KEY.format(email=email)
+    existing_user = await UserDAO.find_one_or_none(filters=[User.email == email]) or await redis_client.get(email_key)
     if existing_user:
         raise EmailAlreadyExistsException(email=email)
 
-    hashed_password = get_password_hash(user_data.password)
-    code = ("".join(random.choices(string.ascii_uppercase + string.digits, k=VERIFICATION_CODE_LENGTH))).upper()
-
-    await redis_client.setex(f"user_email_{email}", timedelta(minutes=PENDING_VERIFICATION_MINUTES), hashed_password)
-    await redis_client.setex(f"verification_code_{email}", timedelta(minutes=PENDING_VERIFICATION_MINUTES), code)
-    send_verification_email.delay(email, code)
+    hashed_password = Hashing.get_password_hash(user_data.password)
+    await redis_client.setex(email_key, timedelta(seconds=MAX_TIME_PENDING_VERIFICATION), hashed_password)
+    await redis_client.setex(attempts_key, timedelta(seconds=MAX_TIME_PENDING_VERIFICATION), 0)
+    await send_verification_code(email)
 
     return {"message": "Verification email sent"}
+
+
+@router_auth.post("/register/resend")
+async def resend_verification_code(email: EmailStr) -> dict[str, str]:
+    attempts_key, email_key = ATTEMPTS_SEND_KEY.format(email=email), USER_EMAIL_KEY.format(email=email)
+    attempts = await redis_client.get(attempts_key)
+    hashed_password = await redis_client.get(email_key)
+    if not hashed_password:
+        raise MaxTimeVerifyEmailException
+    if attempts and int(attempts) >= MAX_ATTEMPTS_SEND:
+        await redis_client.delete(email_key)
+        raise MaxAttemptsSendCodeException
+
+    ttl_user_email = await redis_client.ttl(email_key)
+    ttl_attempts = await redis_client.ttl(attempts_key)
+    new_ttl = max(ttl_user_email, ttl_attempts, TIME_PENDING_VERIFICATION)
+    await redis_client.setex(email_key, timedelta(seconds=new_ttl), hashed_password)
+    await redis_client.setex(attempts_key, timedelta(seconds=new_ttl), int(attempts) + 1)
+    await send_verification_code(email)
+
+    return {"message": "New verification code sent"}
 
 
 @router_auth.post("/register/verify")
 async def verify_email(user_data: SUserVerification) -> dict[str, str | int]:
     email = user_data.email
-    stored_code = await redis_client.get(f"verification_code_{email}")
-    if not stored_code:
-        raise ExpiredVerificationCodeException
-    if stored_code != user_data.code:
-        raise InvalidVerificationCodeException
+    hashed_password = await redis_client.get(USER_EMAIL_KEY.format(email=email))
+    if not hashed_password:
+        raise MaxTimeVerifyEmailException
+    await check_verification_code(user_data)
 
-    await redis_client.delete(f"verification_code_{email}")
-    hashed_password = await redis_client.get(f"user_email_{email}")
-    await redis_client.delete(f"user_email_{email}")
-
+    for key in [USER_EMAIL_KEY, CODE_VERIFY_KEY, ATTEMPTS_ENTER_KEY, ATTEMPTS_SEND_KEY]:
+        await redis_client.delete(key.format(email=email))
     user = await UserDAO.add_record(email=email, hashed_password=hashed_password)
     await UserDAO.update_record(filters=[User.id == user.id], update_data={"user_name": f"user_{user.id}"})
 
@@ -82,27 +106,27 @@ async def login_user(response: Response, user_data: SUserAuth) -> dict[str, str]
     user = await authenticate_user(user_data.login, user_data.password)
     access_token = create_jwt_token({"sub": str(user.id)}, timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
     refresh_token = create_jwt_token({"sub": str(user.id)}, timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS))
-    response.set_cookie("access_token", access_token, httponly=True)
-    response.set_cookie("refresh_token", refresh_token, httponly=True)
+    response.set_cookie(ACCESS_TOKEN, access_token, httponly=True)
+    response.set_cookie(REFRESH_TOKEN, refresh_token, httponly=True)
 
     return {"message": "Login successful"}
 
 
 @router_auth.post("/refresh")
 async def refresh_token(
-    response: Response, refresh_token: str = Cookie(None, include_in_schema=False)
+    response: Response, refresh_token: str = Cookie(REFRESH_TOKEN, include_in_schema=False)
 ) -> dict[str, str]:
     payload = check_jwt_token(refresh_token)
     user_id = payload.get("sub")
     access_token = create_jwt_token({"sub": user_id}, timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
-    response.set_cookie("access_token", access_token, httponly=True)
+    response.set_cookie(ACCESS_TOKEN, access_token, httponly=True)
     return {"message": "Access token refreshed"}
 
 
 @router_auth.post("/logout")
 async def logout_user(response: Response) -> dict[str, str]:
-    response.delete_cookie("access_token")
-    response.delete_cookie("refresh_token")
+    response.delete_cookie(ACCESS_TOKEN)
+    response.delete_cookie(REFRESH_TOKEN)
     return {"message": "Logged out"}
 
 
