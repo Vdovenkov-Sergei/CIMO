@@ -23,6 +23,9 @@ class Settings(BaseSettings):
     SMTP_USER: str
     SMTP_PASS: str
 
+    BASE_PHOTO_URL: str
+    BASE_POSTER_URL: str
+
     @property
     def database_url(self) -> str:
         return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}" f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"

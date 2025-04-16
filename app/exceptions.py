@@ -74,3 +74,13 @@ class MaxAttemptsSendCodeException(ApiException):
 class MaxTimeVerifyEmailException(ApiException):
     status_code: int = status.HTTP_403_FORBIDDEN
     error_message: str = "Max time to verify email exceeded"
+
+
+class PersonNotFoundException(ApiException):
+    status_code: int = status.HTTP_404_NOT_FOUND
+    error_message: str = "Person with id={person_id} not found"
+    
+    
+class MovieNotFoundException(ApiException):
+    status_code: int = status.HTTP_404_NOT_FOUND
+    error_message: str = "Movie with id={movie_id} not found"

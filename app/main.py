@@ -22,6 +22,8 @@ from app.messages.router import router_message
 from app.users.router import router_auth, router_user
 from app.viewed_movies.router import router_viewed_movie
 from app.watch_later_movies.router import router_watch_later_movie
+from app.people.router import router as router_people
+from app.movies.router import router as router_movies
 
 
 async def on_shutdown():
@@ -35,6 +37,8 @@ app.include_router(router_user)
 app.include_router(router_auth)
 app.include_router(router_viewed_movie)
 app.include_router(router_watch_later_movie)
+app.include_router(router_people)
+app.include_router(router_movies)
 
 app.mount("/static", StaticFiles(directory="app/static"), "static")
 
