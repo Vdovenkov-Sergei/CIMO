@@ -2,10 +2,11 @@ from typing import Optional
 
 from sqlalchemy import RowMapping, select
 from sqlalchemy.orm import joinedload
+
 from app.dao.base import BaseDAO
+from app.database import async_session_maker
 from app.movie_roles.models import MovieRole
 from app.movies.models import Movie
-from app.database import async_session_maker
 
 
 class MovieDAO(BaseDAO):

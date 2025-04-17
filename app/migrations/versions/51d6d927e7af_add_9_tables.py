@@ -68,7 +68,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('sessions',
-    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('id', sa.UUID(), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('user_1_id', sa.BigInteger(), nullable=False),
     sa.Column('user_2_id', sa.BigInteger(), nullable=True),
     sa.Column('session_type', session_type, server_default='SOLO', nullable=False),

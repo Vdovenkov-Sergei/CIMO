@@ -1,5 +1,7 @@
 from typing import Optional
+
 from pydantic import BaseModel, Field, model_validator
+
 from app.config import settings
 from app.movie_roles.schemas import SMovieRoleRead
 from app.movies.models import MovieType

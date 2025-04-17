@@ -79,8 +79,35 @@ class MaxTimeVerifyEmailException(ApiException):
 class PersonNotFoundException(ApiException):
     status_code: int = status.HTTP_404_NOT_FOUND
     error_message: str = "Person with id={person_id} not found"
-    
-    
+
+
 class MovieNotFoundException(ApiException):
     status_code: int = status.HTTP_404_NOT_FOUND
     error_message: str = "Movie with id={movie_id} not found"
+
+
+class SessionNotFoundException(ApiException):
+    status_code: int = status.HTTP_404_NOT_FOUND
+    error_message: str = "Session with id={session_id} not found"
+
+
+class UserAlreadyInSessionException(ApiException):
+    error_message: str = "User with id={user_id} already in session with id={session_id}"
+
+
+class MaxParticipantsInSessionException(ApiException):
+    status_code: int = status.HTTP_403_FORBIDDEN
+    error_message: str = "Max participants in session exceeded"
+
+
+class ParticipantsNotEnoughException(ApiException):
+    error_message: str = "Participants not enough"
+
+
+class UserNotInSessionException(ApiException):
+    status_code: int = status.HTTP_403_FORBIDDEN
+    error_message: str = "User with id={user_id} not in session"
+
+
+class SessionAlreadyInProgressException(ApiException):
+    error_message: str = "Session with id={session_id} already in progress"
