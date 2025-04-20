@@ -13,6 +13,7 @@ class SessionMovie(Base):
     session_id: Mapped[uuid.UUID] = mapped_column()
     user_id: Mapped[int] = mapped_column()
     movie_id: Mapped[int] = mapped_column(ForeignKey("movies.id", ondelete="CASCADE", onupdate="CASCADE"))
+    is_matched: Mapped[bool] = mapped_column(server_default="false", nullable=False)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
 
     __table_args__ = (

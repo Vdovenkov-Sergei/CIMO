@@ -13,8 +13,8 @@ class SessionDAO(BaseDAO):
 
     @classmethod
     async def find_existing_session(cls, *, user_id: int) -> Optional[RowMapping]:
-        query = select(*Session.__table__.columns).where(
-            and_(Session.user_id == user_id, Session.status.not_in([SessionStatus.COMPLETED]))
+        query = select(*cls.model.__table__.columns).where(
+            and_(cls.model.user_id == user_id, cls.model.status.not_in([SessionStatus.COMPLETED]))
         )
         async with async_session_maker() as session:
             result = await session.execute(query)
@@ -22,7 +22,7 @@ class SessionDAO(BaseDAO):
 
     @classmethod
     async def get_participants(cls, *, session_id: uuid.UUID) -> Sequence[RowMapping]:
-        query = select(*Session.__table__.columns).where(Session.id == session_id)
+        query = select(*cls.model.__table__.columns).where(cls.model.id == session_id)
         async with async_session_maker() as session:
             result = await session.execute(query)
             return result.mappings().all()

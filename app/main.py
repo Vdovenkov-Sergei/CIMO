@@ -1,5 +1,3 @@
-# type: ignore
-
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from sqladmin import Admin
@@ -27,6 +25,7 @@ from app.movies.router import router as router_movies
 from app.people.router import router as router_people
 from app.users.router import router_auth, router_user
 from app.sessions.router import router as router_sessions
+from app.session_movies.router import router as router_session_movies
 
 
 async def on_shutdown():
@@ -43,6 +42,7 @@ app.include_router(router_watch_later_movie)
 app.include_router(router_people)
 app.include_router(router_movies)
 app.include_router(router_sessions)
+app.include_router(router_session_movies)
 
 app.mount("/static", StaticFiles(directory="app/static"), "static")
 
