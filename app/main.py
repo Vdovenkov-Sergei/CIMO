@@ -1,7 +1,12 @@
 # type: ignore
 
+from contextlib import asynccontextmanager
+from typing import AsyncIterator
+
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.redis import RedisBackend
 from sqladmin import Admin
 
 from app.admin.views import (
@@ -30,11 +35,14 @@ from app.sessions.router import router as router_sessions
 from app.users.router import router_auth, router_user
 
 
-async def on_shutdown():
+@asynccontextmanager
+async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    FastAPICache.init(RedisBackend(redis_client), prefix="cache")
+    yield
     await redis_client.close()
 
+app = FastAPI(title="CIMO", docs_url="/docs")
 
-app = FastAPI(title="CIMO", on_shutdown=[on_shutdown])
 app.include_router(router_chat)
 app.include_router(router_message)
 app.include_router(router_user)

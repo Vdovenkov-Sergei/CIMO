@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+from fastapi_cache.decorator import cache
 
 from app.exceptions import MovieNotFoundException
 from app.movies.dao import MovieDAO
@@ -10,6 +11,7 @@ router = APIRouter(prefix="/movies", tags=["Movies"])
 
 
 @router.get("/{movie_id}")
+@cache(expire=120)
 async def get_movie(movie_id: int, _: User = Depends(get_current_user)) -> SMovieRead:
     movie = await MovieDAO.find_by_id(model_id=movie_id)
     if not movie:
@@ -18,6 +20,7 @@ async def get_movie(movie_id: int, _: User = Depends(get_current_user)) -> SMovi
 
 
 @router.get("/{movie_id}/detailed")
+@cache(expire=120)
 async def get_detailed_movie(movie_id: int, _: User = Depends(get_current_user)) -> SMovieDetailedRead:
     movie = await MovieDAO.find_movie_with_roles(movie_id=movie_id)
     if not movie:

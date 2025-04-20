@@ -23,15 +23,15 @@ def send_verification_email(email_to: EmailStr, code: str) -> None:
         server.send_message(msg_content)
 
 
-@shared_task
-def clean_completed_sessions():
+@shared_task  # type: ignore
+def clean_completed_sessions() -> None:
     asyncio.run(_clean_completed_sessions())
 
 
-async def _clean_completed_sessions():
+async def _clean_completed_sessions() -> None:
     query = delete(Session).where(
         Session.status == SessionStatus.COMPLETED,
-        Session.ended_at != None,
+        Session.ended_at.isnot(None),
         Session.ended_at < datetime.now(UTC),
     )
     async with async_session_maker() as session:
