@@ -4,7 +4,7 @@ SRC_CODE_DIR = app/
 POETRY_CMD = poetry run
 EXCLUDE = migrations
 
-.PHONY: format run celery flower test lint clean
+.PHONY: format run celery flower beat test lint clean
 
 format:
 	$(POETRY_CMD) black $(SRC_CODE_DIR) --exclude=$(EXCLUDE)
@@ -18,6 +18,9 @@ celery:
 
 flower:
 	$(POETRY_CMD) celery -A $(CELERY_APP) flower
+
+beat:
+	$(POETRY_CMD) celery -A $(CELERY_APP) beat --loglevel=INFO
 
 test:
 	$(POETRY_CMD) pytest -k "$(TEST_NAME)" -m "$(MARKERS)" -q --cov=$(SRC_CODE_DIR) --cov-report=term-missing
