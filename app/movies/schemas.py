@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Self
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -16,7 +16,7 @@ class SMovieRead(BaseModel):
     rating_imdb: Optional[float]
 
     @model_validator(mode="after")
-    def postprocess_poster_url(self):
+    def postprocess_poster_url(self) -> Self:
         if not self.poster_url.startswith("http"):
             self.poster_url = f"{settings.BASE_POSTER_URL}{self.poster_url}"
         return self

@@ -1,3 +1,5 @@
+# type: ignore
+
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from sqladmin import Admin
@@ -23,9 +25,9 @@ from app.watch_later_movies.router import router_watch_later_movie
 from app.people.router import router as router_people
 from app.movies.router import router as router_movies
 from app.people.router import router as router_people
-from app.users.router import router_auth, router_user
-from app.sessions.router import router as router_sessions
 from app.session_movies.router import router as router_session_movies
+from app.sessions.router import router as router_sessions
+from app.users.router import router_auth, router_user
 
 
 async def on_shutdown():

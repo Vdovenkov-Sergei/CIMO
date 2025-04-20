@@ -1,10 +1,11 @@
 from typing import Optional
 
-from sqlalchemy import RowMapping, select
+from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 
 from app.dao.base import BaseDAO
 from app.database import async_session_maker
+from app.movie_roles.models import MovieRole
 from app.movies.models import Movie
 
 
@@ -12,10 +13,10 @@ class MovieDAO(BaseDAO):
     model = Movie
 
     @classmethod
-    async def find_movie_with_roles(cls, movie_id: int) -> Optional[RowMapping]:
+    async def find_movie_with_roles(cls, movie_id: int) -> Optional[Movie]:
         query = (
             select(cls.model)
-            .options(joinedload(cls.model.roles).joinedload(cls.model.person))
+            .options(joinedload(cls.model.roles).joinedload(MovieRole.person))
             .where(cls.model.id == movie_id)
         )
         async with async_session_maker() as session:

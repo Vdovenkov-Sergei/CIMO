@@ -1,7 +1,7 @@
 import uuid
 from typing import Optional, Sequence
 
-from sqlalchemy import RowMapping, and_, func, select
+from sqlalchemy import RowMapping, select
 
 from app.dao.base import BaseDAO
 from app.database import async_session_maker
@@ -14,7 +14,7 @@ class SessionDAO(BaseDAO):
     @classmethod
     async def find_existing_session(cls, *, user_id: int) -> Optional[RowMapping]:
         query = select(*cls.model.__table__.columns).where(
-            and_(cls.model.user_id == user_id, cls.model.status.not_in([SessionStatus.COMPLETED]))
+            cls.model.user_id == user_id, cls.model.status.not_in([SessionStatus.COMPLETED])
         )
         async with async_session_maker() as session:
             result = await session.execute(query)

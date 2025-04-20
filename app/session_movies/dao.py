@@ -1,13 +1,12 @@
-import select
-from typing import Optional
 import uuid
+from typing import Sequence
 
-from sqlalchemy import RowMapping, Sequence, func
-from app.dao.base import BaseDAO
-from app.session_movies.models import SessionMovie
+from sqlalchemy import func, select
 from sqlalchemy.orm import joinedload
 
+from app.dao.base import BaseDAO
 from app.database import async_session_maker
+from app.session_movies.models import SessionMovie
 
 
 class SessionMovieDAO(BaseDAO):
@@ -25,11 +24,10 @@ class SessionMovieDAO(BaseDAO):
             return user_count == cls.PAIR
 
     @classmethod
-    async def get_movies(
-        cls, session_id: uuid.UUID, user_id: int, limit: int, offset: int
-    ) -> Optional[Sequence[RowMapping]]:
+    async def get_movies(cls, session_id: uuid.UUID, user_id: int, limit: int, offset: int) -> Sequence[SessionMovie]:
         query = (
-            select(cls.model).options(joinedload(cls.model.movie))
+            select(cls.model)
+            .options(joinedload(cls.model.movie))
             .where(
                 cls.model.session_id == session_id,
                 cls.model.user_id == user_id,
