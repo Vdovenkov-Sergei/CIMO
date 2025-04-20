@@ -111,7 +111,7 @@ class PersonAdmin(BaseAdmin, model=Person):
 
 
 class SessionAdmin(BaseAdmin, model=Session):
-    column_list = [Session.id, Session.user, Session.status, Session.created_at, Session.ended_at]
+    column_list = [Session.id, Session.user, Session.status, Session.created_at, Session.ended_at, Session.is_pair]
     column_sortable_list = [Session.id, Session.created_at, Session.ended_at]
     column_searchable_list = [Session.id]
     column_default_sort = (Session.id, False)
@@ -128,7 +128,13 @@ class UserAdmin(BaseAdmin, model=User):
 
 
 class SessionMovieAdmin(BaseAdmin, model=SessionMovie):
-    column_list = [SessionMovie.session, SessionMovie.user_id, SessionMovie.movie, SessionMovie.created_at]
+    column_list = [
+        SessionMovie.session,
+        SessionMovie.user_id,
+        SessionMovie.movie,
+        SessionMovie.created_at,
+        SessionMovie.is_matched,
+    ]
     column_default_sort = [
         (SessionMovie.session_id, False),
         (SessionMovie.user_id, False),
