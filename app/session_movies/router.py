@@ -53,7 +53,7 @@ async def create_session_movie(data: SSessionMovieCreate, user: User = Depends(g
         raise UserNotInSessionException(user_id=user.id)
     await SessionMovieDAO.add_record(session_id=session.id, user_id=user.id, movie_id=data.movie_id)
 
-    if session.is_pair and SessionMovieDAO.check_movie_match(session_id=session.id, movie_id=data.movie_id):
+    if session.is_pair and await SessionMovieDAO.check_movie_match(session_id=session.id, movie_id=data.movie_id):
         await SessionMovieDAO.update_record(
             filters=[SessionMovie.session_id == session.id, SessionMovie.movie_id == data.movie_id],
             update_data={"is_matched": True},

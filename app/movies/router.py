@@ -22,4 +22,4 @@ async def get_detailed_movie(movie_id: int, _: User = Depends(get_current_user))
     movie = await MovieDAO.find_movie_with_roles(movie_id=movie_id)
     if not movie:
         raise MovieNotFoundException(movie_id=movie_id)
-    return SMovieDetailedRead.model_validate(movie)
+    return movie  # type: ignore

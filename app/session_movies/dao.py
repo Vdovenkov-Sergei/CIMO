@@ -20,7 +20,7 @@ class SessionMovieDAO(BaseDAO):
         )
         async with async_session_maker() as session:
             result = await session.execute(query)
-            user_count = result.scalar_one()
+            user_count = result.scalar() or 0
             return user_count == cls.PAIR
 
     @classmethod
