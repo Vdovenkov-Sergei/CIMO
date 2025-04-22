@@ -15,6 +15,11 @@ async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
 redis_client = aioredis.from_url(settings.redis_url, encoding="utf-8", decode_responses=True)
 
 
+async def get_session():
+    async with async_session_maker() as session:
+        yield session
+
+
 class Base(DeclarativeBase):
     type_annotation_map = {
         int: BigInteger,

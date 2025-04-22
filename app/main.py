@@ -16,8 +16,12 @@ from app.admin.views import (
     ViewedMovieAdmin,
     WatchLaterMovieAdmin,
 )
+from app.chats.router import router_chat
 from app.database import engine, redis_client
+from app.messages.router import router_message
 from app.users.router import router_auth, router_user
+from app.viewed_movies.router import router_viewed_movie
+from app.watch_later_movies.router import router_watch_later_movie
 
 
 async def on_shutdown():
@@ -25,8 +29,12 @@ async def on_shutdown():
 
 
 app = FastAPI(title="CIMO", on_shutdown=[on_shutdown])
+app.include_router(router_chat)
+app.include_router(router_message)
 app.include_router(router_user)
 app.include_router(router_auth)
+app.include_router(router_viewed_movie)
+app.include_router(router_watch_later_movie)
 
 app.mount("/static", StaticFiles(directory="app/static"), "static")
 

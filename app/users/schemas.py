@@ -35,3 +35,14 @@ class SUserRegisterUsername(BaseModel):
         max_length=30,
         description="Username must be 5-30 length, can contain a-zA-Z0-9_.",
     )
+
+
+class SUserUpdate(BaseModel):
+    email: EmailStr | None = None
+    user_name: str | None = Field(
+        default=None,
+        pattern=USERNAME_REGEX,
+        min_length=5,
+        max_length=30,
+        description="Username must be 5-30 length, can contain a-zA-Z0-9_."
+    )

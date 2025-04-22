@@ -1,7 +1,8 @@
 from datetime import timedelta
 
-from fastapi import APIRouter, Cookie, Depends, Response
+from fastapi import APIRouter, Cookie, Depends, Response, HTTPException
 from pydantic import EmailStr
+from starlette import status
 
 from app.config import settings
 from app.database import redis_client
@@ -16,7 +17,7 @@ from app.users.auth import authenticate_user, check_jwt_token, check_verificatio
 from app.users.dao import UserDAO
 from app.users.dependencies import get_current_user
 from app.users.models import User
-from app.users.schemas import SUserAuth, SUserRegisterEmail, SUserRegisterUsername, SUserVerification
+from app.users.schemas import SUserAuth, SUserRegisterEmail, SUserRegisterUsername, SUserVerification, SUserUpdate
 from app.users.utils import (
     ACCESS_TOKEN,
     ATTEMPTS_ENTER_KEY,
@@ -133,3 +134,23 @@ async def logout_user(response: Response) -> dict[str, str]:
 @router_user.get("/me")
 async def read_users_me(user: User = Depends(get_current_user)) -> dict[str, str | int]:
     return {"id": user.id, "email": user.email, "user_name": user.user_name}
+
+
+@router_user.patch("/me")
+async def update_user_me(update_data: SUserUpdate, user: User = Depends(get_current_user)) -> dict[str, str]:
+    update_fields = {}
+
+    if update_data.email and update_data.email != user.email:
+        existing_email = await UserDAO.find_one_or_none(filters=[User.email == update_data.email])
+        if existing_email:
+            raise EmailAlreadyExistsException(email=update_data.email)
+        update_fields["email"] = update_data.email
+
+    if update_data.user_name and update_data.user_name != user.user_name:
+        existing_username = await UserDAO.find_one_or_none(filters=[User.user_name == update_data.user_name])
+        if existing_username:
+            raise UsernameAlreadyExistsException(user_name=update_data.user_name)
+        update_fields["user_name"] = update_data.user_name
+
+    await UserDAO.update_record(filters=[User.id == user.id], update_data=update_fields)
+    return {"message": "User updated successfully"}
