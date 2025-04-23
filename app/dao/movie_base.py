@@ -36,3 +36,7 @@ class MovieBaseDAO(BaseDAO):
         return await cls.find_one_or_none(
             columns=columns, options=options, filters=[cls.model.user_id == user_id, cls.model.movie_id == movie_id]
         )
+
+    @classmethod
+    async def delete_movie(cls, *, user_id, movie_id) -> int:
+        return await cls.delete_record(filters=[cls.model.user_id == user_id, cls.model.movie_id == movie_id])

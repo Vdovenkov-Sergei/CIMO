@@ -1,18 +1,26 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import get_session
+from app.users.dependencies import get_current_user
+from app.users.models import User
 from app.watch_later_movies.dao import WatchLaterMovieDAO
-from app.watch_later_movies.schemas import WatchLaterRead, WatchLaterCreate
+from app.watch_later_movies.schemas import SWatchLaterMovieCreate, SWatchLaterMovieRead
 
-router_watch_later_movie = APIRouter(prefix="/watch_later_movies", tags=["Watch later movies"])
-
-
-@router_watch_later_movie.post("/", response_model=WatchLaterRead)
-async def add_to_watch_later(data: WatchLaterCreate, session: AsyncSession = Depends(get_session)):
-    return await WatchLaterMovieDAO.create(session, data)
+router = APIRouter(prefix="/movies/later", tags=["Watch Later Movies"])
 
 
-@router_watch_later_movie.get("/{user_id}", response_model=list[WatchLaterRead])
-async def get_watch_later(user_id: int, session: AsyncSession = Depends(get_session)):
-    return await WatchLaterMovieDAO.get_by_user(session, user_id)
+@router.post("/", response_model=dict[str, str])
+async def add_to_watch_later_list(data: SWatchLaterMovieCreate, user: User = Depends(get_current_user)) -> dict[str, str]:
+    await WatchLaterMovieDAO.add_record(user_id=user.id, movie_id=data.movie_id)
+    return {"message": "The movie was successfully added."}
+
+
+@router.get("/", response_model=list[SWatchLaterMovieRead])
+async def get_watch_later_list(limit: int = 20, offset: int = 0, user: User = Depends(get_current_user)) -> list[SWatchLaterMovieRead]:
+    movies = await WatchLaterMovieDAO.find_movies(user_id=user.id, limit=limit, offset=offset)
+    return [SWatchLaterMovieRead.model_validate(movie) for movie in movies]
+
+
+@router.delete("/{movie_id}", response_model=dict[str, str])
+async def delete_from_watch_later_list(movie_id: int, user: User = Depends(get_current_user)) -> dict[str, str]:
+    await WatchLaterMovieDAO.delete_movie(user_id=user.id, movie_id=movie_id)
+    return {"message": "The movie was successfully deleted."}

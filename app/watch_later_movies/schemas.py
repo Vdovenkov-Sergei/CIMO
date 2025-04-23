@@ -1,17 +1,13 @@
 from pydantic import BaseModel
 from datetime import datetime
 
+from app.movies.schemas import SMovieRead
 
-class WatchLaterCreate(BaseModel):
-    user_id: int
+
+class SWatchLaterMovieCreate(BaseModel):
     movie_id: int
 
 
-class WatchLaterRead(BaseModel):
-    user_id: int
-    movie_id: int
+class SWatchLaterMovieRead(BaseModel):
+    movie: SMovieRead
     created_at: datetime
-
-    model_config = {
-        "from_attributes": True
-    }
