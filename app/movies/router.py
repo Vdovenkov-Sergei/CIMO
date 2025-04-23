@@ -15,14 +15,14 @@ async def get_movie_by_id(movie_id: int):
     return movie
 
 
-@router.get("/{movie_id}")
+@router.get("/{movie_id}", response_model=SMovieRead)
 @cache(expire=120)
 async def get_movie(movie_id: int) -> SMovieRead:
     movie = await get_movie_by_id(movie_id)
     return SMovieRead.model_validate(movie)
 
 
-@router.get("/{movie_id}/detailed")
+@router.get("/{movie_id}/detailed", response_model=SMovieDetailedRead)
 @cache(expire=120)
 async def get_detailed_movie(movie_id: int) -> SMovieDetailedRead:
     movie = await get_movie_by_id(movie_id)

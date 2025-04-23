@@ -11,27 +11,26 @@ from app.exceptions import (
     SessionAlreadyInProgressException,
     SessionNotFoundException,
     UserAlreadyInSessionException,
-    UserNotInSessionException,
 )
 from app.sessions.dao import SessionDAO
+from app.sessions.dependencies import get_current_session
 from app.sessions.models import Session, SessionStatus
-from app.sessions.schemas import SSessionCreate, SSessionRead, SStatusUpdate
+from app.sessions.schemas import SSessionCreate, SSessionRead, SSessionUpdate
 from app.users.dependencies import get_current_user
 from app.users.models import User
 
 PAIR, SOLO = 2, 1
-
 router = APIRouter(prefix="/sessions", tags=["Sessions"])
 
 
-@router.get("/me")
+@router.get("/me", response_model=Optional[SSessionRead])
 @cache(expire=60)
 async def get_user_session(user: User = Depends(get_current_user)) -> Optional[SSessionRead]:
     session = await SessionDAO.find_existing_session(user_id=user.id)
     return SSessionRead.model_validate(session) if session else None
 
 
-@router.post("/")
+@router.post("/", response_model=SSessionRead)
 async def create_session(data: SSessionCreate, user: User = Depends(get_current_user)) -> SSessionRead:
     existing_session = await SessionDAO.find_existing_session(user_id=user.id)
     if existing_session and existing_session.is_pair == data.is_pair:
@@ -42,7 +41,7 @@ async def create_session(data: SSessionCreate, user: User = Depends(get_current_
     return SSessionRead.model_validate(session)
 
 
-@router.post("/join/{session_id}")
+@router.post("/join/{session_id}", response_model=SSessionRead)
 async def join_session(session_id: uuid.UUID, user: User = Depends(get_current_user)) -> SSessionRead:
     existing_session = await SessionDAO.find_existing_session(user_id=user.id)
     if existing_session and existing_session.id == session_id:
@@ -61,7 +60,7 @@ async def join_session(session_id: uuid.UUID, user: User = Depends(get_current_u
     return SSessionRead.model_validate(joined_session)
 
 
-@router.get("/ready/{session_id}")
+@router.get("/ready/{session_id}", response_model=bool)
 async def check_ready_participants(session_id: uuid.UUID) -> bool:
     participants = await SessionDAO.get_participants(session_id=session_id)
     if not participants:
@@ -72,12 +71,10 @@ async def check_ready_participants(session_id: uuid.UUID) -> bool:
     return all(p.status == SessionStatus.PREPARED for p in participants)
 
 
-@router.patch("/status")
-async def change_session_status(data: SStatusUpdate, user: User = Depends(get_current_user)) -> None:
-    session = await SessionDAO.find_existing_session(user_id=user.id)
-    if not session:
-        raise UserNotInSessionException(user_id=user.id)
-
+@router.patch("/status", response_model=dict[str, str])
+async def change_session_status(
+    data: SSessionUpdate, session: Session = Depends(get_current_session)
+) -> dict[str, str]:
     new_status = SessionStatus(data.status)
     update_fields: dict[str, Any] = {"status": new_status}
 
@@ -86,19 +83,14 @@ async def change_session_status(data: SStatusUpdate, user: User = Depends(get_cu
     elif (session.status, new_status) == (SessionStatus.REVIEW, SessionStatus.COMPLETED):
         update_fields["ended_at"] = datetime.now(UTC)
 
-    await SessionDAO.update_record(
-        filters=[Session.id == session.id, Session.user_id == user.id], update_data=update_fields
-    )
+    await SessionDAO.update_session(session_id=session.id, user_id=session.user_id, update_data=update_fields)
+    return {"message": "Session status updated successfully."}
 
 
-@router.delete("/leave")
-async def leave_session(user: User = Depends(get_current_user)) -> dict[str, str]:
-    session = await SessionDAO.find_existing_session(user_id=user.id)
-    if not session:
-        raise UserNotInSessionException(user_id=user.id)
-
+@router.delete("/leave", response_model=dict[str, str])
+async def leave_session(session: Session = Depends(get_current_session)) -> dict[str, str]:
     if session.status in [SessionStatus.ACTIVE, SessionStatus.REVIEW, SessionStatus.COMPLETED]:
         raise SessionAlreadyInProgressException(session_id=str(session.id))
 
-    await SessionDAO.delete_record(filters=[Session.id == session.id, Session.user_id == user.id])
-    return {"detail": "You left the session successfully."}
+    await SessionDAO.delete_record(session_id=session.id, user_id=session.user_id)
+    return {"message": "You left the session successfully."}

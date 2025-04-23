@@ -1,5 +1,5 @@
 import uuid
-from typing import Optional, Sequence
+from typing import Any, Optional, Sequence
 
 from sqlalchemy import RowMapping, select
 
@@ -26,3 +26,13 @@ class SessionDAO(BaseDAO):
         async with async_session_maker() as session:
             result = await session.execute(query)
             return result.mappings().all()
+
+    @classmethod
+    async def update_session(cls, *, session_id: uuid.UUID, user_id: int, update_data: dict[str, Any]) -> int:
+        return await cls.update_record(
+            filters=[cls.model.id == session_id, cls.model.user_id == user_id], update_data=update_data
+        )
+
+    @classmethod
+    async def delete_session(cls, *, session_id: uuid.UUID, user_id: int) -> int:
+        return await cls.delete_record(filters=[cls.model.id == session_id, cls.model.user_id == user_id])

@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydantic import BaseModel, EmailStr, Field
 
 from app.users.utils import VERIFICATION_CODE_LEN
@@ -35,6 +36,13 @@ class SUserRegisterUsername(BaseModel):
         max_length=30,
         description="Username must be 5-30 length, can contain a-zA-Z0-9_.",
     )
+
+
+class SUserRead(BaseModel):
+    id: int
+    email: EmailStr
+    user_name: str
+    created_at: datetime
 
 
 class SUserUpdate(BaseModel):

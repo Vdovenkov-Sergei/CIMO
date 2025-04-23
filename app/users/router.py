@@ -1,8 +1,7 @@
 from datetime import timedelta
 
-from fastapi import APIRouter, Cookie, Depends, Response, HTTPException
+from fastapi import APIRouter, Cookie, Depends, Response
 from pydantic import EmailStr
-from starlette import status
 
 from app.config import settings
 from app.database import redis_client
@@ -17,7 +16,7 @@ from app.users.auth import authenticate_user, check_jwt_token, check_verificatio
 from app.users.dao import UserDAO
 from app.users.dependencies import get_current_user
 from app.users.models import User
-from app.users.schemas import SUserAuth, SUserRegisterEmail, SUserRegisterUsername, SUserVerification, SUserUpdate
+from app.users.schemas import SUserAuth, SUserRead, SUserRegisterEmail, SUserRegisterUsername, SUserVerification, SUserUpdate
 from app.users.utils import (
     ACCESS_TOKEN,
     ATTEMPTS_ENTER_KEY,
@@ -36,7 +35,7 @@ router_auth = APIRouter(prefix="/auth", tags=["Authentication"])
 router_user = APIRouter(prefix="/users", tags=["User"])
 
 
-@router_auth.post("/register/email")
+@router_auth.post("/register/email", response_model=dict[str, str])
 async def register_email(user_data: SUserRegisterEmail) -> dict[str, str]:
     email = user_data.email
     email_key, attempts_key = USER_EMAIL_KEY.format(email=email), ATTEMPTS_SEND_KEY.format(email=email)
@@ -49,10 +48,10 @@ async def register_email(user_data: SUserRegisterEmail) -> dict[str, str]:
     await redis_client.setex(attempts_key, timedelta(seconds=MAX_TIME_PENDING_VERIFICATION), 0)
     await send_verification_code(email)
 
-    return {"message": "Verification email sent"}
+    return {"message": "Verification email sent."}
 
 
-@router_auth.post("/register/resend")
+@router_auth.post("/register/resend", response_model=dict[str, str])
 async def resend_verification_code(email: EmailStr) -> dict[str, str]:
     attempts_key, email_key = ATTEMPTS_SEND_KEY.format(email=email), USER_EMAIL_KEY.format(email=email)
     attempts = await redis_client.get(attempts_key)
@@ -70,10 +69,10 @@ async def resend_verification_code(email: EmailStr) -> dict[str, str]:
     await redis_client.setex(attempts_key, timedelta(seconds=new_ttl), int(attempts) + 1)
     await send_verification_code(email)
 
-    return {"message": "New verification code sent"}
+    return {"message": "New verification code sent."}
 
 
-@router_auth.post("/register/verify")
+@router_auth.post("/register/verify", response_model=dict[str, str | int])
 async def verify_email(user_data: SUserVerification) -> dict[str, str | int]:
     email = user_data.email
     hashed_password = await redis_client.get(USER_EMAIL_KEY.format(email=email))
@@ -86,10 +85,10 @@ async def verify_email(user_data: SUserVerification) -> dict[str, str | int]:
     user = await UserDAO.add_record(email=email, hashed_password=hashed_password)
     await UserDAO.update_record(filters=[User.id == user.id], update_data={"user_name": f"user_{user.id}"})
 
-    return {"message": "Email successfully verified and user registered", "id": user.id}
+    return {"message": "Email successfully verified and user registered.", "id": user.id}
 
 
-@router_auth.post("/register/username")
+@router_auth.post("/register/username", response_model=dict[str, str])
 async def register_username(user_data: SUserRegisterUsername) -> dict[str, str]:
     user = await UserDAO.find_one_or_none(filters=[User.id == user_data.user_id])
     if not user:
@@ -99,10 +98,10 @@ async def register_username(user_data: SUserRegisterUsername) -> dict[str, str]:
         raise UsernameAlreadyExistsException(user_name=user_data.user_name)
 
     await UserDAO.update_record(filters=[User.id == user.id], update_data={"user_name": user_data.user_name})
-    return {"message": "Username successfully set"}
+    return {"message": "Username successfully set."}
 
 
-@router_auth.post("/login")
+@router_auth.post("/login", response_model=dict[str, str])
 async def login_user(response: Response, user_data: SUserAuth) -> dict[str, str]:
     user = await authenticate_user(user_data.login, user_data.password)
     access_token = create_jwt_token({"sub": str(user.id)}, timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
@@ -110,34 +109,34 @@ async def login_user(response: Response, user_data: SUserAuth) -> dict[str, str]
     response.set_cookie(ACCESS_TOKEN, access_token, httponly=True)
     response.set_cookie(REFRESH_TOKEN, refresh_token, httponly=True)
 
-    return {"message": "Login successful"}
+    return {"message": "Login successful."}
 
 
-@router_auth.post("/refresh")
+@router_auth.post("/refresh", response_model=dict[str, str])
 async def refresh_token(
-    response: Response, refresh_token: str = Cookie(REFRESH_TOKEN, include_in_schema=False)
+    response: Response, refresh_token: str = Cookie(include_in_schema=False, default=None)
 ) -> dict[str, str]:
     payload = check_jwt_token(refresh_token)
     user_id = payload.get("sub")
     access_token = create_jwt_token({"sub": user_id}, timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
     response.set_cookie(ACCESS_TOKEN, access_token, httponly=True)
-    return {"message": "Access token refreshed"}
+    return {"message": "Access token refreshed."}
 
 
-@router_auth.post("/logout")
+@router_auth.post("/logout", response_model=dict[str, str])
 async def logout_user(response: Response) -> dict[str, str]:
     response.delete_cookie(ACCESS_TOKEN)
     response.delete_cookie(REFRESH_TOKEN)
-    return {"message": "Logged out"}
+    return {"message": "Logged out."}
 
 
-@router_user.get("/me")
-async def read_users_me(user: User = Depends(get_current_user)) -> dict[str, str | int]:
-    return {"id": user.id, "email": user.email, "user_name": user.user_name}
+@router_user.get("/me", response_model=SUserRead)
+async def read_users_me(user: User = Depends(get_current_user)) -> SUserRead:
+    return SUserRead.model_validate(user)
 
 
-@router_user.patch("/me")
-async def update_user_me(update_data: SUserUpdate, user: User = Depends(get_current_user)) -> dict[str, str]:
+@router_user.patch("/me", response_model=dict[str, str])
+async def update_users_me(update_data: SUserUpdate, user: User = Depends(get_current_user)) -> dict[str, str]:
     update_fields = {}
 
     if update_data.email and update_data.email != user.email:
@@ -153,4 +152,4 @@ async def update_user_me(update_data: SUserUpdate, user: User = Depends(get_curr
         update_fields["user_name"] = update_data.user_name
 
     await UserDAO.update_record(filters=[User.id == user.id], update_data=update_fields)
-    return {"message": "User updated successfully"}
+    return {"message": "User updated successfully."}

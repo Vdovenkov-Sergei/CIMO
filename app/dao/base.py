@@ -50,7 +50,7 @@ class BaseDAO:
         if joins is not None:
             for table, condition in joins:
                 query = query.join(table, condition)
-        if options:
+        if options is not None:
             query = query.options(*options)
         if filters is not None:
             query = query.where(and_(*filters))

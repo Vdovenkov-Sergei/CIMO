@@ -30,7 +30,7 @@ def create_jwt_token(data: dict[str, Any], expires_delta: timedelta) -> str:
 
 
 def check_jwt_token(token: Optional[str]) -> dict[str, Any]:
-    if not token:
+    if token is None:
         raise TokenNotFoundException
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, settings.ALGORITHM)

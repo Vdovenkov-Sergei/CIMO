@@ -11,7 +11,7 @@ class SSessionCreate(BaseModel):
     is_pair: bool = False
 
 
-class SStatusUpdate(BaseModel):
+class SSessionUpdate(BaseModel):
     status: SessionStatus
 
     model_config = {"use_enum_values": True}

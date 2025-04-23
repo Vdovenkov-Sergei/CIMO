@@ -8,7 +8,7 @@ from app.people.schemas import SPersonRead
 router = APIRouter(prefix="/people", tags=["People"])
 
 
-@router.get("/{person_id}")
+@router.get("/{person_id}", response_model=SPersonRead)
 @cache(expire=120)
 async def get_person(person_id: int) -> SPersonRead:
     person = await PersonDAO.find_by_id(person_id)
