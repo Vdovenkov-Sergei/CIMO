@@ -1,9 +1,8 @@
 from typing import Optional, Self
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, model_validator
 
 from app.config import settings
-from app.movie_roles.schemas import SMovieRoleRead
 from app.movies.models import MovieType
 
 
@@ -12,8 +11,6 @@ class SMovieRead(BaseModel):
     name: str
     release_year: int
     poster_url: str
-    rating_kp: Optional[float]
-    rating_imdb: Optional[float]
 
     @model_validator(mode="after")
     def postprocess_poster_url(self) -> Self:
@@ -24,11 +21,16 @@ class SMovieRead(BaseModel):
 
 class SMovieDetailedRead(SMovieRead):
     type: MovieType
+    rating_kp: Optional[float]
+    rating_imdb: Optional[float]
     description: Optional[str]
     runtime: Optional[int]
     age_rating: Optional[int]
     genres: Optional[list[str]]
     countries: Optional[list[str]]
-    roles: list[SMovieRoleRead] = Field(default_factory=list)
 
     model_config = {"use_enum_values": True}
+
+    @model_validator(mode="after")
+    def postprocess_poster_url(self) -> Self:
+        return super().postprocess_poster_url()

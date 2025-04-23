@@ -39,7 +39,7 @@ async def swipe_session_movie(
 
         if session.is_pair and await SessionMovieDAO.check_movie_match(session_id=session.id, movie_id=data.movie_id):
             await SessionMovieDAO.update_movie_match(session_id=session.id, movie_id=data.movie_id)
-            movie = await MovieDAO.find_by_id(model_id=data.movie_id)
+            movie = await MovieDAO.find_by_id(data.movie_id)
             notification = MatchNotification(
                 movie=SMovieRead.model_validate(movie), match_time=datetime.now(UTC)
             ).model_dump_json()
