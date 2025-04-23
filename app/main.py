@@ -33,6 +33,7 @@ from app.people.router import router as router_people
 from app.session_movies.router import router as router_session_movies
 from app.sessions.router import router as router_sessions
 from app.users.router import router_auth, router_user
+from app.movie_roles.router import router as router_movie_roles
 
 
 @asynccontextmanager
@@ -48,6 +49,7 @@ app.include_router(router_auth)
 app.include_router(router_chat)
 app.include_router(router_message)
 app.include_router(router_people)
+app.include_router(router_movie_roles)
 app.include_router(router_movies)
 app.include_router(router_sessions)
 app.include_router(router_session_movies)

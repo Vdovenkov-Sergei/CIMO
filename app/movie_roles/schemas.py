@@ -6,7 +6,6 @@ from app.people.schemas import SPersonRead
 
 class SMovieRoleRead(BaseModel):
     person: SPersonRead
-    priority: int
     role: RoleType
 
     model_config = {"use_enum_values": True}

@@ -1,0 +1,18 @@
+from sqlalchemy import RowMapping
+from app.dao.base import BaseDAO
+from app.movie_roles.models import MovieRole
+
+from sqlalchemy.orm import joinedload
+
+class MovieRoleDAO(BaseDAO):
+    model = MovieRole
+
+    @classmethod
+    async def get_movie_roles(cls, *, movie_id: int, limit: int, offset: int) -> list[RowMapping]:
+        return await cls.find_all(
+            options=[joinedload(cls.model.person)],
+            filters=[cls.model.movie_id == movie_id],
+            order_by=[cls.model.priority.asc()],
+            limit=limit,
+            offset=offset,
+        )
