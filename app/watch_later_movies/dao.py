@@ -1,27 +1,19 @@
-from datetime import datetime, UTC
 from typing import Sequence
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.dao.base import MovieBaseDAO
-from app.watch_later_movies.models import WatchLaterMovie
-from app.watch_later_movies.schemas import WatchLaterCreate
+from sqlalchemy import RowMapping
+
+from app.dao.movie_base import MovieBaseDAO
+from app.viewed_movies.models import ViewedMovie
 
 
 class WatchLaterMovieDAO(MovieBaseDAO):
-    @staticmethod
-    async def create(session: AsyncSession, data: WatchLaterCreate) -> WatchLaterMovie:
-        new_movie = WatchLaterMovie(
-            user_id=data.user_id,
-            movie_id=data.movie_id,
-            created_at=datetime.now(UTC)
-        )
-        session.add(new_movie)
-        await session.commit()
-        await session.refresh(new_movie)
-        return new_movie
+    model = ViewedMovie
 
-    @staticmethod
-    async def get_by_user(session: AsyncSession, user_id: int) -> Sequence[WatchLaterMovie]:
-        result = await session.execute(select(WatchLaterMovie).where(WatchLaterMovie.user_id == user_id))
-        return result.scalars().all()
+    @classmethod
+    async def find_movies(cls, *, user_id: int, limit: int, offset: int) -> Sequence[RowMapping]:
+        return await super().find_movies(
+            filters=[cls.model.user_id == user_id],
+            order_by=[cls.model.created_at.desc()],
+            limit=limit,
+            offset=offset,
+        )
