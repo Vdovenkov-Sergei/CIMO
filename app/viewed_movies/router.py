@@ -1,21 +1,28 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.dao.base import BaseDAO
-from app.database import get_session
 from app.users.dependencies import get_current_user
 from app.users.models import User
 from app.viewed_movies.dao import ViewedMovieDAO
-from app.viewed_movies.schemas import ViewedMovieRead, ViewedMovieCreate
+from app.viewed_movies.schemas import SViewedMovieRead, SViewedMovieCreate
 
-router_viewed_movie = APIRouter(prefix="/viewed_movies", tags=["Viewed movies"])
-
-
-@router_viewed_movie.post("/", response_model=ViewedMovieRead)
-async def add_viewed_movie(data: ViewedMovieCreate, user: User = Depends(get_current_user)):
-    return await ViewedMovieDAO.add_record(user_id=user.id, movie_id=data.movie_id, review=data.review)
+router = APIRouter(prefix="/movies/viewed", tags=["Viewed Movies"])
 
 
-@router_viewed_movie.get("/", response_model=list[ViewedMovieRead])
-async def get_viewed_movies(user_id: int, session: AsyncSession = Depends(get_current_user)):
-    return await ViewedMovieDAO.get_by_user(session, user_id)
+@router.post("/", response_model=dict[str, str])
+async def add_to_viewed_list(data: SViewedMovieCreate, user: User = Depends(get_current_user)) -> dict[str, str]:
+    await ViewedMovieDAO.add_record(user_id=user.id, movie_id=data.movie_id, review=data.review)
+    return {"message": "The movie was successfully added."}
+
+
+@router.get("/", response_model=list[SViewedMovieRead])
+async def get_viewed_list(
+    limit: int = 20, offset: int = 0, order_review: bool = False, user: User = Depends(get_current_user)
+) -> list[SViewedMovieRead]:
+    movies = await ViewedMovieDAO.find_movies(user_id=user.id, limit=limit, offset=offset, order_review=order_review)
+    return [SViewedMovieRead.model_validate(movie) for movie in movies]
+
+
+@router.delete("/{movie_id}", response_model=dict[str, str])
+async def delete_from_viewed_list(movie_id: int, user: User = Depends(get_current_user)) -> dict[str, str]:
+    await ViewedMovieDAO.delete_movie(user_id=user.id, movie_id=movie_id)
+    return {"message": "The movie was successfully deleted."}

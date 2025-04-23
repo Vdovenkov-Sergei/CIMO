@@ -9,9 +9,7 @@ class ViewedMovieDAO(MovieBaseDAO):
     model = ViewedMovie
 
     @classmethod
-    async def find_movies(
-        cls, *, user_id: int, limit: int, offset: int, order_review: bool = False
-    ) -> Sequence[RowMapping]:
+    async def find_movies(cls, *, user_id: int, limit: int, offset: int, order_review: bool) -> Sequence[RowMapping]:
         order_by = [cls.model.review.desc()] if order_review else []
         order_by.append(cls.model.created_at.desc())
         return await super().find_movies(

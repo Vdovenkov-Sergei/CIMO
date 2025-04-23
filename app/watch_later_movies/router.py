@@ -9,13 +9,17 @@ router = APIRouter(prefix="/movies/later", tags=["Watch Later Movies"])
 
 
 @router.post("/", response_model=dict[str, str])
-async def add_to_watch_later_list(data: SWatchLaterMovieCreate, user: User = Depends(get_current_user)) -> dict[str, str]:
+async def add_to_watch_later_list(
+    data: SWatchLaterMovieCreate, user: User = Depends(get_current_user)
+) -> dict[str, str]:
     await WatchLaterMovieDAO.add_record(user_id=user.id, movie_id=data.movie_id)
     return {"message": "The movie was successfully added."}
 
 
 @router.get("/", response_model=list[SWatchLaterMovieRead])
-async def get_watch_later_list(limit: int = 20, offset: int = 0, user: User = Depends(get_current_user)) -> list[SWatchLaterMovieRead]:
+async def get_watch_later_list(
+    limit: int = 20, offset: int = 0, user: User = Depends(get_current_user)
+) -> list[SWatchLaterMovieRead]:
     movies = await WatchLaterMovieDAO.find_movies(user_id=user.id, limit=limit, offset=offset)
     return [SWatchLaterMovieRead.model_validate(movie) for movie in movies]
 
