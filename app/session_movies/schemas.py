@@ -12,6 +12,7 @@ class SSessionMovieRead(BaseModel):
 
 class SSessionMovieCreate(BaseModel):
     movie_id: int
+    is_liked: bool
 
 
 class MatchNotification(BaseModel):

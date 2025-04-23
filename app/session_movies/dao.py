@@ -23,12 +23,27 @@ class SessionMovieDAO(MovieBaseDAO):
             return user_count == cls.PAIR
 
     @classmethod
-    async def find_movies(
-        cls, *, session_id: uuid.UUID, user_id: int, limit: int, offset: int
-    ) -> Sequence[RowMapping]:
+    async def update_movie_match(cls, *, session_id: uuid.UUID, movie_id: int) -> int:
+        return await cls.update_record(
+            filters=[cls.model.session_id == session_id, cls.model.movie_id == movie_id],
+            update_data={"is_matched": True},
+        )
+
+    @classmethod
+    async def find_movies(cls, *, session_id: uuid.UUID, user_id: int, limit: int, offset: int) -> Sequence[RowMapping]:
         return await super().find_movies(
             filters=[cls.model.session_id == session_id, cls.model.user_id == user_id],
             order_by=[cls.model.is_matched.desc(), cls.model.created_at.desc()],
             limit=limit,
             offset=offset,
+        )
+
+    @classmethod
+    async def delete_movie(cls, *, session_id: uuid.UUID, user_id: int, movie_id: int) -> int:
+        return await cls.delete_record(
+            filters=[
+                cls.model.session_id == session_id,
+                cls.model.user_id == user_id,
+                cls.model.movie_id == movie_id,
+            ]
         )
