@@ -1,6 +1,8 @@
-# Development of a web application for personalized movie selection
+# CIMO
 
-## Creating a virtual environment
+## Backend
+
+### Creating a virtual environment
 
 To create a virtual environment via `poetry`, follow these steps:
 
@@ -13,7 +15,7 @@ To create a virtual environment via `poetry`, follow these steps:
 Click [here](https://python-poetry.org/docs/) for more information about **poetry**
 
 
-## Creating migrations
+### Creating migrations
 
 To create a new migration, follow these steps:
 
@@ -22,7 +24,7 @@ To create a new migration, follow these steps:
 - To roll back the migration, run the command `alembic downgrade -1`.
 
 
-## Checking column properties in PostgreSQL table
+### Checking column properties in PostgreSQL table
 
 To check the properties of columns in a specific table in PostgreSQL, you can use the following SQL query. This query retrieves metadata information from the `information_schema.columns` system catalog:
 
