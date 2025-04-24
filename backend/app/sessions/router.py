@@ -3,7 +3,6 @@ from datetime import UTC, datetime
 from typing import Any, Optional
 
 from fastapi import APIRouter, Depends
-from fastapi_cache.decorator import cache
 
 from app.exceptions import (
     MaxParticipantsInSessionException,
@@ -24,7 +23,6 @@ router = APIRouter(prefix="/sessions", tags=["Sessions"])
 
 
 @router.get("/me", response_model=Optional[SSessionRead])
-@cache(expire=60)
 async def get_user_session(user: User = Depends(get_current_user)) -> Optional[SSessionRead]:
     session = await SessionDAO.find_existing_session(user_id=user.id)
     return SSessionRead.model_validate(session) if session else None

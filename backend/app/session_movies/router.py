@@ -46,7 +46,7 @@ async def swipe_session_movie(
             for websocket in active_sessions.get(session.id, []):
                 await websocket.send_text(notification)
 
-    # Здесь будет логика обновления рекомендаций и отдачи нового movie_id
+    # TODO Здесь будет логика обновления рекомендаций и отдачи нового movie_id
 
     return {"message": "The movie was successfully swipped.", "movie_id": data.movie_id}
 

@@ -10,7 +10,7 @@ router = APIRouter(prefix="/chats/message", tags=["Chats"])
 
 
 async def bot_generate_response(_: str) -> str:
-    # Здесь будет логика работы бота
+    # TODO Здесь будет логика работы бота
     return "Я не знаю, что ответить =("
 
 
