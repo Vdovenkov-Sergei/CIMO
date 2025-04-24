@@ -7,7 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 
 
-class SenderType(PyEnum):
+class SenderType(str, PyEnum):
     USER = "USER"
     BOT = "BOT"
 

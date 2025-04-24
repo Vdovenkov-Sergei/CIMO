@@ -4,7 +4,7 @@ from typing import Any, Optional, Sequence
 from sqlalchemy import select
 
 from app.dao.base import BaseDAO
-from app.database import Base, async_session_maker
+from app.database import async_session_maker
 from app.sessions.models import Session, SessionStatus
 
 

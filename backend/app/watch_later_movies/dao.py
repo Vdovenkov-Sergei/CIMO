@@ -10,9 +10,13 @@ class WatchLaterMovieDAO(MovieBaseDAO):
 
     @classmethod
     async def find_movies(cls, *, user_id: int, limit: int, offset: int) -> Sequence[Base]:
-        return await super().find_movies(
+        return await super().find_all_movies(
             filters=[cls.model.user_id == user_id],
             order_by=[cls.model.created_at.desc()],
             limit=limit,
             offset=offset,
         )
+
+    @classmethod
+    async def delete_movie(cls, *, user_id: int, movie_id: int) -> int:
+        return await cls.delete_record(filters=[cls.model.user_id == user_id, cls.model.movie_id == movie_id])

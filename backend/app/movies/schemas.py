@@ -29,7 +29,3 @@ class SMovieDetailedRead(SMovieRead):
     age_rating: Optional[int]
     genres: Optional[list[str]]
     countries: Optional[list[str]]
-
-    @model_validator(mode="after")
-    def postprocess_poster_url(self) -> Self:
-        return super().postprocess_poster_url()

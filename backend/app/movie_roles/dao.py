@@ -1,3 +1,5 @@
+from typing import Sequence
+
 from sqlalchemy.orm import joinedload
 
 from app.dao.base import BaseDAO
@@ -9,7 +11,7 @@ class MovieRoleDAO(BaseDAO):
     model = MovieRole
 
     @classmethod
-    async def get_movie_roles(cls, *, movie_id: int, limit: int, offset: int) -> list[Base]:
+    async def get_movie_roles(cls, *, movie_id: int, limit: int, offset: int) -> Sequence[Base]:
         return await cls.find_all(
             options=[joinedload(cls.model.person)],
             filters=[cls.model.movie_id == movie_id],

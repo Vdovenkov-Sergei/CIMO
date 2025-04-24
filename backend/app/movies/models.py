@@ -6,7 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 
 
-class MovieType(PyEnum):
+class MovieType(str, PyEnum):
     MOVIE = "MOVIE"
     CARTOON = "CARTOON"
     ANIME = "ANIME"

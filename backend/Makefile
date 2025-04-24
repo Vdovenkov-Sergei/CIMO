@@ -34,8 +34,8 @@ style: format lint
 dev:
 	$(MAKE) run & \
 	$(MAKE) celery & \
-	sleep 5 && $(MAKE) flower & \
-	sleep 5 && $(MAKE) beat & \
+	# sleep 5 && $(MAKE) flower & \
+	# sleep 5 && $(MAKE) beat & \
 	wait
 
 clean:

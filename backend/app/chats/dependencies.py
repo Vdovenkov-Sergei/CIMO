@@ -11,4 +11,4 @@ async def get_existing_chat(user: User = Depends(get_current_user)) -> Chat:
     chat = await ChatDAO.find_one_or_none(filters=[Chat.user_id == user.id])
     if not chat:
         raise ChatNotFoundException
-    return chat
+    return chat  # type: ignore

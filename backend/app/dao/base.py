@@ -1,7 +1,7 @@
 from typing import Any, Optional, Sequence, Type
 
 from sqlalchemy import and_, delete, insert, select, update
-from sqlalchemy.orm import Load
+from sqlalchemy.orm.strategy_options import _AbstractLoad
 
 from app.database import Base, async_session_maker
 
@@ -13,7 +13,7 @@ class BaseDAO:
     async def find_one_or_none(
         cls,
         *,
-        options: Optional[list[Load]] = None,
+        options: Optional[list[_AbstractLoad]] = None,
         filters: Optional[list[Any]] = None,
     ) -> Optional[Base]:
         query = select(cls.model)
@@ -26,14 +26,14 @@ class BaseDAO:
             return result.scalars().one_or_none()
 
     @classmethod
-    async def find_by_id(cls, model_id: int, *, options: Optional[list[Load]] = None) -> Optional[Base]:
+    async def find_by_id(cls, model_id: int, *, options: Optional[list[_AbstractLoad]] = None) -> Optional[Base]:
         return await cls.find_one_or_none(options=options, filters=[cls.model.id == model_id])  # type: ignore
 
     @classmethod
     async def find_all(
         cls,
         *,
-        options: Optional[list[Load]] = None,
+        options: Optional[list[_AbstractLoad]] = None,
         filters: Optional[list[Any]] = None,
         order_by: Optional[list[Any]] = None,
         limit: Optional[int] = None,

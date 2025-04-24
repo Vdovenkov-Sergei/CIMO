@@ -42,9 +42,7 @@ def check_jwt_token(token: Optional[str]) -> dict[str, Any]:
 
 
 async def authenticate_user(login: str, password: str) -> User:
-    user = await UserDAO.find_one_or_none(filters=[User.email == login]) or await UserDAO.find_one_or_none(
-        filters=[User.user_name == login]
-    )
+    user = await UserDAO.get_by_login(login)
     if not user or not Hashing.verify_password(password, user.hashed_password):
         raise IncorrectLoginOrPasswordException
     return user

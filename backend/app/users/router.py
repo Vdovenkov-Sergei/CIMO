@@ -90,9 +90,9 @@ async def verify_email(user_data: SUserVerification) -> dict[str, str | int]:
     for key in [USER_EMAIL_KEY, CODE_VERIFY_KEY, ATTEMPTS_ENTER_KEY, ATTEMPTS_SEND_KEY]:
         await redis_client.delete(key.format(email=email))
     user = await UserDAO.add_record(email=email, hashed_password=hashed_password)
-    await UserDAO.update_record(filters=[User.id == user.id], update_data={"user_name": f"user_{user.id}"})
+    await UserDAO.update_record(filters=[User.id == user.id], update_data={"user_name": f"user_{user.id}"})  # type: ignore
 
-    return {"message": "Email successfully verified and user registered.", "id": user.id}
+    return {"message": "Email successfully verified and user registered.", "id": user.id}  # type: ignore
 
 
 @router_auth.post("/register/username", response_model=dict[str, str])
@@ -104,7 +104,7 @@ async def register_username(user_data: SUserRegisterUsername) -> dict[str, str]:
     if existing_user:
         raise UsernameAlreadyExistsException(user_name=user_data.user_name)
 
-    await UserDAO.update_record(filters=[User.id == user.id], update_data={"user_name": user_data.user_name})
+    await UserDAO.update_record(filters=[User.id == user.id], update_data={"user_name": user_data.user_name})  # type: ignore
     return {"message": "Username successfully set."}
 
 

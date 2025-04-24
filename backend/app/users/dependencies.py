@@ -17,4 +17,4 @@ async def get_current_user(access_token: str = Cookie(include_in_schema=False, d
     if not user:
         raise UserNotFoundException
 
-    return user
+    return user  # type: ignore
