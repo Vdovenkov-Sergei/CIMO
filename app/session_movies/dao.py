@@ -1,10 +1,10 @@
 import uuid
 from typing import Sequence
 
-from sqlalchemy import RowMapping, func, select
+from sqlalchemy import func, select
 
 from app.dao.movie_base import MovieBaseDAO
-from app.database import async_session_maker
+from app.database import Base, async_session_maker
 from app.session_movies.models import SessionMovie
 
 
@@ -30,7 +30,7 @@ class SessionMovieDAO(MovieBaseDAO):
         )
 
     @classmethod
-    async def find_movies(cls, *, session_id: uuid.UUID, user_id: int, limit: int, offset: int) -> Sequence[RowMapping]:
+    async def find_movies(cls, *, session_id: uuid.UUID, user_id: int, limit: int, offset: int) -> Sequence[Base]:
         return await super().find_movies(
             filters=[cls.model.session_id == session_id, cls.model.user_id == user_id],
             order_by=[cls.model.is_matched.desc(), cls.model.created_at.desc()],

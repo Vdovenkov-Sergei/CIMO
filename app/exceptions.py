@@ -111,3 +111,13 @@ class UserNotInSessionException(ApiException):
 
 class SessionAlreadyInProgressException(ApiException):
     error_message: str = "Session with id={session_id} already in progress"
+
+
+class ChatNotFoundException(ApiException):
+    status_code: int = status.HTTP_404_NOT_FOUND
+    error_message: str = "User doesn`t have a chat"
+
+
+class ChatAlreadyExistsException(ApiException):
+    status_code: int = status.HTTP_409_CONFLICT
+    error_message: str = "Chat already exists"

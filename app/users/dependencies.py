@@ -1,12 +1,12 @@
 from fastapi import Cookie
-from sqlalchemy import RowMapping
 
 from app.exceptions import UserIsNotPresentException, UserNotFoundException
 from app.users.auth import check_jwt_token
 from app.users.dao import UserDAO
+from app.users.models import User
 
 
-async def get_current_user(access_token: str = Cookie(include_in_schema=False, default=None)) -> RowMapping:
+async def get_current_user(access_token: str = Cookie(include_in_schema=False, default=None)) -> User:
     payload = check_jwt_token(access_token)
 
     user_id = payload.get("sub")

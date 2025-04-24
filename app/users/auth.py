@@ -1,8 +1,7 @@
 from datetime import UTC, datetime, timedelta
 from typing import Any, Optional
 
-from jose import JWTError, jwt
-from sqlalchemy import RowMapping
+from jose import ExpiredSignatureError, JWTError, jwt
 
 from app.config import settings
 from app.database import redis_client
@@ -34,17 +33,15 @@ def check_jwt_token(token: Optional[str]) -> dict[str, Any]:
         raise TokenNotFoundException
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, settings.ALGORITHM)
+    except ExpiredSignatureError:
+        raise TokenExpiredException
     except JWTError:
         raise IncorrectTokenFormatException
-
-    expire = payload.get("exp")
-    if expire and expire < int(datetime.now(UTC).timestamp()):
-        raise TokenExpiredException
 
     return payload  # type: ignore
 
 
-async def authenticate_user(login: str, password: str) -> RowMapping:
+async def authenticate_user(login: str, password: str) -> User:
     user = await UserDAO.find_one_or_none(filters=[User.email == login]) or await UserDAO.find_one_or_none(
         filters=[User.user_name == login]
     )

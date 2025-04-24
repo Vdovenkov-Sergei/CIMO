@@ -55,7 +55,7 @@ async def swipe_session_movie(
 async def get_session_list(
     limit: int = 20, offset: int = 0, session: Session = Depends(get_current_session)
 ) -> list[SSessionMovieRead]:
-    movies = await SessionMovieDAO.get_movies(
+    movies = await SessionMovieDAO.find_movies(
         session_id=session.id, user_id=session.user_id, limit=limit, offset=offset
     )
     return [SSessionMovieRead.model_validate(movie) for movie in movies]

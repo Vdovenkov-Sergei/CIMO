@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends
 from app.users.dependencies import get_current_user
 from app.users.models import User
 from app.viewed_movies.dao import ViewedMovieDAO
-from app.viewed_movies.schemas import SViewedMovieRead, SViewedMovieCreate
+from app.viewed_movies.schemas import SViewedMovieCreate, SViewedMovieRead
 
 router = APIRouter(prefix="/movies/viewed", tags=["Viewed Movies"])
 

@@ -3,7 +3,6 @@ from fastapi import APIRouter
 from app.movie_roles.dao import MovieRoleDAO
 from app.movie_roles.schemas import SMovieRoleRead
 
-
 router = APIRouter(prefix="/movie/roles", tags=["Movie Roles"])
 
 

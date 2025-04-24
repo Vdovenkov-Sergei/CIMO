@@ -1,12 +1,13 @@
 from typing import Optional, Self
 
-from pydantic import BaseModel, model_validator
+from pydantic import model_validator
 
 from app.config import settings
 from app.movies.models import MovieType
+from app.schemas.base import BaseSchema
 
 
-class SMovieRead(BaseModel):
+class SMovieRead(BaseSchema):
     id: int
     name: str
     release_year: int
@@ -28,8 +29,6 @@ class SMovieDetailedRead(SMovieRead):
     age_rating: Optional[int]
     genres: Optional[list[str]]
     countries: Optional[list[str]]
-
-    model_config = {"use_enum_values": True}
 
     @model_validator(mode="after")
     def postprocess_poster_url(self) -> Self:

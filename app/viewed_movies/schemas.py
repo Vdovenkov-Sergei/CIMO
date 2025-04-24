@@ -1,15 +1,17 @@
-from pydantic import BaseModel, Field
 from datetime import datetime
 
+from pydantic import Field
+
 from app.movies.schemas import SMovieRead
+from app.schemas.base import BaseSchema
 
 
-class SViewedMovieCreate(BaseModel):
+class SViewedMovieCreate(BaseSchema):
     movie_id: int
     review: int = Field(..., ge=1, le=10, description="Rating must be between 1 and 10")
 
 
-class SViewedMovieRead(BaseModel):
+class SViewedMovieRead(BaseSchema):
     movie: SMovieRead
     review: int = Field(..., ge=1, le=10, description="Rating between 1 and 10")
     created_at: datetime

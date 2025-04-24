@@ -1,11 +1,12 @@
 from typing import Optional, Self
 
-from pydantic import BaseModel, model_validator
+from pydantic import model_validator
 
 from app.config import settings
+from app.schemas.base import BaseSchema
 
 
-class SPersonRead(BaseModel):
+class SPersonRead(BaseSchema):
     id: int
     name: str
     photo_url: Optional[str] = None

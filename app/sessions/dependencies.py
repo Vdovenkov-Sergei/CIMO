@@ -1,9 +1,10 @@
 from fastapi import Depends
+
+from app.exceptions import UserNotInSessionException
 from app.sessions.dao import SessionDAO
+from app.sessions.models import Session
 from app.users.dependencies import get_current_user
 from app.users.models import User
-from app.sessions.models import Session
-from app.exceptions import UserNotInSessionException
 
 
 async def get_current_session(user: User = Depends(get_current_user)) -> Session:

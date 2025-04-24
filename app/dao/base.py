@@ -1,6 +1,6 @@
 from typing import Any, Optional, Sequence, Type
 
-from sqlalchemy import RowMapping, and_, delete, insert, select, update
+from sqlalchemy import and_, delete, insert, select, update
 from sqlalchemy.orm import Load
 
 from app.database import Base, async_session_maker
@@ -13,43 +13,33 @@ class BaseDAO:
     async def find_one_or_none(
         cls,
         *,
-        columns: Optional[list[Any]] = None,
         options: Optional[list[Load]] = None,
         filters: Optional[list[Any]] = None,
-    ) -> Optional[RowMapping]:
-        selected_columns = columns if columns else cls.model.__table__.columns
-        query = select(*selected_columns)
+    ) -> Optional[Base]:
+        query = select(cls.model)
         if options is not None:
             query = query.options(*options)
         if filters is not None:
             query = query.where(and_(*filters))
         async with async_session_maker() as session:
             result = await session.execute(query)
-            return result.mappings().one_or_none()
+            return result.scalars().one_or_none()
 
     @classmethod
-    async def find_by_id(
-        cls, model_id: int, *, columns: Optional[list[Any]] = None, options: Optional[list[Load]] = None
-    ) -> Optional[RowMapping]:
-        return await cls.find_one_or_none(columns=columns, options=options, filters=[cls.model.id == model_id])
+    async def find_by_id(cls, model_id: int, *, options: Optional[list[Load]] = None) -> Optional[Base]:
+        return await cls.find_one_or_none(options=options, filters=[cls.model.id == model_id])  # type: ignore
 
     @classmethod
     async def find_all(
         cls,
         *,
-        joins: Optional[list[tuple[Type[Base], Any]]] = None,
-        columns: Optional[list[Any]] = None,
         options: Optional[list[Load]] = None,
         filters: Optional[list[Any]] = None,
         order_by: Optional[list[Any]] = None,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
-    ) -> Sequence[RowMapping]:
-        selected_columns = columns if columns else cls.model.__table__.columns
-        query = select(*selected_columns)
-        if joins is not None:
-            for table, condition in joins:
-                query = query.join(table, condition)
+    ) -> Sequence[Base]:
+        query = select(cls.model)
         if options is not None:
             query = query.options(*options)
         if filters is not None:
@@ -62,15 +52,15 @@ class BaseDAO:
             query = query.offset(offset)
         async with async_session_maker() as session:
             result = await session.execute(query)
-            return result.mappings().all()
+            return result.scalars().all()
 
     @classmethod
-    async def add_record(cls, **data: Any) -> RowMapping:
-        query = insert(cls.model).values(**data).returning(*cls.model.__table__.columns)
+    async def add_record(cls, **data: Any) -> Base:
+        query = insert(cls.model).values(**data).returning(cls.model)
         async with async_session_maker() as session:
             result = await session.execute(query)
             await session.commit()
-            return result.mappings().one()
+            return result.scalars().one()
 
     @classmethod
     async def delete_record(cls, *, filters: list[Any]) -> int:

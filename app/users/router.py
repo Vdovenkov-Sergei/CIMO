@@ -16,7 +16,14 @@ from app.users.auth import authenticate_user, check_jwt_token, check_verificatio
 from app.users.dao import UserDAO
 from app.users.dependencies import get_current_user
 from app.users.models import User
-from app.users.schemas import SUserAuth, SUserRead, SUserRegisterEmail, SUserRegisterUsername, SUserVerification, SUserUpdate
+from app.users.schemas import (
+    SUserAuth,
+    SUserRead,
+    SUserRegisterEmail,
+    SUserRegisterUsername,
+    SUserUpdate,
+    SUserVerification,
+)
 from app.users.utils import (
     ACCESS_TOKEN,
     ATTEMPTS_ENTER_KEY,
@@ -137,19 +144,12 @@ async def read_users_me(user: User = Depends(get_current_user)) -> SUserRead:
 
 @router_user.patch("/me", response_model=dict[str, str])
 async def update_users_me(update_data: SUserUpdate, user: User = Depends(get_current_user)) -> dict[str, str]:
-    update_fields = {}
+    if update_data.user_name == user.user_name:
+        raise UsernameAlreadyExistsException(user_name=update_data.user_name)
 
-    if update_data.email and update_data.email != user.email:
-        existing_email = await UserDAO.find_one_or_none(filters=[User.email == update_data.email])
-        if existing_email:
-            raise EmailAlreadyExistsException(email=update_data.email)
-        update_fields["email"] = update_data.email
+    existing_username = await UserDAO.find_one_or_none(filters=[User.user_name == update_data.user_name])
+    if existing_username:
+        raise UsernameAlreadyExistsException(user_name=update_data.user_name)
 
-    if update_data.user_name and update_data.user_name != user.user_name:
-        existing_username = await UserDAO.find_one_or_none(filters=[User.user_name == update_data.user_name])
-        if existing_username:
-            raise UsernameAlreadyExistsException(user_name=update_data.user_name)
-        update_fields["user_name"] = update_data.user_name
-
-    await UserDAO.update_record(filters=[User.id == user.id], update_data=update_fields)
+    await UserDAO.update_record(filters=[User.id == user.id], update_data=update_data.model_dump())
     return {"message": "User updated successfully."}

@@ -92,5 +92,5 @@ async def leave_session(session: Session = Depends(get_current_session)) -> dict
     if session.status in [SessionStatus.ACTIVE, SessionStatus.REVIEW, SessionStatus.COMPLETED]:
         raise SessionAlreadyInProgressException(session_id=str(session.id))
 
-    await SessionDAO.delete_record(session_id=session.id, user_id=session.user_id)
+    await SessionDAO.delete_session(session_id=session.id, user_id=session.user_id)
     return {"message": "You left the session successfully."}

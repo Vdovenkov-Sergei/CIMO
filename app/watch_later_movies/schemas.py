@@ -1,13 +1,13 @@
-from pydantic import BaseModel
 from datetime import datetime
 
 from app.movies.schemas import SMovieRead
+from app.schemas.base import BaseSchema
 
 
-class SWatchLaterMovieCreate(BaseModel):
+class SWatchLaterMovieCreate(BaseSchema):
     movie_id: int
 
 
-class SWatchLaterMovieRead(BaseModel):
+class SWatchLaterMovieRead(BaseSchema):
     movie: SMovieRead
     created_at: datetime

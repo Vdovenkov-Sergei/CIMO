@@ -4,6 +4,7 @@ from markupsafe import Markup
 from sqladmin import ModelView
 
 from app.chats.models import Chat
+from app.config import settings
 from app.messages.models import Message
 from app.movie_roles.models import MovieRole
 from app.movies.models import Movie
@@ -14,8 +15,8 @@ from app.users.models import User
 from app.viewed_movies.models import ViewedMovie
 from app.watch_later_movies.models import WatchLaterMovie
 
-PREFIX_MOVIE = "https://image.openmoviedb.com/kinopoisk-images"
-PREFIX_PERSON = "https://avatars.mds.yandex.net/get-kinopoisk-image"
+PREFIX_MOVIE = settings.BASE_POSTER_URL
+PREFIX_PERSON = settings.BASE_PHOTO_URL
 
 
 def movie_url(m: Movie) -> str:

@@ -1,22 +1,24 @@
 from datetime import datetime
-from pydantic import BaseModel, EmailStr, Field
 
+from pydantic import EmailStr, Field
+
+from app.schemas.base import BaseSchema
 from app.users.utils import VERIFICATION_CODE_LEN
 
 USERNAME_REGEX = r"^[a-zA-Z0-9_.]+$"
 
 
-class SUserAuth(BaseModel):
+class SUserAuth(BaseSchema):
     login: str
     password: str = Field(..., min_length=8, max_length=24, description="Password must be 8-24 length")
 
 
-class SUserRegisterEmail(BaseModel):
+class SUserRegisterEmail(BaseSchema):
     email: EmailStr
     password: str = Field(..., min_length=8, max_length=24, description="Password must be 8-24 length")
 
 
-class SUserVerification(BaseModel):
+class SUserVerification(BaseSchema):
     email: EmailStr
     code: str = Field(
         ...,
@@ -27,7 +29,7 @@ class SUserVerification(BaseModel):
     )
 
 
-class SUserRegisterUsername(BaseModel):
+class SUserRegisterUsername(BaseSchema):
     user_id: int = Field(..., gt=0, description="User ID must be a positive integer")
     user_name: str = Field(
         ...,
@@ -38,19 +40,17 @@ class SUserRegisterUsername(BaseModel):
     )
 
 
-class SUserRead(BaseModel):
+class SUserRead(BaseSchema):
     id: int
     email: EmailStr
     user_name: str
     created_at: datetime
 
 
-class SUserUpdate(BaseModel):
-    email: EmailStr | None = None
-    user_name: str | None = Field(
-        default=None,
+class SUserUpdate(BaseSchema):
+    user_name: str = Field(
         pattern=USERNAME_REGEX,
         min_length=5,
         max_length=30,
-        description="Username must be 5-30 length, can contain a-zA-Z0-9_."
+        description="Username must be 5-30 length, can contain a-zA-Z0-9_.",
     )

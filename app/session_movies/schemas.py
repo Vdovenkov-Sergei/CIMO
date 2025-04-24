@@ -1,20 +1,19 @@
 from datetime import datetime
 
-from pydantic import BaseModel
-
 from app.movies.schemas import SMovieRead
+from app.schemas.base import BaseSchema
 
 
-class SSessionMovieRead(BaseModel):
+class SSessionMovieRead(BaseSchema):
     movie: SMovieRead
     is_matched: bool
 
 
-class SSessionMovieCreate(BaseModel):
+class SSessionMovieCreate(BaseSchema):
     movie_id: int
     is_liked: bool
 
 
-class MatchNotification(BaseModel):
+class MatchNotification(BaseSchema):
     movie: SMovieRead
     match_time: datetime
