@@ -1,7 +1,8 @@
+from datetime import UTC, datetime, timedelta
 import uuid
 from typing import Any, Optional, Sequence
 
-from sqlalchemy import select
+from sqlalchemy import and_, or_, select
 
 from app.dao.base import BaseDAO
 from app.database import async_session_maker
@@ -36,3 +37,30 @@ class SessionDAO(BaseDAO):
     @classmethod
     async def delete_session(cls, *, session_id: uuid.UUID, user_id: int) -> int:
         return await cls.delete_record(filters=[cls.model.id == session_id, cls.model.user_id == user_id])
+
+    @classmethod
+    async def clean_completed_sessions(cls) -> None:
+        return await cls.delete_record(filters=[cls.model.status == SessionStatus.COMPLETED])
+
+    @classmethod
+    async def clean_old_sessions(cls) -> None:
+        now = datetime.now(UTC)
+        afk_cutoff = now - timedelta(days=3)
+        pending_prepared_cutoff = now - timedelta(days=1)
+        return await cls.delete_record(
+            filters=[
+                or_(
+                    # Удаляем AFK сессии старше 3 дней по started_at
+                    and_(
+                        Session.status == SessionStatus.AFK,
+                        Session.started_at.is_not(None),
+                        Session.started_at < afk_cutoff,
+                    ),
+                    # Удаляем PENDING/PREPARED сессии старше 1 дня по created_at
+                    and_(
+                        Session.status.in_([SessionStatus.PENDING, SessionStatus.PREPARED]),
+                        Session.created_at < pending_prepared_cutoff,
+                    ),
+                )
+            ]
+        )

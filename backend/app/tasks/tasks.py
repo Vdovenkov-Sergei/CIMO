@@ -1,17 +1,14 @@
 import asyncio
 import smtplib
-from datetime import UTC, datetime
 from email.message import EmailMessage
 
 from celery import shared_task
 from pydantic import EmailStr
-from sqlalchemy import delete
 
 from app.config import settings
-from app.database import async_session_maker
-from app.sessions.models import Session, SessionStatus
 from app.tasks.celery import celery_app
 from app.tasks.email_templates import create_verification_template
+from app.sessions.dao import SessionDAO
 
 
 @celery_app.task  # type: ignore
@@ -28,12 +25,14 @@ def clean_completed_sessions() -> None:
     asyncio.run(_clean_completed_sessions())
 
 
+@shared_task  # type: ignore
+def clean_old_sessions() -> None:
+    asyncio.run(_clean_old_sessions())
+
+
 async def _clean_completed_sessions() -> None:
-    query = delete(Session).where(
-        Session.status == SessionStatus.COMPLETED,
-        Session.ended_at.isnot(None),
-        Session.ended_at < datetime.now(UTC),
-    )
-    async with async_session_maker() as session:
-        await session.execute(query)
-        await session.commit()
+    await SessionDAO.clean_completed_sessions()
+
+
+async def _clean_old_sessions() -> None:
+    await SessionDAO.clean_old_sessions()

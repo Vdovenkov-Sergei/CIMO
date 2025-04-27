@@ -12,6 +12,10 @@ router = APIRouter(prefix="/movies/later", tags=["Watch Later Movies"])
 async def add_to_watch_later_list(
     data: SWatchLaterMovieCreate, user: User = Depends(get_current_user)
 ) -> dict[str, str]:
+    existing_movie = await WatchLaterMovieDAO.find_by_user_movie_id(user_id=user.id, movie_id=data.movie_id)
+    if existing_movie:
+        return {"message": "The movie is already in the watch later list."}
+    
     await WatchLaterMovieDAO.add_record(user_id=user.id, movie_id=data.movie_id)
     return {"message": "The movie was successfully added."}
 

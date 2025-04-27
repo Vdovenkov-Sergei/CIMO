@@ -1,5 +1,5 @@
 import uuid
-from typing import Sequence
+from typing import Optional, Sequence
 
 from sqlalchemy import func, select
 
@@ -38,6 +38,18 @@ class SessionMovieDAO(MovieBaseDAO):
             offset=offset,
         )
 
+    @classmethod
+    async def find_by_session_user_movie_id(
+        cls, *, session_id: uuid.UUID, user_id: int, movie_id: int
+    ) -> Optional[Base]:
+        return await cls.find_one_or_none(
+            filters=[
+                cls.model.session_id == session_id,
+                cls.model.user_id == user_id,
+                cls.model.movie_id == movie_id,
+            ]
+        )
+    
     @classmethod
     async def delete_movie(cls, *, session_id: uuid.UUID, user_id: int, movie_id: int) -> int:
         return await cls.delete_record(

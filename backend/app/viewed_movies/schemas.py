@@ -15,3 +15,7 @@ class SViewedMovieRead(BaseSchema):
     movie: SMovieRead
     review: int = Field(..., ge=1, le=10, description="Rating between 1 and 10")
     created_at: datetime
+
+
+class SViewedMovieUpdate(BaseSchema):
+    review: int = Field(..., ge=1, le=10, description="Rating must be between 1 and 10")

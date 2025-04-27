@@ -7,7 +7,6 @@ from fastapi import APIRouter, Depends
 from app.exceptions import (
     MaxParticipantsInSessionException,
     ParticipantsNotEnoughException,
-    SessionAlreadyInProgressException,
     SessionNotFoundException,
     UserAlreadyInSessionException,
 )
@@ -87,8 +86,5 @@ async def change_session_status(
 
 @router.delete("/leave", response_model=dict[str, str])
 async def leave_session(session: Session = Depends(get_current_session)) -> dict[str, str]:
-    if session.status in [SessionStatus.ACTIVE, SessionStatus.REVIEW, SessionStatus.COMPLETED]:
-        raise SessionAlreadyInProgressException(session_id=str(session.id))
-
     await SessionDAO.delete_session(session_id=session.id, user_id=session.user_id)
     return {"message": "You left the session successfully."}

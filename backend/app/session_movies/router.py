@@ -8,7 +8,8 @@ from app.movies.schemas import SMovieRead
 from app.session_movies.dao import SessionMovieDAO
 from app.session_movies.schemas import MatchNotification, SSessionMovieCreate, SSessionMovieRead
 from app.sessions.dependencies import get_current_session
-from app.sessions.models import Session
+from app.sessions.models import Session, SessionStatus
+from app.exceptions import InvalidSessionStatusException
 
 router = APIRouter(prefix="/movies/session", tags=["Session Movies"])
 active_sessions: dict[uuid.UUID, list[WebSocket]] = {}
@@ -34,7 +35,13 @@ async def websocket_endpoint(websocket: WebSocket, session_id: uuid.UUID) -> Non
 async def swipe_session_movie(
     data: SSessionMovieCreate, session: Session = Depends(get_current_session)
 ) -> dict[str, str | int]:
-    if data.is_liked:
+    if session.status != SessionStatus.ACTIVE:
+        raise InvalidSessionStatusException(status=session.status.value)
+
+    existing_movie = await SessionMovieDAO.find_by_session_user_movie_id(
+        session_id=session.id, user_id=session.user_id, movie_id=data.movie_id
+    )
+    if data.is_liked and not existing_movie:
         await SessionMovieDAO.add_record(session_id=session.id, user_id=session.user_id, movie_id=data.movie_id)
 
         if session.is_pair and await SessionMovieDAO.check_movie_match(session_id=session.id, movie_id=data.movie_id):
@@ -55,6 +62,9 @@ async def swipe_session_movie(
 async def get_session_list(
     limit: int = 20, offset: int = 0, session: Session = Depends(get_current_session)
 ) -> list[SSessionMovieRead]:
+    if session.status not in (SessionStatus.REVIEW, SessionStatus.ACTIVE):
+        raise InvalidSessionStatusException(status=session.status.value)
+
     movies = await SessionMovieDAO.find_movies(
         session_id=session.id, user_id=session.user_id, limit=limit, offset=offset
     )
@@ -63,5 +73,8 @@ async def get_session_list(
 
 @router.delete("/{movie_id}", response_model=dict[str, str])
 async def delete_from_session_list(movie_id: int, session: Session = Depends(get_current_session)) -> dict[str, str]:
+    if session.status != SessionStatus.REVIEW:
+        raise InvalidSessionStatusException(status=session.status.value)
+
     await SessionMovieDAO.delete_movie(session_id=session.id, user_id=session.user_id, movie_id=movie_id)
     return {"message": "The movie was successfully deleted."}

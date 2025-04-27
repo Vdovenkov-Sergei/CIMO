@@ -22,3 +22,9 @@ class ViewedMovieDAO(MovieBaseDAO):
     @classmethod
     async def delete_movie(cls, *, user_id: int, movie_id: int) -> int:
         return await cls.delete_record(filters=[cls.model.user_id == user_id, cls.model.movie_id == movie_id])
+
+    @classmethod
+    async def update_review(cls, *, user_id: int, movie_id: int, review: int) -> int:
+        return await cls.update_record(
+            filters=[cls.model.user_id == user_id, cls.model.movie_id == movie_id], update_data={"review": review}
+        )

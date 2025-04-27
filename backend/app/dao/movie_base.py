@@ -1,6 +1,7 @@
 from typing import Any, Optional, Sequence
 
 from sqlalchemy.orm import joinedload
+from sqlalchemy.orm.strategy_options import _AbstractLoad
 
 from app.dao.base import BaseDAO
 from app.database import Base
@@ -22,4 +23,13 @@ class MovieBaseDAO(BaseDAO):
             order_by=order_by,
             limit=limit,
             offset=offset,
+        )
+
+    @classmethod
+    async def find_by_user_movie_id(
+        cls, *, user_id: int, movie_id: int, options: Optional[list[_AbstractLoad]] = None
+    ) -> Optional[Base]:
+        return await cls.find_one_or_none(
+            options=options,
+            filters=[cls.model.user_id == user_id, cls.model.movie_id == movie_id],
         )
