@@ -1,5 +1,5 @@
-from datetime import UTC, datetime, timedelta
 import uuid
+from datetime import UTC, datetime, timedelta
 from typing import Any, Optional, Sequence
 
 from sqlalchemy import and_, or_, select
@@ -39,11 +39,11 @@ class SessionDAO(BaseDAO):
         return await cls.delete_record(filters=[cls.model.id == session_id, cls.model.user_id == user_id])
 
     @classmethod
-    async def clean_completed_sessions(cls) -> None:
+    async def clean_completed_sessions(cls) -> int:
         return await cls.delete_record(filters=[cls.model.status == SessionStatus.COMPLETED])
 
     @classmethod
-    async def clean_old_sessions(cls) -> None:
+    async def clean_old_sessions(cls) -> int:
         now = datetime.now(UTC)
         afk_cutoff = now - timedelta(days=3)
         pending_prepared_cutoff = now - timedelta(days=1)

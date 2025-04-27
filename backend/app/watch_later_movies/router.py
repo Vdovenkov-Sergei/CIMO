@@ -15,7 +15,7 @@ async def add_to_watch_later_list(
     existing_movie = await WatchLaterMovieDAO.find_by_user_movie_id(user_id=user.id, movie_id=data.movie_id)
     if existing_movie:
         return {"message": "The movie is already in the watch later list."}
-    
+
     await WatchLaterMovieDAO.add_record(user_id=user.id, movie_id=data.movie_id)
     return {"message": "The movie was successfully added."}
 

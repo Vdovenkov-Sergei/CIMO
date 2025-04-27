@@ -31,5 +31,5 @@ class MovieBaseDAO(BaseDAO):
     ) -> Optional[Base]:
         return await cls.find_one_or_none(
             options=options,
-            filters=[cls.model.user_id == user_id, cls.model.movie_id == movie_id],
+            filters=[cls.model.user_id == user_id, cls.model.movie_id == movie_id],  # type: ignore
         )

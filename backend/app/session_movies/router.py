@@ -3,13 +3,13 @@ from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 
+from app.exceptions import InvalidSessionStatusException
 from app.movies.dao import MovieDAO
 from app.movies.schemas import SMovieRead
 from app.session_movies.dao import SessionMovieDAO
 from app.session_movies.schemas import MatchNotification, SSessionMovieCreate, SSessionMovieRead
 from app.sessions.dependencies import get_current_session
 from app.sessions.models import Session, SessionStatus
-from app.exceptions import InvalidSessionStatusException
 
 router = APIRouter(prefix="/movies/session", tags=["Session Movies"])
 active_sessions: dict[uuid.UUID, list[WebSocket]] = {}

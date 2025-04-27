@@ -40,6 +40,15 @@ class SUserRegisterUsername(BaseSchema):
     )
 
 
+class SUserResetPassword(BaseSchema):
+    email: EmailStr
+
+
+class SUserVerifyPassword(BaseSchema):
+    token: str
+    new_password: str = Field(..., min_length=8, max_length=24, description="Password must be 8-24 length")
+
+
 class SUserRead(BaseSchema):
     id: int
     email: EmailStr

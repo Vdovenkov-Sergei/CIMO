@@ -49,7 +49,7 @@ class SessionMovieDAO(MovieBaseDAO):
                 cls.model.movie_id == movie_id,
             ]
         )
-    
+
     @classmethod
     async def delete_movie(cls, *, session_id: uuid.UUID, user_id: int, movie_id: int) -> int:
         return await cls.delete_record(

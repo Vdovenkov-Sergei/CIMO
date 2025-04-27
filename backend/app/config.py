@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     SMTP_USER: str
     SMTP_PASS: str
 
+    BASE_URL: str
     BASE_PHOTO_URL: str
     BASE_POSTER_URL: str
 

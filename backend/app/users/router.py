@@ -1,3 +1,4 @@
+import secrets
 from datetime import timedelta
 
 from fastapi import APIRouter, Cookie, Depends, Response
@@ -9,9 +10,11 @@ from app.exceptions import (
     EmailAlreadyExistsException,
     MaxAttemptsSendCodeException,
     MaxTimeVerifyEmailException,
+    TokenNotFoundException,
     UsernameAlreadyExistsException,
     UserNotFoundException,
 )
+from app.tasks.tasks import send_email_with_reset_link
 from app.users.auth import authenticate_user, check_jwt_token, check_verification_code, create_jwt_token
 from app.users.dao import UserDAO
 from app.users.dependencies import get_current_user
@@ -21,8 +24,10 @@ from app.users.schemas import (
     SUserRead,
     SUserRegisterEmail,
     SUserRegisterUsername,
+    SUserResetPassword,
     SUserUpdate,
     SUserVerification,
+    SUserVerifyPassword,
 )
 from app.users.utils import (
     ACCESS_TOKEN,
@@ -32,6 +37,9 @@ from app.users.utils import (
     MAX_ATTEMPTS_SEND,
     MAX_TIME_PENDING_VERIFICATION,
     REFRESH_TOKEN,
+    RESET_PASSWORD_TIME,
+    RESET_TOKEN_KEY,
+    RESET_TOKEN_LENGTH,
     TIME_PENDING_VERIFICATION,
     USER_EMAIL_KEY,
     Hashing,
@@ -106,6 +114,40 @@ async def register_username(user_data: SUserRegisterUsername) -> dict[str, str]:
 
     await UserDAO.update_record(filters=[User.id == user.id], update_data={"user_name": user_data.user_name})  # type: ignore
     return {"message": "Username successfully set."}
+
+
+@router_auth.post("/password/forgot", response_model=dict[str, str])
+async def forgot_password(user_data: SUserResetPassword) -> dict[str, str]:
+    email = user_data.email
+    user = await UserDAO.find_one_or_none(filters=[User.email == email])
+    if not user:
+        raise UserNotFoundException
+
+    reset_token = secrets.token_urlsafe(RESET_TOKEN_LENGTH)
+    reset_token_key = RESET_TOKEN_KEY.format(token=reset_token)
+    await redis_client.setex(reset_token_key, timedelta(seconds=RESET_PASSWORD_TIME), user.id)  # type: ignore
+
+    reset_link = f"{settings.BASE_URL}/reset-password?token={reset_token}"
+    send_email_with_reset_link.delay(user.email, reset_link)  # type: ignore
+    return {"message": "Password reset email sent"}
+
+
+@router_auth.post("/password/reset", response_model=dict[str, str])
+async def reset_password(user_data: SUserVerifyPassword) -> dict[str, str]:
+    reset_token_key = RESET_TOKEN_KEY.format(token=user_data.token)
+    user_id = await redis_client.get(reset_token_key)
+    if not user_id:
+        raise TokenNotFoundException
+
+    user = await UserDAO.find_by_id(int(user_id))
+    if not user:
+        raise UserNotFoundException
+
+    hashed_password = Hashing.get_password_hash(user_data.new_password)
+    await UserDAO.update_record(filters=[User.id == user.id], update_data={"hashed_password": hashed_password})  # type: ignore
+    await redis_client.delete(RESET_TOKEN_KEY)
+
+    return {"message": "Password successfully reset"}
 
 
 @router_auth.post("/login", response_model=dict[str, str])

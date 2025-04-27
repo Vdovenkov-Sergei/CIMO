@@ -12,9 +12,9 @@ router = APIRouter(prefix="/movies/viewed", tags=["Viewed Movies"])
 async def add_to_viewed_list(data: SViewedMovieCreate, user: User = Depends(get_current_user)) -> dict[str, str]:
     existing_movie = await ViewedMovieDAO.find_by_user_movie_id(user_id=user.id, movie_id=data.movie_id)
     if existing_movie:
-        ViewedMovieDAO.update_review(user_id=user.id, movie_id=data.movie_id, review=data.review)
+        await ViewedMovieDAO.update_review(user_id=user.id, movie_id=data.movie_id, review=data.review)
         return {"message": "The movie review was successfully updated."}
-    
+
     await ViewedMovieDAO.add_record(user_id=user.id, movie_id=data.movie_id, review=data.review)
     return {"message": "The movie was successfully added."}
 

@@ -1,4 +1,5 @@
 from datetime import timedelta
+
 from sqladmin.authentication import AuthenticationBackend
 from starlette.requests import Request
 
@@ -12,7 +13,7 @@ class AdminAuth(AuthenticationBackend):
         form = await request.form()
         login, password = form["username"], form["password"]
 
-        user = await authenticate_superuser(login, password)
+        user = await authenticate_superuser(login, password)  # type: ignore
         access_token = create_jwt_token({"sub": str(user.id)}, timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
         request.session.update({"token": access_token})
         return True

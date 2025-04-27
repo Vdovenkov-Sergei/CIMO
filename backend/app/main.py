@@ -9,6 +9,7 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from sqladmin import Admin
 
+from app.admin.auth import auth_backend
 from app.admin.views import (
     ChatAdmin,
     MessageAdmin,
@@ -21,7 +22,6 @@ from app.admin.views import (
     ViewedMovieAdmin,
     WatchLaterMovieAdmin,
 )
-from app.admin.auth import auth_backend
 from app.chats.router import router as router_chat
 from app.database import engine, redis_client
 from app.messages.router import router as router_message

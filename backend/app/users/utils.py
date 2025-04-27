@@ -13,6 +13,8 @@ TIME_PENDING_VERIFICATION = 120
 MAX_ATTEMPTS_ENTER = 5
 MAX_ATTEMPTS_SEND = 3
 MAX_TIME_PENDING_VERIFICATION = MAX_ATTEMPTS_SEND * TIME_PENDING_VERIFICATION + 5
+RESET_TOKEN_LENGTH = 16
+RESET_PASSWORD_TIME = 1800
 
 ACCESS_TOKEN = "access_token"
 REFRESH_TOKEN = "refresh_token"
@@ -21,6 +23,7 @@ USER_EMAIL_KEY = "user_{email}"
 CODE_VERIFY_KEY = "code_verify_{email}"
 ATTEMPTS_ENTER_KEY = "attempts_enter_{email}"
 ATTEMPTS_SEND_KEY = "attempts_send_{email}"
+RESET_TOKEN_KEY = "reset_token_{token}"
 
 
 class Hashing:
