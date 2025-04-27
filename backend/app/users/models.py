@@ -14,6 +14,7 @@ class User(Base):
     hashed_password: Mapped[str] = mapped_column(nullable=False)
     user_name: Mapped[str] = mapped_column(unique=True, nullable=True)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
+    is_superuser: Mapped[bool] = mapped_column(server_default="false", nullable=False)
 
     chat = relationship("Chat", back_populates="user", uselist=False, cascade="all, delete-orphan")
     viewed_movies = relationship("ViewedMovie", back_populates="user", cascade="all, delete-orphan")

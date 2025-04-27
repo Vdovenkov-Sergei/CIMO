@@ -31,7 +31,7 @@ frontend-lint:
 	cd $(FRONTEND_DIR) && npm run lint
 
 frontend-clean:
-	cd $(FRONTEND_DIR) && rm -rf dist node_modules .vite
+	cd $(FRONTEND_DIR) && rm -rf dist .vite
 
 ## -------------------- ОБЩИЕ --------------------
 

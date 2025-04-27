@@ -122,3 +122,8 @@ class ChatAlreadyExistsException(ApiException):
 class InvalidSessionStatusException(ApiException):
     status_code: int = status.HTTP_403_FORBIDDEN
     error_message: str = "Invalid session status {status}"
+
+
+class NotSuperUserException(ApiException):
+    status_code: int = status.HTTP_403_FORBIDDEN
+    error_message: str = "Superuser privileges are required."

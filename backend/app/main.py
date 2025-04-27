@@ -21,6 +21,7 @@ from app.admin.views import (
     ViewedMovieAdmin,
     WatchLaterMovieAdmin,
 )
+from app.admin.auth import auth_backend
 from app.chats.router import router as router_chat
 from app.database import engine, redis_client
 from app.messages.router import router as router_message
@@ -57,7 +58,7 @@ app.include_router(router_watch_later_movies)
 
 app.mount("/static", StaticFiles(directory="app/static"), "static")
 
-admin = Admin(app, engine, title="CIMO admin", logo_url="/static/images/CIMO.jpg")
+admin = Admin(app, engine, title="CIMO admin", logo_url="/static/images/CIMO.jpg", authentication_backend=auth_backend)
 admin.add_view(UserAdmin)
 admin.add_view(ChatAdmin)
 admin.add_view(MessageAdmin)

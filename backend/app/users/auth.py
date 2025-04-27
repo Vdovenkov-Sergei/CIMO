@@ -10,6 +10,7 @@ from app.exceptions import (
     IncorrectTokenFormatException,
     InvalidVerificationCodeException,
     MaxAttemptsEnterCodeException,
+    NotSuperUserException,
     TokenExpiredException,
     TokenNotFoundException,
     VerificationCodeExpiredException,
@@ -45,6 +46,13 @@ async def authenticate_user(login: str, password: str) -> User:
     user = await UserDAO.get_by_login(login)
     if not user or not Hashing.verify_password(password, user.hashed_password):
         raise IncorrectLoginOrPasswordException
+    return user
+
+
+async def authenticate_superuser(login: str, password: str) -> User:
+    user = await authenticate_user(login, password)
+    if not user.is_superuser:
+        raise NotSuperUserException
     return user
 
 
