@@ -1,32 +1,60 @@
-MAIN_APP = app.main:app
-CELERY_APP = app.tasks.celery:celery_app
-SRC_CODE_DIR = app/
-POETRY_CMD = poetry run
-EXCLUDE = migrations
+BACKEND_DIR = backend
+FRONTEND_DIR = frontend
 
-.PHONY: format run celery flower test lint clean
+.PHONY: backend-dev backend-test backend-style backend-clean \
+        frontend-dev frontend-build frontend-lint frontend-clean \
+        dev test style check install clean venv
 
-format:
-	$(POETRY_CMD) black $(SRC_CODE_DIR) --exclude=$(EXCLUDE)
-	$(POETRY_CMD) isort $(SRC_CODE_DIR) --skip=$(EXCLUDE)
+## -------------------- BACKEND --------------------
 
-run:
-	$(POETRY_CMD) uvicorn $(MAIN_APP) --reload
+backend-dev:
+	cd $(BACKEND_DIR) && make dev
 
-celery:
-	$(POETRY_CMD) celery -A $(CELERY_APP) worker --loglevel=INFO --pool=solo
+backend-test:
+	cd $(BACKEND_DIR) && make test
 
-flower:
-	$(POETRY_CMD) celery -A $(CELERY_APP) flower
+backend-style:
+	cd $(BACKEND_DIR) && make style
 
-test:
-	$(POETRY_CMD) pytest -k "$(TEST_NAME)" -m "$(MARKERS)" -q --cov=$(SRC_CODE_DIR) --cov-report=term-missing
+backend-clean:
+	cd $(BACKEND_DIR) && make clean
 
-lint:
-	$(POETRY_CMD) ruff check $(SRC_CODE_DIR) --exclude=$(EXCLUDE)
-	$(POETRY_CMD) mypy $(SRC_CODE_DIR) --exclude=$(EXCLUDE)
+## -------------------- FRONTEND --------------------
 
-clean:
-	find . -type d -name "__pycache__" ! -path "./.venv/*" -exec rm -rf {} +
-	find . -type f \( -name "*.pyc" -o -name "*.pyo" -o -name "*.pyd" \) ! -path "./.venv/*" -delete
-	rm -rf .coverage .pytest_cache .mypy_cache .ruff_cache
+frontend-dev:
+	cd $(FRONTEND_DIR) && npm run dev
+
+frontend-build:
+	cd $(FRONTEND_DIR) && npm run build
+
+frontend-lint:
+	cd $(FRONTEND_DIR) && npm run lint
+
+frontend-clean:
+	cd $(FRONTEND_DIR) && rm -rf dist .vite
+
+## -------------------- ОБЩИЕ --------------------
+
+dev: 
+	$(MAKE) backend-dev & \
+	$(MAKE) frontend-dev & \
+	wait
+
+test: backend-test
+
+style: backend-style frontend-lint
+
+check: style test
+
+install:
+	cd $(BACKEND_DIR) && poetry install --no-root
+	cd $(FRONTEND_DIR) && npm install
+
+clean: backend-clean frontend-clean
+
+venv:
+	@if [ "$$OS" = "Windows_NT" ]; then \
+		cmd /k "$(BACKEND_DIR)\\.venv\\Scripts\\activate.bat"; \
+	else \
+		bash --init-file <(echo "source $(BACKEND_DIR)/.venv/bin/activate"); \
+	fi
