@@ -2,6 +2,7 @@ from typing import Optional
 
 from faker import Faker
 from fastapi import APIRouter, Depends
+from fastapi_cache.decorator import cache
 
 from app.chats.dao import ChatDAO
 from app.chats.models import Chat
@@ -24,6 +25,7 @@ async def create_chat(user: User = Depends(get_current_user)) -> SChatRead:
 
 
 @router.get("/", response_model=Optional[SChatRead])
+@cache(expire=60)
 async def get_chat(user: User = Depends(get_current_user)) -> Optional[SChatRead]:
     chat = await ChatDAO.find_one_or_none(filters=[Chat.user_id == user.id])
     return SChatRead.model_validate(chat) if chat else None
