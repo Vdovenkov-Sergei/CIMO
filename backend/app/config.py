@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env")
-    
+
     MODE: Literal["DEV", "TEST", "PROD"]
     LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
@@ -21,13 +21,15 @@ class Settings(BaseSettings):
 
     REDIS_HOST: str
     REDIS_PORT: int
+    CACHE_EXPIRE: int
 
     SMTP_HOST: str
     SMTP_PORT: int
     SMTP_USER: str
     SMTP_PASS: str
 
-    BASE_URL: str
+    BACKEND_URL: str
+    FRONTEND_URL: str
     BASE_PHOTO_URL: str
     BASE_POSTER_URL: str
 

@@ -1,9 +1,12 @@
-# type: ignore
-
 from contextlib import asynccontextmanager
+from pathlib import Path
+import time
 from typing import AsyncIterator
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
@@ -33,11 +36,13 @@ from app.sessions.router import router as router_sessions
 from app.users.router import router_auth, router_user
 from app.viewed_movies.router import router as router_viewed_movies
 from app.watch_later_movies.router import router as router_watch_later_movies
+from app.config import settings
+from app.logger import logger
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-    FastAPICache.init(RedisBackend(redis_client), prefix="cache")
+    FastAPICache.init(RedisBackend(redis_client), prefix="cache", expire=settings.CACHE_EXPIRE)
     yield
     await redis_client.close()
 
@@ -56,7 +61,62 @@ app.include_router(router_session_movies)
 app.include_router(router_viewed_movies)
 app.include_router(router_watch_later_movies)
 
-app.mount("/static", StaticFiles(directory="app/static"), "static")
+origins = [settings.FRONTEND_URL]
+if settings.MODE == "DEV":
+    origins.append("http://localhost:8000")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "OPTIONS", "DELETE", "PATCH", "PUT"],
+    allow_headers=[
+        "Content-Type",
+        "Set-Cookie",
+        "Access-Control-Allow-Headers",
+        "Access-Control-Allow-Origin",
+        "Authorization",
+    ],
+)
+
+
+@app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
+    logger.info("Request handling time", extra={"process_time": round(process_time, 4)})
+    return response
+
+
+@app.middleware("http")
+async def redirect_http_to_https(request: Request, call_next):
+    if request.url.scheme == "http":
+        new_url = request.url._replace(scheme="https")
+        return RedirectResponse(url=new_url)
+    response = await call_next(request)
+    return response
+
+
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    #! Защита от атак типа clickjacking
+    response.headers["X-Frame-Options"] = "DENY"
+    #! Установка Content Security Policy (CSP)
+    response.headers["Content-Security-Policy"] = "default-src 'self'"
+    #! Защита от некоторых типов атак через JavaScript
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    #! Защита от кражи cookies (не позволять отправку cookies через небезопасные каналы)
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    #! Защита от подделки запросов
+    response.headers["X-Content-Type-Options"] = "nosniff"
+
+    return response
+
+
+BASE_DIR = Path(__file__).resolve().parent
+app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 
 admin = Admin(app, engine, title="CIMO admin", logo_url="/static/images/CIMO.jpg", authentication_backend=auth_backend)
 admin.add_view(UserAdmin)

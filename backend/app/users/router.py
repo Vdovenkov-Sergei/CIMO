@@ -127,7 +127,7 @@ async def forgot_password(user_data: SUserResetPassword) -> dict[str, str]:
     reset_token_key = RESET_TOKEN_KEY.format(token=reset_token)
     await redis_client.setex(reset_token_key, timedelta(seconds=RESET_PASSWORD_TIME), user.id)  # type: ignore
 
-    reset_link = f"{settings.BASE_URL}/reset-password?token={reset_token}"
+    reset_link = f"{settings.FRONTEND_URL}/reset-password?token={reset_token}"
     send_email_with_reset_link.delay(user.email, reset_link)  # type: ignore
     return {"message": "Password reset email sent"}
 
