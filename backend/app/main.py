@@ -6,7 +6,7 @@ from typing import AsyncIterator
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
-from fastapi.responses import RedirectResponse
+# from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
@@ -38,6 +38,9 @@ from app.viewed_movies.router import router as router_viewed_movies
 from app.watch_later_movies.router import router as router_watch_later_movies
 from app.config import settings
 from app.logger import logger
+"""import sentry_sdk
+from sentry_sdk.integrations.logging import LoggingIntegration
+from sentry_sdk.integrations.fastapi import FastApiIntegration"""
 
 
 @asynccontextmanager
@@ -46,6 +49,16 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     yield
     await redis_client.close()
 
+
+"""sentry_sdk.init(
+    settings.SENTRY_DSN,
+    integrations=[
+        LoggingIntegration(level=logging.INFO, event_level=logging.ERROR),
+        FastApiIntegration(),
+    ],
+    traces_sample_rate=1.0,
+    send_default_pii=True,
+)"""
 
 app = FastAPI(title="CIMO", docs_url="/docs", lifespan=lifespan)
 
@@ -89,10 +102,10 @@ async def add_process_time_header(request: Request, call_next):
     return response
 
 
-@app.middleware("http")
+"""@app.middleware("http")
 async def redirect_http_to_https(request: Request, call_next):
     if request.url.scheme == "http":
-        new_url = request.url._replace(scheme="https")
+        new_url = request.url.replace(scheme="https")
         return RedirectResponse(url=new_url)
     response = await call_next(request)
     return response
@@ -112,7 +125,7 @@ async def add_security_headers(request: Request, call_next):
     #! Защита от подделки запросов
     response.headers["X-Content-Type-Options"] = "nosniff"
 
-    return response
+    return response"""
 
 
 BASE_DIR = Path(__file__).resolve().parent

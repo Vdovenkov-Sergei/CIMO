@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env")
+    model_config = SettingsConfigDict(env_file=".env.development")
 
     MODE: Literal["DEV", "TEST", "PROD"]
     LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
@@ -28,10 +28,11 @@ class Settings(BaseSettings):
     SMTP_USER: str
     SMTP_PASS: str
 
-    BACKEND_URL: str
     FRONTEND_URL: str
     BASE_PHOTO_URL: str
     BASE_POSTER_URL: str
+
+    SENTRY_DSN: str
 
     @property
     def database_url(self) -> str:

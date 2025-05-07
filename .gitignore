@@ -1,4 +1,4 @@
-###VS code###
+### VS code ###
 .vscode
 
 ### Python ###
@@ -124,9 +124,10 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
+.env*
 .venv
 env/
+data
 venv/
 ENV/
 env.bak/
@@ -209,10 +210,6 @@ yarn-error.log*
 
 # Storybook
 storybook-static/
-
-# Vite specific
-vite.config.js
-vite.config.ts
 
 # IDEs and editors (optional, depending on your team)
 .idea/

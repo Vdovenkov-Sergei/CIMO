@@ -1,0 +1,86 @@
+services:
+  db:
+    image: postgres:17
+    container_name: cimo_db
+    env_file:
+      - ./backend/.env.production
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    container_name: cimo_redis
+
+  backend:
+    build:
+      context: ./backend
+    container_name: cimo_backend
+    env_file:
+      - ./backend/.env.production
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    command: ["/backend/docker/app.sh", "app"]
+
+  celery:
+    build:
+      context: ./backend
+    container_name: cimo_celery
+    env_file:
+      - ./backend/.env.production
+    depends_on:
+      - redis
+    command: ["/backend/docker/app.sh", "celery"]
+
+  flower:
+    build:
+      context: ./backend
+    container_name: cimo_flower
+    env_file:
+      - ./backend/.env.production
+    ports:
+      - "5555:5555"
+    depends_on:
+      - redis
+    command: ["/backend/docker/app.sh", "flower"]
+
+  beat:
+    build:
+      context: ./backend
+    container_name: cimo_beat
+    env_file:
+      - ./backend/.env.production
+    depends_on:
+      - db
+      - redis
+    command: ["/backend/docker/app.sh", "beat"]
+
+  load-data:
+    build:
+      context: ./backend
+    container_name: cimo_load_data
+    command: ["/backend/docker/load.sh"]
+    env_file:
+      - ./backend/.env.production
+    depends_on:
+      - db
+    volumes:
+      - ./backend/app/data:/app/data
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: cimo_frontend
+    ports:
+      - "3000:3000"
+    stdin_open: true
+    tty: true
+    env_file:
+      - ./frontend/.env.production
+
+volumes:
+  postgres_data:
