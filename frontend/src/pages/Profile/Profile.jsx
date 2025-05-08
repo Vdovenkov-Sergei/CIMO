@@ -65,7 +65,7 @@ const Profile = () => {
         </section>
 
         <nav className="profile-nav">
-          <Link to="/my-movies" className="profile-nav__link">
+          <Link to="/myMovies" className="profile-nav__link">
             <h3 className="profile-nav__title">Мои фильмы</h3>
             <span className="profile-nav__icon">→</span>
           </Link>
