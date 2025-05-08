@@ -43,7 +43,7 @@ $primary-font: 'Inter', sans-serif;
   border-radius: 12px;
   overflow: hidden;
   position: relative;
-  width: 400px;
+  min-width: 400px;
 
   &__image {
     width: 100%;
@@ -89,7 +89,7 @@ $primary-font: 'Inter', sans-serif;
   .form {
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 12px;
 
     &__group {
       display: flex;
@@ -171,5 +171,29 @@ $primary-font: 'Inter', sans-serif;
         &:hover {
             text-decoration: underline;
         }
+    }
+}
+
+@media (max-width: 768px) {
+    .main-content {
+      flex-direction: column;
+    }
+
+    .onboarding {
+      width: 300px;
+    }
+
+    .auth-form {
+      width: 300px;
+    }
+    
+}
+@media (min-width: 768px) and (max-width: 1100px) {
+  .onboarding {
+      width: 300px;
+    }
+
+    .auth-form {
+      width: 300px;
     }
 }

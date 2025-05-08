@@ -2,14 +2,14 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination } from 'swiper/modules';
-import './Signup.scss';
+import './ForgotPassword.scss';
 
 // Импортируем изображения (предположим, они лежат в src/assets/images/onboarding/)
 import onboarding1 from '@/assets/images/onboarding1.png';
 import onboarding2 from '@/assets/images/onboarding2.png';
 import onboarding3 from '@/assets/images/onboarding3.png';
 
-const Signup = () => {
+const ForgotPassword = () => {
   const onboardingImages = [
     { id: 1, src: onboarding1, alt: 'Демонстрация функционала 1' },
     { id: 2, src: onboarding2, alt: 'Демонстрация функционала 2' },
@@ -45,41 +45,19 @@ const Signup = () => {
         </section>
 
         <section className="auth-form">
-          <h2 className="auth-form__title">Добро пожаловать!</h2>
-          <p className="auth-form__subtitle">Пожалуйста, заполните форму</p>
+          <h2 className="auth-form__title">Введите почту</h2>
+          <p className="auth-form__subtitle">На Ваш электронный адрес будет отправлена ссылка для восстановления пароля</p>
 
           <form className="form">
             <div className="form__group">
               <input 
                 type="text" 
-                placeholder="Логин" 
-                className="form__input"
-              />
-            </div>
-
-            <div className="form__group">
-              <input 
-                type="password" 
-                placeholder="Пароль" 
-                className="form__input"
-              />
-            </div>
-
-            <div className="form__group">
-              <input 
-                type="password" 
-                placeholder="Пароль" 
+                placeholder="Почта" 
                 className="form__input"
               />
             </div>
 
             <button type="submit" className="form__button">Далее</button>
-
-            <p className="form__footer-text">
-              Есть аккаунт?{' '}
-              <Link to="/" className="form__link">Войти</Link>
-            </p>
-            <Link to="/verification" className="form__link">Верификация</Link>
           </form>
         </section>
       </main>
@@ -92,4 +70,4 @@ const Signup = () => {
   );
 };
 
-export default Signup;
+export default ForgotPassword;

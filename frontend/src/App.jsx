@@ -7,6 +7,8 @@ const Signup = lazy(() => import('@/pages/Signup/Signup'));
 const Verification = lazy(() => import('@/pages/Verification/Verification'));
 const Nickname = lazy(() => import('@/pages/Nickname/Nickname'));
 const ModeSelection = lazy(() => import('@/pages/ModeSelection/ModeSelection'));
+const ForgotPassword = lazy(() => import('@/pages/ForgotPassword/ForgotPassword'));
+const CreatePassword = lazy(() => import('@/pages/CreatePassword/CreatePassword'));
 
 function App() {
   return (
@@ -18,6 +20,8 @@ function App() {
             <Route path="/verification" element={<Verification />} />
             <Route path="/nickname" element={<Nickname />} />
             <Route path="/modeSelection" element={<ModeSelection />} />
+            <Route path="/forgotPassword" element={<ForgotPassword />} />
+            <Route path="/createPassword" element={<CreatePassword />} />
           </Routes>
       </main>
     </BrowserRouter>
