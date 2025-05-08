@@ -9,6 +9,7 @@ const Nickname = lazy(() => import('@/pages/Nickname/Nickname'));
 const ModeSelection = lazy(() => import('@/pages/ModeSelection/ModeSelection'));
 const ForgotPassword = lazy(() => import('@/pages/ForgotPassword/ForgotPassword'));
 const CreatePassword = lazy(() => import('@/pages/CreatePassword/CreatePassword'));
+const Profile = lazy(() => import('@/pages/Profile/Profile'));
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
             <Route path="/modeSelection" element={<ModeSelection />} />
             <Route path="/forgotPassword" element={<ForgotPassword />} />
             <Route path="/createPassword" element={<CreatePassword />} />
+            <Route path="/profile" element={<Profile />} />
           </Routes>
       </main>
     </BrowserRouter>
