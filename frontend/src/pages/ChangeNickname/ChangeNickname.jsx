@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import './Profile.scss';
+import './ChangeNickname.scss';
 
-const Profile = () => {
+const ChangeNickname = () => {
   const user = {
     avatar: 'src/assets/images/person-square.svg',
     login: 'cinemood_user',
@@ -25,7 +25,7 @@ const Profile = () => {
             {isProfileMenuOpen && (
               <ul className="profile-menu__list">
                 <li><Link to="/profile">Профиль</Link></li>
-                <li><Link to="/myMovies">Мои фильмы</Link></li>
+                <li><Link to="/my-movies">Мои фильмы</Link></li>
                 <li><Link to="/">Выход</Link></li>
               </ul>
             )}
@@ -44,7 +44,7 @@ const Profile = () => {
       </header>
 
       {/* Основная часть - полностью переписываем */}
-      <main className="profile-main container">
+      <main className="profile-main-nick container">
         <div className="profile-header">
           <div className="profile-avatar">
             <img 
@@ -54,27 +54,24 @@ const Profile = () => {
             />
           </div>
           <h2 className="profile-login">@{user.login}</h2>
-          <Link to="/changeNickname" className="profile-header__link">Изменить никнейм</Link>
         </div>
 
-        <section className="profile-section">
-          <h3 className="profile-section__title">Персональная информация</h3>
-          <div className="profile-info">
-            <span className="profile-info__value">Email: {user.email}</span>
-          </div>
-        </section>
+        <div className="change-nickname">
+          <h2 className="change-nickname__title">Придумайте никнейм</h2>
+          <p className="change-nickname__subtitle">Никнейм должен быть уникальным</p>
 
-        <nav className="profile-nav">
-          <Link to="/myMovies" className="profile-nav__link">
-            <h3 className="profile-nav__title">Мои фильмы</h3>
-            <span className="profile-nav__icon">→</span>
-          </Link>
-          
-          <Link to="/" className="profile-nav__link">
-            <h3 className="profile-nav__title">Выход</h3>
-            <span className="profile-nav__icon">→</span>
-          </Link>
-        </nav>
+          <form className="form">
+            <div className="form__group">
+              <input 
+                type="text" 
+                placeholder="Никнейм" 
+                className="form__input"
+              />
+            </div>
+
+            <button type="submit" className="form__button">Сохранить</button>
+          </form>
+        </div>
       </main>
 
       {/* Футер (оставляем как было) */}
@@ -86,4 +83,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default ChangeNickname;

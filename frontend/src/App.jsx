@@ -11,6 +11,7 @@ const ForgotPassword = lazy(() => import('@/pages/ForgotPassword/ForgotPassword'
 const CreatePassword = lazy(() => import('@/pages/CreatePassword/CreatePassword'));
 const Profile = lazy(() => import('@/pages/Profile/Profile'));
 const MyMovies = lazy(() => import('@/pages/MyMovies/MyMovies'));
+const ChangeNickname = lazy(() => import('@/pages/ChangeNickname/ChangeNickname'));
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
             <Route path="/createPassword" element={<CreatePassword />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/myMovies" element={<MyMovies />} />
+            <Route path="/changeNickname" element={<ChangeNickname />} />
           </Routes>
       </main>
     </BrowserRouter>

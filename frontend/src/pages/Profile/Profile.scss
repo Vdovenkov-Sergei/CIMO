@@ -125,7 +125,16 @@ $primary-font: 'Inter', sans-serif;
   flex-direction: column;
   align-items: center;
   margin-bottom: 40px;
-  margin-top: 50px;
+
+  &__link {
+    margin-top: 5px;
+    color:#A1ACFF;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
 }
 
 .profile-avatar {

@@ -18,7 +18,7 @@ const MyMovies = () => {
     ],
     watched: [
       { id: 5, title: 'Фильм5', poster: '/movies/poster5.jpg', watched: true },
-      { id: 6, title: 'фильм6', poster: '/movies/poster6.jpg', watched: true },
+      { id: 6, title: 'Фильм6', poster: '/movies/poster6.jpg', watched: true },
     ]
   });
 
@@ -63,7 +63,6 @@ const MyMovies = () => {
               <ul className="profile-menu__list">
                 <li><Link to="/profile">Профиль</Link></li>
                 <li><Link to="/myMovies">Мои фильмы</Link></li>
-                <li><Link to="/settings">Настройки</Link></li>
                 <li><Link to="/">Выход</Link></li>
               </ul>
             )}

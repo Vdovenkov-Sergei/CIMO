@@ -20,7 +20,6 @@ const ModeSelection = () => {
               <ul className="profile-menu__list">
                 <li><Link to="/profile">Профиль</Link></li>
                 <li><Link to="/myMovies">Мои фильмы</Link></li>
-                <li><Link to="/settings">Настройки</Link></li>
                 <li><Link to="/">Выход</Link></li>
               </ul>
             )}
