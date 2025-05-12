@@ -1,6 +1,7 @@
+import logging
+import time
 from contextlib import asynccontextmanager
 from pathlib import Path
-import time
 from typing import AsyncIterator
 
 from fastapi import FastAPI, Request
@@ -11,6 +12,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from sqladmin import Admin
+from sqlalchemy import select
 
 from app.admin.auth import auth_backend
 from app.admin.views import (
@@ -26,7 +28,9 @@ from app.admin.views import (
     WatchLaterMovieAdmin,
 )
 from app.chats.router import router as router_chat
-from app.database import engine, redis_client
+from app.config import settings
+from app.database import async_engine, async_session_maker, redis_client
+from app.logger import logger
 from app.messages.router import router as router_message
 from app.movie_roles.router import router as router_movie_roles
 from app.movies.router import router as router_movies
@@ -36,21 +40,49 @@ from app.sessions.router import router as router_sessions
 from app.users.router import router_auth, router_user
 from app.viewed_movies.router import router as router_viewed_movies
 from app.watch_later_movies.router import router as router_watch_later_movies
-from app.config import settings
-from app.logger import logger
-"""import sentry_sdk
+
+import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
-from sentry_sdk.integrations.fastapi import FastApiIntegration"""
+from sentry_sdk.integrations.fastapi import FastApiIntegration
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-    FastAPICache.init(RedisBackend(redis_client), prefix="cache", expire=settings.CACHE_EXPIRE)
+    logger.info("Starting application...")
+
+    try:
+        async with async_session_maker() as session:
+            await session.execute(select(1))
+        logger.info("Successfully connected to database", extra={"db_url": settings.async_database_url})
+    except Exception as err:
+        logger.critical(
+            "Error connecting to database",
+            extra={"error": str(err), "db_url": settings.async_database_url},
+            exc_info=True,
+        )
+        raise
+
+    try:
+        await redis_client.ping()
+        FastAPICache.init(RedisBackend(redis_client), prefix="cache", expire=settings.CACHE_EXPIRE)
+        logger.info("Successfully connected to Redis and initialized cache", extra={"redis_url": settings.redis_url})
+    except Exception as err:
+        logger.critical(
+            "Error connecting to Redis", extra={"error": str(err), "redis_url": settings.redis_url}, exc_info=True
+        )
+        raise
+
     yield
-    await redis_client.close()
+
+    logger.info("Shutting down application...")
+    try:
+        await redis_client.close()
+        logger.info("Redis client connection closed.")
+    except Exception as err:
+        logger.warning("Error while closing Redis connection", extra={"error": str(err)}, exc_info=True)
 
 
-"""sentry_sdk.init(
+sentry_sdk.init(
     settings.SENTRY_DSN,
     integrations=[
         LoggingIntegration(level=logging.INFO, event_level=logging.ERROR),
@@ -58,7 +90,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     ],
     traces_sample_rate=1.0,
     send_default_pii=True,
-)"""
+)
 
 app = FastAPI(title="CIMO", docs_url="/docs", lifespan=lifespan)
 
@@ -73,11 +105,9 @@ app.include_router(router_sessions)
 app.include_router(router_session_movies)
 app.include_router(router_viewed_movies)
 app.include_router(router_watch_later_movies)
+logger.info("Routers have been successfully added.")
 
 origins = [settings.FRONTEND_URL]
-if settings.MODE == "DEV":
-    origins.append("http://localhost:8000")
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -131,7 +161,9 @@ async def add_security_headers(request: Request, call_next):
 BASE_DIR = Path(__file__).resolve().parent
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 
-admin = Admin(app, engine, title="CIMO admin", logo_url="/static/images/CIMO.jpg", authentication_backend=auth_backend)
+admin = Admin(
+    app, async_engine, title="CIMO admin", logo_url="/static/images/CIMO.jpg", authentication_backend=auth_backend
+)
 admin.add_view(UserAdmin)
 admin.add_view(ChatAdmin)
 admin.add_view(MessageAdmin)
@@ -142,3 +174,4 @@ admin.add_view(SessionAdmin)
 admin.add_view(SessionMovieAdmin)
 admin.add_view(ViewedMovieAdmin)
 admin.add_view(WatchLaterMovieAdmin)
+logger.info("Admin views have been successfully added.")

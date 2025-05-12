@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 
+from app.config import settings
 from app.users.dependencies import get_current_user
 from app.users.models import User
 from app.viewed_movies.dao import ViewedMovieDAO
@@ -15,13 +16,16 @@ async def add_to_viewed_list(data: SViewedMovieCreate, user: User = Depends(get_
         await ViewedMovieDAO.update_review(user_id=user.id, movie_id=data.movie_id, review=data.review)
         return {"message": "The movie review was successfully updated."}
 
-    await ViewedMovieDAO.add_record(user_id=user.id, movie_id=data.movie_id, review=data.review)
+    await ViewedMovieDAO.add_movie(user_id=user.id, movie_id=data.movie_id, review=data.review)
     return {"message": "The movie was successfully added."}
 
 
 @router.get("/", response_model=list[SViewedMovieRead])
 async def get_viewed_list(
-    limit: int = 20, offset: int = 0, order_review: bool = False, user: User = Depends(get_current_user)
+    limit: int = settings.DEFAULT_PAG_LIMIT,
+    offset: int = settings.DEFAULT_PAG_OFFSET,
+    order_review: bool = False,
+    user: User = Depends(get_current_user),
 ) -> list[SViewedMovieRead]:
     movies = await ViewedMovieDAO.find_movies(user_id=user.id, limit=limit, offset=offset, order_review=order_review)
     return [SViewedMovieRead.model_validate(movie) for movie in movies]

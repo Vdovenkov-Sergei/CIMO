@@ -127,3 +127,8 @@ class InvalidSessionStatusException(ApiException):
 class NotSuperUserException(ApiException):
     status_code: int = status.HTTP_403_FORBIDDEN
     error_message: str = "Superuser privileges are required."
+
+
+class MaxTimeVerifyPasswordException(ApiException):
+    status_code: int = status.HTTP_403_FORBIDDEN
+    error_message: str = "Max time to verify password exceeded"

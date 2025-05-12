@@ -1,4 +1,5 @@
 from typing import Literal
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -34,9 +35,16 @@ class Settings(BaseSettings):
 
     SENTRY_DSN: str
 
+    DEFAULT_PAG_LIMIT: int = 20
+    DEFAULT_PAG_OFFSET: int = 0
+
     @property
-    def database_url(self) -> str:
+    def async_database_url(self) -> str:
         return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}" f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+
+    @property
+    def sync_database_url(self) -> str:
+        return f"postgresql+psycopg2://{self.DB_USER}:{self.DB_PASS}" f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
     @property
     def redis_url(self) -> str:

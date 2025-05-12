@@ -1,7 +1,7 @@
 from typing import Sequence
 
+from app.dao.decorators import log_db_add, log_db_delete, log_db_find_all, log_db_update
 from app.dao.movie_base import MovieBaseDAO
-from app.database import Base
 from app.viewed_movies.models import ViewedMovie
 
 
@@ -9,7 +9,8 @@ class ViewedMovieDAO(MovieBaseDAO):
     model = ViewedMovie
 
     @classmethod
-    async def find_movies(cls, *, user_id: int, limit: int, offset: int, order_review: bool) -> Sequence[Base]:
+    @log_db_find_all("Fetch viewed movies")
+    async def find_movies(cls, *, user_id: int, limit: int, offset: int, order_review: bool) -> Sequence[ViewedMovie]:
         order_by = [cls.model.review.desc()] if order_review else []
         order_by.append(cls.model.created_at.desc())  # type: ignore
         return await super().find_all_movies(
@@ -20,11 +21,18 @@ class ViewedMovieDAO(MovieBaseDAO):
         )
 
     @classmethod
+    @log_db_delete("Delete viewed movie")
     async def delete_movie(cls, *, user_id: int, movie_id: int) -> int:
         return await cls.delete_record(filters=[cls.model.user_id == user_id, cls.model.movie_id == movie_id])
 
     @classmethod
+    @log_db_update("Update review")
     async def update_review(cls, *, user_id: int, movie_id: int, review: int) -> int:
         return await cls.update_record(
             filters=[cls.model.user_id == user_id, cls.model.movie_id == movie_id], update_data={"review": review}
         )
+
+    @classmethod
+    @log_db_add("Add viewed movie")
+    async def add_movie(cls, *, user_id: int, movie_id: int, review: int) -> ViewedMovie:
+        return await cls.add_record(user_id=user_id, movie_id=movie_id, review=review)

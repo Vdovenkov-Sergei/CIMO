@@ -4,6 +4,7 @@ from sqlalchemy.orm import joinedload
 from sqlalchemy.orm.strategy_options import _AbstractLoad
 
 from app.dao.base import BaseDAO
+from app.dao.decorators import log_db_find_one
 from app.database import Base
 
 
@@ -26,6 +27,7 @@ class MovieBaseDAO(BaseDAO):
         )
 
     @classmethod
+    @log_db_find_one("Fetch user's movie")
     async def find_by_user_movie_id(
         cls, *, user_id: int, movie_id: int, options: Optional[list[_AbstractLoad]] = None
     ) -> Optional[Base]:

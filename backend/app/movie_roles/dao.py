@@ -3,7 +3,7 @@ from typing import Sequence
 from sqlalchemy.orm import joinedload
 
 from app.dao.base import BaseDAO
-from app.database import Base
+from app.dao.decorators import log_db_find_all
 from app.movie_roles.models import MovieRole
 
 
@@ -11,7 +11,8 @@ class MovieRoleDAO(BaseDAO):
     model = MovieRole
 
     @classmethod
-    async def get_movie_roles(cls, *, movie_id: int, limit: int, offset: int) -> Sequence[Base]:
+    @log_db_find_all("Fetch movie roles")
+    async def get_movie_roles(cls, *, movie_id: int, limit: int, offset: int) -> Sequence[MovieRole]:
         return await cls.find_all(
             options=[joinedload(cls.model.person)],
             filters=[cls.model.movie_id == movie_id],

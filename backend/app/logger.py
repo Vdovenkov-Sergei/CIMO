@@ -6,6 +6,7 @@ from pythonjsonlogger import jsonlogger
 from app.config import settings
 
 logger = logging.getLogger()
+logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
 
 logHandler = logging.StreamHandler()
 

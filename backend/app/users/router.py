@@ -10,10 +10,11 @@ from app.exceptions import (
     EmailAlreadyExistsException,
     MaxAttemptsSendCodeException,
     MaxTimeVerifyEmailException,
-    TokenNotFoundException,
+    MaxTimeVerifyPasswordException,
     UsernameAlreadyExistsException,
     UserNotFoundException,
 )
+from app.logger import logger
 from app.tasks.tasks import send_email_with_reset_link
 from app.users.auth import authenticate_user, check_jwt_token, check_verification_code, create_jwt_token
 from app.users.dao import UserDAO
@@ -54,13 +55,15 @@ router_user = APIRouter(prefix="/users", tags=["User"])
 async def register_email(user_data: SUserRegisterEmail) -> dict[str, str]:
     email = user_data.email
     email_key, attempts_key = USER_EMAIL_KEY.format(email=email), ATTEMPTS_SEND_KEY.format(email=email)
-    existing_user = await UserDAO.find_one_or_none(filters=[User.email == email]) or await redis_client.get(email_key)
+    existing_user = await UserDAO.find_by_email(email=email) or await redis_client.get(email_key)
     if existing_user:
         raise EmailAlreadyExistsException(email=email)
 
     hashed_password = Hashing.get_password_hash(user_data.password)
     await redis_client.setex(email_key, timedelta(seconds=MAX_TIME_PENDING_VERIFICATION), hashed_password)
+    logger.debug("User email & password stored in Redis.", extra={"email": email, "hashed_password": hashed_password})
     await redis_client.setex(attempts_key, timedelta(seconds=MAX_TIME_PENDING_VERIFICATION), 0)
+    logger.debug("Attempts to send verification code stored in Redis.", extra={"attempts_key": attempts_key})
     await send_verification_code(email)
 
     return {"message": "Verification email sent."}
@@ -82,6 +85,10 @@ async def resend_verification_code(email: EmailStr) -> dict[str, str]:
     new_ttl = max(ttl_user_email, ttl_attempts, TIME_PENDING_VERIFICATION)
     await redis_client.setex(email_key, timedelta(seconds=new_ttl), hashed_password)
     await redis_client.setex(attempts_key, timedelta(seconds=new_ttl), int(attempts) + 1)
+    logger.debug(
+        "TTL updated and attempt incremented.",
+        extra={"email": email, "new_ttl": new_ttl, "attempts": int(attempts) + 1},
+    )
     await send_verification_code(email)
 
     return {"message": "New verification code sent."}
@@ -97,38 +104,46 @@ async def verify_email(user_data: SUserVerification) -> dict[str, str | int]:
 
     for key in [USER_EMAIL_KEY, CODE_VERIFY_KEY, ATTEMPTS_ENTER_KEY, ATTEMPTS_SEND_KEY]:
         await redis_client.delete(key.format(email=email))
-    user = await UserDAO.add_record(email=email, hashed_password=hashed_password)
-    await UserDAO.update_record(filters=[User.id == user.id], update_data={"user_name": f"user_{user.id}"})  # type: ignore
+    logger.debug("Temporary Redis keys deleted after verification.", extra={"email": email})
 
+    user = await UserDAO.add_user(email=email, hashed_password=hashed_password)
+    await UserDAO.update_user(user_id=user.id, update_data={"user_name": f"user_{user.id}"})  # type: ignore
+    logger.debug("Default username set for user.", extra={"user_id": user.id, "user_name": f"user_{user.id}"})
+
+    logger.info("User registered successfully.", extra={"user_id": user.id, "email": email})
     return {"message": "Email successfully verified and user registered.", "id": user.id}  # type: ignore
 
 
 @router_auth.post("/register/username", response_model=dict[str, str])
 async def register_username(user_data: SUserRegisterUsername) -> dict[str, str]:
-    user = await UserDAO.find_one_or_none(filters=[User.id == user_data.user_id])
+    user = await UserDAO.find_user_by_id(user_id=user_data.user_id)
     if not user:
         raise UserNotFoundException
-    existing_user = await UserDAO.find_one_or_none(filters=[User.user_name == user_data.user_name])
+    existing_user = await UserDAO.find_by_user_name(user_name=user_data.user_name)
     if existing_user:
         raise UsernameAlreadyExistsException(user_name=user_data.user_name)
 
-    await UserDAO.update_record(filters=[User.id == user.id], update_data={"user_name": user_data.user_name})  # type: ignore
+    await UserDAO.update_user(user_id=user.id, update_data={"user_name": user_data.user_name})  # type: ignore
+    logger.info("Username successfully set.", extra={"user_id": user.id, "user_name": user_data.user_name})
     return {"message": "Username successfully set."}
 
 
 @router_auth.post("/password/forgot", response_model=dict[str, str])
 async def forgot_password(user_data: SUserResetPassword) -> dict[str, str]:
     email = user_data.email
-    user = await UserDAO.find_one_or_none(filters=[User.email == email])
+    user = await UserDAO.find_by_email(email=email)
     if not user:
         raise UserNotFoundException
 
     reset_token = secrets.token_urlsafe(RESET_TOKEN_LENGTH)
+    logger.debug("Reset token generated.", extra={"reset_token": reset_token})
     reset_token_key = RESET_TOKEN_KEY.format(token=reset_token)
     await redis_client.setex(reset_token_key, timedelta(seconds=RESET_PASSWORD_TIME), user.id)  # type: ignore
+    logger.debug("Reset token stored in Redis.", extra={"reset_token": reset_token})
 
     reset_link = f"{settings.FRONTEND_URL}/resetPassword?token={reset_token}"
     send_email_with_reset_link.delay(user.email, reset_link)  # type: ignore
+    logger.info("Password reset email sent (task dispatched).", extra={"email": user.email, "reset_link": reset_link})
     return {"message": "Password reset email sent"}
 
 
@@ -137,16 +152,18 @@ async def reset_password(user_data: SUserVerifyPassword) -> dict[str, str]:
     reset_token_key = RESET_TOKEN_KEY.format(token=user_data.token)
     user_id = await redis_client.get(reset_token_key)
     if not user_id:
-        raise TokenNotFoundException
+        raise MaxTimeVerifyPasswordException
 
-    user = await UserDAO.find_by_id(int(user_id))
+    user = await UserDAO.find_user_by_id(user_id=int(user_id))
     if not user:
         raise UserNotFoundException
 
     hashed_password = Hashing.get_password_hash(user_data.new_password)
-    await UserDAO.update_record(filters=[User.id == user.id], update_data={"hashed_password": hashed_password})  # type: ignore
+    await UserDAO.update_user(user_id=user.id, update_data={"hashed_password": hashed_password})  # type: ignore
     await redis_client.delete(RESET_TOKEN_KEY)
+    logger.debug("Reset token deleted from Redis.", extra={"reset_token": user_data.token})
 
+    logger.info("Password successfully reset.", extra={"user_id": user.id})
     return {"message": "Password successfully reset"}
 
 
@@ -156,8 +173,11 @@ async def login_user(response: Response, user_data: SUserAuth) -> dict[str, str]
     access_token = create_jwt_token({"sub": str(user.id)}, timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
     refresh_token = create_jwt_token({"sub": str(user.id)}, timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS))
     response.set_cookie(ACCESS_TOKEN, access_token, httponly=True)
+    logger.debug("Access token set in cookie.", extra={"access_token": access_token})
     response.set_cookie(REFRESH_TOKEN, refresh_token, httponly=True)
+    logger.debug("Refresh token set in cookie.", extra={"refresh_token": refresh_token})
 
+    logger.info("User logged in.", extra={"user_id": user.id})
     return {"message": "Login successful."}
 
 
@@ -169,13 +189,20 @@ async def refresh_token(
     user_id = payload.get("sub")
     access_token = create_jwt_token({"sub": user_id}, timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
     response.set_cookie(ACCESS_TOKEN, access_token, httponly=True)
+    logger.debug("New access token set in cookie.", extra={"access_token": access_token})
+
+    logger.info("Access token refreshed.", extra={"user_id": user_id})
     return {"message": "Access token refreshed."}
 
 
 @router_auth.post("/logout", response_model=dict[str, str])
 async def logout_user(response: Response) -> dict[str, str]:
     response.delete_cookie(ACCESS_TOKEN)
+    logger.debug("Access token deleted from cookie.")
     response.delete_cookie(REFRESH_TOKEN)
+    logger.debug("Refresh token deleted from cookie.")
+
+    logger.info("User logged out.")
     return {"message": "Logged out."}
 
 
@@ -189,9 +216,9 @@ async def update_users_me(update_data: SUserUpdate, user: User = Depends(get_cur
     if update_data.user_name == user.user_name:
         raise UsernameAlreadyExistsException(user_name=update_data.user_name)
 
-    existing_username = await UserDAO.find_one_or_none(filters=[User.user_name == update_data.user_name])
+    existing_username = await UserDAO.find_by_user_name(user_name=update_data.user_name)
     if existing_username:
         raise UsernameAlreadyExistsException(user_name=update_data.user_name)
 
-    await UserDAO.update_record(filters=[User.id == user.id], update_data=update_data.model_dump())
+    await UserDAO.update_user(user_id=user.id, update_data=update_data.model_dump())
     return {"message": "User updated successfully."}

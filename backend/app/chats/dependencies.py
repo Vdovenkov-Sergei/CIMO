@@ -8,7 +8,7 @@ from app.users.models import User
 
 
 async def get_existing_chat(user: User = Depends(get_current_user)) -> Chat:
-    chat = await ChatDAO.find_one_or_none(filters=[Chat.user_id == user.id])
+    chat = await ChatDAO.get_existing_chat(user_id=user.id)
     if not chat:
         raise ChatNotFoundException
     return chat  # type: ignore

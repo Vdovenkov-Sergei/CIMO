@@ -1,21 +1,38 @@
 from datetime import datetime
+import re
 
-from pydantic import EmailStr, Field
+from pydantic import EmailStr, Field, field_validator
 
 from app.schemas.base import BaseSchema
-from app.users.utils import VERIFICATION_CODE_LEN
+from app.users.utils import (
+    MAX_PASSWORD_LEN,
+    MAX_USERNAME_LEN,
+    MIN_PASSWORD_LEN,
+    MIN_USERNAME_LEN,
+    VERIFICATION_CODE_LEN,
+)
 
 USERNAME_REGEX = r"^[a-zA-Z0-9_.]+$"
 
 
 class SUserAuth(BaseSchema):
     login: str
-    password: str = Field(..., min_length=8, max_length=24, description="Password must be 8-24 length")
+    password: str = Field(
+        ...,
+        min_length=MIN_PASSWORD_LEN,
+        max_length=MAX_PASSWORD_LEN,
+        description=f"Password must be {MIN_PASSWORD_LEN}-{MAX_PASSWORD_LEN} length",
+    )
 
 
 class SUserRegisterEmail(BaseSchema):
     email: EmailStr
-    password: str = Field(..., min_length=8, max_length=24, description="Password must be 8-24 length")
+    password: str = Field(
+        ...,
+        min_length=MIN_PASSWORD_LEN,
+        max_length=MAX_PASSWORD_LEN,
+        description=f"Password must be {MIN_PASSWORD_LEN}-{MAX_PASSWORD_LEN} length",
+    )
 
 
 class SUserVerification(BaseSchema):
@@ -25,7 +42,7 @@ class SUserVerification(BaseSchema):
         pattern=r"^[A-Z0-9]+$",
         min_length=VERIFICATION_CODE_LEN,
         max_length=VERIFICATION_CODE_LEN,
-        description="Code must be 6 length, can contain A-Z0-9",
+        description=f"Code must be {VERIFICATION_CODE_LEN} length, can contain A-Z0-9",
     )
 
 
@@ -34,10 +51,16 @@ class SUserRegisterUsername(BaseSchema):
     user_name: str = Field(
         ...,
         pattern=USERNAME_REGEX,
-        min_length=5,
-        max_length=30,
-        description="Username must be 5-30 length, can contain a-zA-Z0-9_.",
+        min_length=MIN_USERNAME_LEN,
+        max_length=MAX_USERNAME_LEN,
+        description=f"Username must be {MIN_USERNAME_LEN}-{MAX_USERNAME_LEN} length, can contain a-zA-Z0-9_.",
     )
+
+    @field_validator("user_name")
+    def not_reserved_username(cls, v):
+        if re.fullmatch(r"user_\d+", v):
+            raise ValueError("Usernames like 'user_\d+' are not allowed")
+        return v
 
 
 class SUserResetPassword(BaseSchema):
@@ -46,7 +69,12 @@ class SUserResetPassword(BaseSchema):
 
 class SUserVerifyPassword(BaseSchema):
     token: str
-    new_password: str = Field(..., min_length=8, max_length=24, description="Password must be 8-24 length")
+    new_password: str = Field(
+        ...,
+        min_length=MIN_PASSWORD_LEN,
+        max_length=MAX_PASSWORD_LEN,
+        description=f"Password must be {MIN_PASSWORD_LEN}-{MAX_PASSWORD_LEN} length",
+    )
 
 
 class SUserRead(BaseSchema):
@@ -59,7 +87,13 @@ class SUserRead(BaseSchema):
 class SUserUpdate(BaseSchema):
     user_name: str = Field(
         pattern=USERNAME_REGEX,
-        min_length=5,
-        max_length=30,
-        description="Username must be 5-30 length, can contain a-zA-Z0-9_.",
+        min_length=MIN_USERNAME_LEN,
+        max_length=MAX_USERNAME_LEN,
+        description=f"Username must be {MIN_USERNAME_LEN}-{MAX_USERNAME_LEN} length, can contain a-zA-Z0-9_.",
     )
+
+    @field_validator("user_name")
+    def not_reserved_username(cls, v):
+        if re.fullmatch(r"user_\d+", v):
+            raise ValueError("usernames like 'user_123' are not allowed")
+        return v

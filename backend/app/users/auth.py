@@ -15,6 +15,7 @@ from app.exceptions import (
     TokenNotFoundException,
     VerificationCodeExpiredException,
 )
+from app.logger import logger
 from app.users.dao import UserDAO
 from app.users.models import User
 from app.users.schemas import SUserVerification
@@ -26,6 +27,7 @@ def create_jwt_token(data: dict[str, Any], expires_delta: timedelta) -> str:
     expire_time = datetime.now(UTC) + expires_delta
     to_encode.update({"exp": int(expire_time.timestamp())})
     jwt_token = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    logger.debug("JWT token created successfully.", extra={"token": jwt_token})
     return jwt_token  # type: ignore
 
 
@@ -34,6 +36,7 @@ def check_jwt_token(token: Optional[str]) -> dict[str, Any]:
         raise TokenNotFoundException
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, settings.ALGORITHM)
+        logger.debug("JWT token decoded correctly.", extra={"token": token})
     except ExpiredSignatureError:
         raise TokenExpiredException
     except JWTError:
@@ -43,9 +46,11 @@ def check_jwt_token(token: Optional[str]) -> dict[str, Any]:
 
 
 async def authenticate_user(login: str, password: str) -> User:
-    user = await UserDAO.get_by_login(login)
+    user = await UserDAO.find_by_login(login=login)
     if not user or not Hashing.verify_password(password, user.hashed_password):
         raise IncorrectLoginOrPasswordException
+
+    logger.debug("User authenticated.", extra={"user_id": user.id, "login": login})
     return user
 
 
@@ -71,3 +76,5 @@ async def check_verification_code(user_data: SUserVerification) -> None:
     if stored_code != code:
         await redis_client.incr(attempts_key)
         raise InvalidVerificationCodeException
+
+    logger.debug("Verification code validated successfully.", extra={"email": email})

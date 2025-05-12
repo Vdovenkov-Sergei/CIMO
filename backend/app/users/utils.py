@@ -6,6 +6,7 @@ from passlib.context import CryptContext
 from pydantic import EmailStr
 
 from app.database import redis_client
+from app.logger import logger
 from app.tasks.tasks import send_verification_email
 
 VERIFICATION_CODE_LEN = 6
@@ -25,6 +26,11 @@ ATTEMPTS_ENTER_KEY = "attempts_enter_{email}"
 ATTEMPTS_SEND_KEY = "attempts_send_{email}"
 RESET_TOKEN_KEY = "reset_token_{token}"
 
+MIN_PASSWORD_LEN = 8
+MAX_PASSWORD_LEN = 24
+MIN_USERNAME_LEN = 5
+MAX_USERNAME_LEN = 30
+
 
 class Hashing:
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -39,8 +45,9 @@ class Hashing:
 
 
 def generate_verification_code() -> str:
-    code = "".join(random.choices(string.ascii_uppercase + string.digits, k=VERIFICATION_CODE_LEN))
-    return code.upper()
+    code = "".join(random.choices(string.ascii_uppercase + string.digits, k=VERIFICATION_CODE_LEN)).upper()
+    logger.debug("Verification code generated.", extra={"code": code})
+    return code
 
 
 async def send_verification_code(email: EmailStr) -> None:
@@ -48,4 +55,6 @@ async def send_verification_code(email: EmailStr) -> None:
     attempts_key, code_key = ATTEMPTS_SEND_KEY.format(email=email), CODE_VERIFY_KEY.format(email=email)
     await redis_client.setex(code_key, timedelta(seconds=TIME_PENDING_VERIFICATION), code)
     await redis_client.setex(attempts_key, timedelta(seconds=TIME_PENDING_VERIFICATION), 0)
+    logger.debug("Verification code saved to Redis.", extra={"email": email, "code": code})
     send_verification_email.delay(email, code)
+    logger.info("Verification code email sent (task dispatched).", extra={"email": email})
