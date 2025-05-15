@@ -16,7 +16,7 @@ const ChangeNickname = () => {
   };
 
   return (
-    <div className="profile-page">
+    <div className="change-nickname-page">
       {/* Хэдер (оставляем как было) */}
       <header className="header">
         <img src="./src/assets/images/CIMO_logo.svg" class="logo" alt="" />
@@ -25,7 +25,7 @@ const ChangeNickname = () => {
             {isProfileMenuOpen && (
               <ul className="profile-menu__list">
                 <li><Link to="/profile">Профиль</Link></li>
-                <li><Link to="/my-movies">Мои фильмы</Link></li>
+                <li><Link to="/myMovies">Мои фильмы</Link></li>
                 <li><Link to="/">Выход</Link></li>
               </ul>
             )}
@@ -45,6 +45,14 @@ const ChangeNickname = () => {
 
       {/* Основная часть - полностью переписываем */}
       <main className="profile-main-nick container">
+        <div className="navigation">
+          <Link to='/modeSelection' className="navigation__link">Главная страница</Link>
+          <span className="delimeter">-</span>
+          <Link to='/Profile' className="navigation__link">Профиль</Link>
+          <span className="delimeter">-</span>
+          <Link to='/changeNickname' className="navigation__link">Изменить никнейм</Link>
+        </div>
+        
         <div className="profile-header">
           <div className="profile-avatar">
             <img 

@@ -1,5 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 @import 'swiper/swiper-bundle.css';
+@import '../../styles/variables';
+
 // Базовые переменные
 $bg-color: #09090B;
 $text-color: #FFFFFF;
@@ -13,10 +15,9 @@ $primary-font: 'Inter', sans-serif;
   font-family: $primary-font;
   display: flex;
   flex-direction: column;
-}
 
-// Стили хедера
-.header {
+  // Стили хедера
+  .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -27,18 +28,18 @@ $primary-font: 'Inter', sans-serif;
     .logo {
         width: 150px;
     }
-}
+  }
 
-// Основной контент
-.main-content {
+  // Основной контент
+  .main-content {
   display: flex;
   flex: 1;
   padding: 40px;
   gap: 60px;
   align-items: center;
-}
+  }
 
-.onboarding {
+  .onboarding {
   flex: 1;
   border-radius: 12px;
   overflow: hidden;
@@ -62,10 +63,10 @@ $primary-font: 'Inter', sans-serif;
       background: #A1ACFF;
     }
   }
-}
+  }
 
-// Форма авторизации
-.auth-form {
+  // Форма авторизации
+  .auth-form {
   width: 400px;
   padding: 40px 20px;
   border-radius: 12px;
@@ -73,13 +74,13 @@ $primary-font: 'Inter', sans-serif;
   flex-direction: column;
   background-color: #121214;
   text-align: center;
-  
+
   &__title {
     font-size: 24px;
     font-weight: 600;
     margin: 0 0 8px 0;
   }
-  
+
   &__subtitle {
     color: #A1ACFF;
     margin: 0 0 32px 0;
@@ -127,21 +128,22 @@ $primary-font: 'Inter', sans-serif;
     }
     
     &__button {
-      padding: 12px;
-      background-color: $link-color;
-      color: $bg-color;
+      text-align: center;
+      padding: 12px 24px;
+      background-color: $button-color;
+      font-size: 16px;
+      color: $text-color;
       border: none;
       border-radius: 6px;
       font-family: $primary-font;
       font-weight: 500;
       cursor: pointer;
-      transition: opacity 0.2s;
       
       &:hover {
-        opacity: 0.9;
+        background-color: $button-hover-color;
       }
     }
-  
+
     &__footer-text {
       font-size: 14px;
       color: rgba(255, 255, 255, 0.7);
@@ -149,30 +151,32 @@ $primary-font: 'Inter', sans-serif;
       margin: 8px 0 0 0;
     }
   }
-}
+  }
 
 
 
-// Футер
-.footer {
+  // Футер
+  .footer {
     padding: 40px;
     text-align: center;
-    background-color: #09090B;
     
-    &__title {
-        font-size: 18px;
-        margin-bottom: 12px;
+    .footer-title {
+      font-size: 18px;
+      margin-bottom: 12px;
     }
     
-    &__email {
-        color: #A1ACFF;
-        text-decoration: none;
-        
-        &:hover {
-            text-decoration: underline;
-        }
+    .footer-email {
+      color: $link-color;
+      text-decoration: none;
+      
+      &:hover {
+        text-decoration: underline;
+      }
     }
+  }
 }
+
+
 
 @media (max-width: 768px) {
     .main-content {

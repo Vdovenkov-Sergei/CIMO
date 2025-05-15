@@ -51,7 +51,7 @@ const ModeSelection = () => {
             <div className="mode-card__image">
               <img src="src/assets/images/mode1.png" alt="" />
             </div>
-            <a href="" className="mode-card__button">Начать одиночную сессию</a>
+            <a href="/singleSession" className="mode-card__button">Начать одиночную сессию</a>
           </div>
 
           {/* Парный режим */}

@@ -17,7 +17,7 @@ const Nickname = () => {
   ];
 
   return (
-    <div className="login-page">
+    <div className="nickname-page">
       <header className="header">
         <img src="./src/assets/images/CIMO_logo.svg" class="logo" alt="" />
       </header>
@@ -58,6 +58,7 @@ const Nickname = () => {
             </div>
 
             <button type="submit" className="form__button">Сохранить</button>
+            <button type="submit" className="form__button">Придумать позже</button>
             <Link to="/modeSelection" className="form__link">Сессии</Link>
 
           </form>

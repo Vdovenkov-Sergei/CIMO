@@ -45,6 +45,12 @@ const Profile = () => {
 
       {/* Основная часть - полностью переписываем */}
       <main className="profile-main container">
+        <div className="navigation">
+          <Link to='/modeSelection' className="navigation__link">Главная страница</Link>
+          <span className="delimeter">-</span>
+          <Link to='/Profile' className="navigation__link">Профиль</Link>
+        </div>
+        
         <div className="profile-header">
           <div className="profile-avatar">
             <img 

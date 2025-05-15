@@ -17,7 +17,7 @@ const ForgotPassword = () => {
   ];
 
   return (
-    <div className="login-page">
+    <div className="forgot-password-page">
       <header className="header">
         <img src="./src/assets/images/CIMO_logo.svg" class="logo" alt="" />
       </header>
@@ -58,6 +58,7 @@ const ForgotPassword = () => {
             </div>
 
             <button type="submit" className="form__button">Далее</button>
+            <Link to='/createPassword'>me</Link>
           </form>
         </section>
       </main>

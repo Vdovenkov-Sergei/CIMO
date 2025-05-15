@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './MyMovies.scss';
+import eyeIconUrl from '../../../src/assets/images/eye.svg'
+import eyeSlashIconUrl from '../../../src/assets/images/eye-slash.svg'
+import trashIconUrl from '../../../src/assets/images/trash.svg'
 
 const MyMovies = () => {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -82,6 +85,14 @@ const MyMovies = () => {
 
       {/* Основная часть */}
       <main className="movies-main container">
+        <div className="navigation">
+          <Link to='/modeSelection' className="navigation__link">Главная страница</Link>
+          <span className="delimeter">-</span>
+          <Link to='/Profile' className="navigation__link">Профиль</Link>
+          <span className="delimeter">-</span>
+          <Link to='/myMovies' className="navigation__link">Мои фильмы</Link>
+        </div>
+
         {/* Секция отложенных фильмов */}
         <section className="movies-section">
           <h2 className="movies-section__title">Отложенные фильмы</h2>
@@ -99,13 +110,13 @@ const MyMovies = () => {
                     onClick={() => markAsWatched(movie.id)}
                     className="movie-button movie-button--primary"
                   >
-                    Пометить как просмотренный
+                    <img src={eyeIconUrl} alt="" />
                   </button>
                   <button 
                     onClick={() => removeMovie(movie.id, false)}
                     className="movie-button movie-button--danger"
                   >
-                    Удалить
+                    <img src={trashIconUrl} alt="" />
                   </button>
                 </div>
               </div>
@@ -130,7 +141,7 @@ const MyMovies = () => {
                     onClick={() => markAsUnwatched(movie.id)}
                     className="movie-button movie-button--secondary"
                   >
-                    Пометить как непросмотренный
+                    <img src={eyeSlashIconUrl} alt="" />
                   </button>
                 </div>
               </div>

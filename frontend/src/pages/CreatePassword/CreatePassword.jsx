@@ -17,7 +17,7 @@ const CreatePassword = () => {
   ];
 
   return (
-    <div className="login-page">
+    <div className="create-password-page">
       <header className="header">
         <img src="./src/assets/images/CIMO_logo.svg" class="logo" alt="" />
       </header>

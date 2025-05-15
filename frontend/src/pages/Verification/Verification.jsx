@@ -17,7 +17,7 @@ const Verification = () => {
   ];
 
   return (
-    <div className="login-page">
+    <div className="verification-page">
       <header className="header">
         <img src="./src/assets/images/CIMO_logo.svg" class="logo" alt="" />
       </header>

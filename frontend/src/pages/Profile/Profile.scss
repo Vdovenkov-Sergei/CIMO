@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+@import '../../styles/variables';
 
 // Базовые переменные
 $bg-color: #09090B;
@@ -16,213 +17,226 @@ $primary-font: 'Inter', sans-serif;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-}
 
-// Стили хедера (оставляем как было)
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 40px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-
-  &__logo {
-    font-size: 24px;
-    font-weight: 600;
-    margin: 0;
-    color: $text-color;
-  }
-
-  &__profile {
-    position: relative;
-  }
-}
-
-// Меню профиля
-.profile-menu-container {
-  display: flex;
-  align-items: center;
-  position: relative;
-}
-
-.profile-icon {
-  width: 40px;
-  height: 40px;
-  overflow: hidden;
-  cursor: pointer;
-  position: relative;
-  z-index: 101; /* Чтобы иконка была поверх меню */
-
-  &__image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-}
-
-.profile-menu__list {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  border-radius: 8px;
-  padding: 10px;
-  margin: 0;
-  list-style: none;
-  display: flex;
-  gap: 15px;
-  z-index: 100;
-  right: 100%; /* Располагаем слева от иконки */
-  margin-right: 10px; /* Отступ от иконки */
-
-  li {
-    a {
-      color: $text-color;
-      text-decoration: none;
-      font-size: 14px;
-      display: block;
-      transition: color 0.2s;
-      padding: 8px 12px;
-      white-space: nowrap;
-
-      &:hover {
-        color: $link-color;
-        background-color: rgba(255, 255, 255, 0.1);
-        border-radius: 4px;
-      }
-    }
-  }
-}
-
-/* Анимация появления */
-.profile-menu__list {
-  opacity: 0;
-  transform: translateY(-50%) translateX(20px);
-  visibility: hidden;
-  transition: all 0.3s ease;
-}
-
-.profile-menu__list,
-.profile-menu__list.show {
-  opacity: 1;
-  transform: translateY(-50%) translateX(0);
-  visibility: visible;
-}
-
-// Основная часть профиля
-.profile-main {
-  flex: 1;
-  padding: 40px;
-  max-width: 800px;
-  margin: 0 auto;
-  width: 100%;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.profile-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 40px;
-
-  &__link {
-    margin-top: 5px;
-    color:#A1ACFF;
-    text-decoration: none;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-}
-
-.profile-avatar {
-  width: 120px;
-  height: 120px;
-  overflow: hidden;
-  margin-bottom: 20px;
-
-  &__image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-}
-
-.profile-login {
-  font-size: 24px;
-  font-weight: 500;
-  margin: 0;
-  color: $text-color;
-}
-
-.profile-section {
-  margin-bottom: 40px;
-  text-align: center;
-
-  &__title {
-    font-size: 20px;
-    margin: 0 0 20px 0;
-    color: $link-color;
-  }
-}
-
-.profile-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-
-  &__link {
+    // Стили хедера (оставляем как было)
+  .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px;
-    background-color: rgba(255, 255, 255, 0.03);
-    border-radius: 12px;
-    text-decoration: none;
-    transition: background-color 0.2s;
-
-    &:hover {
-      background-color: rgba(255, 255, 255, 0.07);
-    }
-
+    padding: 20px 40px;
+    background-color: #09090B;
+    height: 85px;
     
+    .logo {
+        width: 150px;
+    }
   }
 
-  &__title {
-    font-size: 18px;
+  .navigation {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 30px;
+
+    &__link {
+      color: $link-color;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  // Меню профиля
+  .profile-menu-container {
+    display: flex;
+    align-items: center;
+    position: relative;
+  }
+
+  .profile-icon {
+    width: 40px;
+    height: 40px;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    z-index: 101; /* Чтобы иконка была поверх меню */
+
+    &__image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .profile-menu__list {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    border-radius: 8px;
+    padding: 10px;
+    margin: 0;
+    list-style: none;
+    display: flex;
+    gap: 15px;
+    z-index: 100;
+    right: 100%; /* Располагаем слева от иконки */
+    margin-right: 10px; /* Отступ от иконки */
+
+    li {
+      a {
+        color: $text-color;
+        text-decoration: none;
+        font-size: 14px;
+        display: block;
+        transition: color 0.2s;
+        padding: 8px 12px;
+        white-space: nowrap;
+
+        &:hover {
+          color: $link-color;
+          background-color: rgba(255, 255, 255, 0.1);
+          border-radius: 4px;
+        }
+      }
+    }
+  }
+
+  /* Анимация появления */
+  .profile-menu__list {
+    opacity: 0;
+    transform: translateY(-50%) translateX(20px);
+    visibility: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .profile-menu__list,
+  .profile-menu__list.show {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+    visibility: visible;
+  }
+
+  // Основная часть профиля
+  .profile-main {
+    display: flex;
+    flex: 1;
+    padding: 40px;
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .profile-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 40px;
+
+    &__link {
+      margin-top: 5px;
+      color:#A1ACFF;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .profile-avatar {
+    width: 120px;
+    height: 120px;
+    overflow: hidden;
+    margin-bottom: 20px;
+
+    &__image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .profile-login {
+    font-size: 24px;
+    font-weight: 500;
     margin: 0;
     color: $text-color;
   }
 
-  &__icon {
-    color: $link-color;
-    font-size: 20px;
-  }
+  .profile-section {
+    margin-bottom: 40px;
+    text-align: center;
 
-}
-
-// Футер (оставляем как было)
-.footer {
-  padding: 40px;
-  text-align: center;
-  background-color: #09090B;
-    
-  &__title {
-    font-size: 18px;
-    margin-bottom: 12px;
-  }
-    
-  &__email {
-    color: #A1ACFF;
-    text-decoration: none;
-        
-    &:hover {
-      text-decoration: underline;
+    &__title {
+      font-size: 20px;
+      margin: 0 0 20px 0;
+      color: $link-color;
     }
   }
+
+  .profile-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    &__link {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      background-color: rgba(255, 255, 255, 0.03);
+      border-radius: 12px;
+      text-decoration: none;
+      transition: background-color 0.2s;
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.07);
+      }
+
+      
+    }
+
+    &__title {
+      font-size: 18px;
+      margin: 0;
+      color: $text-color;
+    }
+
+    &__icon {
+      color: $link-color;
+      font-size: 20px;
+    }
+
+  }
+
+  // Футер (оставляем как было)
+  .footer {
+    padding: 40px;
+    text-align: center;
+    
+    .footer-title {
+      font-size: 18px;
+      margin-bottom: 12px;
+    }
+    
+    .footer-email {
+      color: $link-color;
+      text-decoration: none;
+      
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
 }
+
 
 // Адаптивность
 @media (max-width: 768px) {
