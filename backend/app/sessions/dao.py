@@ -71,14 +71,14 @@ class SessionDAO(BaseDAO):
                 or_(
                     # Удаляем AFK сессии старше 3 дней по started_at
                     and_(
-                        Session.status == SessionStatus.AFK,
-                        Session.started_at.is_not(None),
-                        Session.started_at < afk_cutoff,
+                        cls.model.status == SessionStatus.AFK,
+                        cls.model.started_at.is_not(None),
+                        cls.model.started_at < afk_cutoff,
                     ),
                     # Удаляем PENDING/PREPARED сессии старше 1 дня по created_at
                     and_(
-                        Session.status.in_([SessionStatus.PENDING, SessionStatus.PREPARED]),
-                        Session.created_at < pending_prepared_cutoff,
+                        cls.model.status.in_([SessionStatus.PENDING, SessionStatus.PREPARED]),
+                        cls.model.created_at < pending_prepared_cutoff,
                     ),
                 )
             ]

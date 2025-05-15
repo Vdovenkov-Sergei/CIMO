@@ -21,8 +21,7 @@ active_sessions: dict[uuid.UUID, list[WebSocket]] = {}
 @router.websocket("/ws/{session_id}")
 async def websocket_endpoint(websocket: WebSocket, session_id: uuid.UUID) -> None:
     await websocket.accept()
-    extra = {"session_id": session_id, "client": str(websocket.client)}
-    logger.info("WebSocket connected.", extra=extra)
+    logger.info("WebSocket connected.", extra={"session_id": session_id})
     if session_id not in active_sessions:
         active_sessions[session_id] = []
     active_sessions[session_id].append(websocket)
@@ -30,10 +29,10 @@ async def websocket_endpoint(websocket: WebSocket, session_id: uuid.UUID) -> Non
     try:
         while True:
             await websocket.receive_text()
-            logger.debug("WebSocket message received.", extra=extra)
+            logger.debug("WebSocket message received.", extra={"session_id": session_id})
     except WebSocketDisconnect:
         active_sessions[session_id].remove(websocket)
-        logger.info("WebSocket disconnected.", extra=extra)
+        logger.info("WebSocket disconnected.", extra={"session_id": session_id})
         if not active_sessions[session_id]:
             del active_sessions[session_id]
 
@@ -43,6 +42,10 @@ async def swipe_session_movie(
     data: SSessionMovieCreate, session: Session = Depends(get_current_session)
 ) -> dict[str, str | int]:
     if session.status != SessionStatus.ACTIVE:
+        logger.warning(
+            "Invalid session status for swipe operation.",
+            extra={"session_id": session.id, "status": session.status.value},
+        )
         raise InvalidSessionStatusException(status=session.status.value)
 
     logger.info(
@@ -86,6 +89,10 @@ async def get_session_list(
     session: Session = Depends(get_current_session),
 ) -> list[SSessionMovieRead]:
     if session.status not in (SessionStatus.REVIEW, SessionStatus.ACTIVE):
+        logger.warning(
+            "Invalid session status for get operation.",
+            extra={"session_id": session.id, "status": session.status.value},
+        )
         raise InvalidSessionStatusException(status=session.status.value)
 
     movies = await SessionMovieDAO.find_movies(
@@ -97,6 +104,10 @@ async def get_session_list(
 @router.delete("/{movie_id}", response_model=dict[str, str])
 async def delete_from_session_list(movie_id: int, session: Session = Depends(get_current_session)) -> dict[str, str]:
     if session.status != SessionStatus.REVIEW:
+        logger.warning(
+            "Invalid session status for delete operation.",
+            extra={"session_id": session.id, "status": session.status.value},
+        )
         raise InvalidSessionStatusException(status=session.status.value)
 
     await SessionMovieDAO.delete_movie(session_id=session.id, user_id=session.user_id, movie_id=movie_id)

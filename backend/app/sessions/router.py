@@ -32,12 +32,10 @@ async def get_user_session(user: User = Depends(get_current_user)) -> Optional[S
 async def create_session(data: SSessionCreate, user: User = Depends(get_current_user)) -> SSessionRead:
     existing_session = await SessionDAO.find_existing_session(user_id=user.id)
     if existing_session and existing_session.is_pair == data.is_pair:
-        logger.info(
-            "Returning existing session of same type.",
-            extra={"session_id": existing_session.id, "user_id": user.id, "pair": data.is_pair},
-        )
+        logger.info("Returning existing session of same type.", extra={"pair": data.is_pair})
         return SSessionRead.model_validate(existing_session)
     if existing_session:
+        logger.warning("User already in a session.", extra={"session_id": existing_session.id, "user_id": user.id})
         raise UserAlreadyInSessionException(user_id=user.id, session_id=str(existing_session.id))
     session = await SessionDAO.add_session(user_id=user.id, is_pair=data.is_pair)
     return SSessionRead.model_validate(session)
@@ -47,9 +45,10 @@ async def create_session(data: SSessionCreate, user: User = Depends(get_current_
 async def join_session(session_id: uuid.UUID, user: User = Depends(get_current_user)) -> SSessionRead:
     existing_session = await SessionDAO.find_existing_session(user_id=user.id)
     if existing_session and existing_session.id == session_id:
-        logger.info("User rejoining same session.", extra={"session_id": existing_session.id, "user_id": user.id})
+        logger.info("User rejoining same session.")
         return SSessionRead.model_validate(existing_session)
     if existing_session:
+        logger.warning("User already in a session.", extra={"session_id": existing_session.id, "user_id": user.id})
         raise UserAlreadyInSessionException(user_id=user.id, session_id=str(existing_session.id))
 
     participants = await SessionDAO.get_participants(session_id=session_id)
@@ -57,6 +56,7 @@ async def join_session(session_id: uuid.UUID, user: User = Depends(get_current_u
         raise SessionNotFoundException(session_id=str(session_id))
     max_participants = PAIR if next(iter(participants)).is_pair else SOLO
     if len(participants) >= max_participants:
+        logger.warning("Session is full.", extra={"session_id": session_id, "count": len(participants)})
         raise MaxParticipantsInSessionException
 
     joined_session = await SessionDAO.add_session(session_id=session_id, user_id=user.id, is_pair=True)
@@ -70,11 +70,12 @@ async def check_ready_participants(session_id: uuid.UUID) -> bool:
         raise SessionNotFoundException(session_id=str(session_id))
     max_participants = PAIR if next(iter(participants)).is_pair else SOLO
     if len(participants) < max_participants:
+        logger.warning("Not enough participants.", extra={"session_id": session_id, "count": len(participants)})
         raise ParticipantsNotEnoughException
 
     ready_flag = all(p.status == SessionStatus.PREPARED for p in participants)
     if ready_flag:
-        logger.info("All participants are ready.", extra={"session_id": session_id})
+        logger.info("All participants are ready.")
     else:
         logger.warning("Not all participants are ready.", extra={"session_id": session_id})
     return ready_flag
@@ -89,16 +90,10 @@ async def change_session_status(
 
     if (session.status, new_status) == (SessionStatus.PREPARED, SessionStatus.ACTIVE):
         update_fields["started_at"] = datetime.now(UTC)
-        logger.debug(
-            "User started session.",
-            extra={"session_id": session.id, "user_id": session.user_id, "time": update_fields["started_at"]},
-        )
+        logger.info("User started session.", extra={"time": update_fields["started_at"], "user_id": session.user_id})
     elif (session.status, new_status) == (SessionStatus.REVIEW, SessionStatus.COMPLETED):
         update_fields["ended_at"] = datetime.now(UTC)
-        logger.debug(
-            "User ended session.",
-            extra={"session_id": session.id, "user_id": session.user_id, "time": update_fields["ended_at"]},
-        )
+        logger.info("User ended session.", extra={"time": update_fields["ended_at"], "user_id": session.user_id})
 
     await SessionDAO.update_session(session_id=session.id, user_id=session.user_id, update_data=update_fields)
     return {"message": "Session status updated successfully."}

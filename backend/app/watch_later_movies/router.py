@@ -6,6 +6,8 @@ from app.users.models import User
 from app.watch_later_movies.dao import WatchLaterMovieDAO
 from app.watch_later_movies.schemas import SWatchLaterMovieCreate, SWatchLaterMovieRead
 
+from app.logger import logger
+
 router = APIRouter(prefix="/movies/later", tags=["Watch Later Movies"])
 
 
@@ -15,6 +17,9 @@ async def add_to_watch_later_list(
 ) -> dict[str, str]:
     existing_movie = await WatchLaterMovieDAO.find_by_user_movie_id(user_id=user.id, movie_id=data.movie_id)
     if existing_movie:
+        logger.warning(
+            "Movie already exists in watch later list.", extra={"user_id": user.id, "movie_id": data.movie_id}
+        )
         return {"message": "The movie is already in the watch later list."}
 
     await WatchLaterMovieDAO.add_movie(user_id=user.id, movie_id=data.movie_id)

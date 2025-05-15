@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import Any, Sequence
 
 from app.dao.decorators import log_db_add, log_db_delete, log_db_find_all, log_db_update
 from app.dao.movie_base import MovieBaseDAO
@@ -26,10 +26,10 @@ class ViewedMovieDAO(MovieBaseDAO):
         return await cls.delete_record(filters=[cls.model.user_id == user_id, cls.model.movie_id == movie_id])
 
     @classmethod
-    @log_db_update("Update review")
-    async def update_review(cls, *, user_id: int, movie_id: int, review: int) -> int:
+    @log_db_update("Update viewed movie")
+    async def update_movie(cls, *, user_id: int, movie_id: int, update_data: dict[str, Any]) -> int:
         return await cls.update_record(
-            filters=[cls.model.user_id == user_id, cls.model.movie_id == movie_id], update_data={"review": review}
+            filters=[cls.model.user_id == user_id, cls.model.movie_id == movie_id], update_data=update_data
         )
 
     @classmethod

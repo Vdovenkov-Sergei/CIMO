@@ -53,10 +53,10 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     try:
         async with async_session_maker() as session:
             await session.execute(select(1))
-        logger.info("Successfully connected to database", extra={"db_url": settings.async_database_url})
+        logger.info("Successfully connected to database.")
     except Exception as err:
         logger.critical(
-            "Error connecting to database",
+            "Error: failed to connect to database.",
             extra={"error": str(err), "db_url": settings.async_database_url},
             exc_info=True,
         )
@@ -65,10 +65,12 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     try:
         await redis_client.ping()
         FastAPICache.init(RedisBackend(redis_client), prefix="cache", expire=settings.CACHE_EXPIRE)
-        logger.info("Successfully connected to Redis and initialized cache", extra={"redis_url": settings.redis_url})
+        logger.info("Successfully connected to Redis and initialized cache.")
     except Exception as err:
         logger.critical(
-            "Error connecting to Redis", extra={"error": str(err), "redis_url": settings.redis_url}, exc_info=True
+            "Error: failed to connect to Redis",
+            extra={"error": str(err), "redis_url": settings.redis_url},
+            exc_info=True,
         )
         raise
 
@@ -79,7 +81,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
         await redis_client.close()
         logger.info("Redis client connection closed.")
     except Exception as err:
-        logger.warning("Error while closing Redis connection", extra={"error": str(err)}, exc_info=True)
+        logger.warning("Error: failed to close Redis client connection.", extra={"error": str(err)}, exc_info=True)
 
 
 sentry_sdk.init(
@@ -105,7 +107,6 @@ app.include_router(router_sessions)
 app.include_router(router_session_movies)
 app.include_router(router_viewed_movies)
 app.include_router(router_watch_later_movies)
-logger.info("Routers have been successfully added.")
 
 origins = [settings.FRONTEND_URL]
 app.add_middleware(
@@ -174,4 +175,3 @@ admin.add_view(SessionAdmin)
 admin.add_view(SessionMovieAdmin)
 admin.add_view(ViewedMovieAdmin)
 admin.add_view(WatchLaterMovieAdmin)
-logger.info("Admin views have been successfully added.")

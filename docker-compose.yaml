@@ -71,16 +71,16 @@ services:
     volumes:
       - ./backend/app/data:/app/data
 
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #   container_name: cimo_frontend
-  #   ports:
-  #     - "3000:3000"
-  #   stdin_open: true
-  #   tty: true
-  #   env_file:
-  #     - ./frontend/.env.production
+  frontend:
+    build:
+      context: ./frontend
+    container_name: cimo_frontend
+    ports:
+      - "3000:3000"
+    stdin_open: true
+    tty: true
+    env_file:
+      - ./frontend/.env.production
 
 volumes:
   postgres_data:

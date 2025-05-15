@@ -9,13 +9,13 @@ from app.people.models import Person
 
 def load_data(path_to_file, table_name):
     try:
-        logger.info("Loading data into table", extra={"table_name": table_name, "path_to_file": path_to_file})
+        logger.info("Loading data into table.", extra={"table_name": table_name})
         df = pd.read_pickle(path_to_file)
         df.to_sql(table_name, con=sync_engine, if_exists="append", index=False)
-        logger.info("Successfully loaded data", extra={"table_name": table_name, "rows": len(df)})
+        logger.info("Successfully loaded data.", extra={"rows": len(df)})
     except Exception as err:
         logger.error(
-            "Error: failed to load data",
+            "Error: failed to load data.",
             extra={"path_to_file": path_to_file, "table_name": table_name, "error": str(err)},
             exc_info=True,
         )

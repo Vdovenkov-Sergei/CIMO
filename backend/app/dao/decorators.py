@@ -2,16 +2,9 @@ import time
 from functools import wraps
 
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.inspection import inspect
 
 from app.logger import logger
-
-
-def orm_to_dict(obj):
-    try:
-        return {c.key: getattr(obj, c.key) for c in inspect(obj).mapper.column_attrs}
-    except Exception:
-        return {"repr": repr(obj)}
+from app.dao.utils import orm_to_dict, to_gerund
 
 
 def log_query_time(func):
@@ -23,16 +16,18 @@ def log_query_time(func):
             return result
         finally:
             duration = round(time.time() - start, 4)
-            logger.debug(f"Database query executed in {duration}s.")
+            logger.debug(f"Database query executed.", extra={"duration": duration})
 
     return wrapper
 
 
 def log_db_errors(action: str):
+    verb, noun = action.strip().capitalize().split(" ", 1)
+
     def decorator(func):
         @wraps(func)
         async def wrapper(*args, **kwargs):
-            logger.info(f"{action.capitalize()}", extra=kwargs)
+            logger.info(f"{to_gerund(verb)} {noun.lower()}...")
             try:
                 return await func(*args, **kwargs)
             except (SQLAlchemyError, Exception) as err:
@@ -59,8 +54,7 @@ def log_db_find_one(action: str):
         async def wrapper(*args, **kwargs):
             result = await func(*args, **kwargs)
             if result:
-                extra = {**kwargs, "result": orm_to_dict(result)}
-                logger.debug(f"{noun.capitalize()} found.", extra=extra)
+                logger.info(f"{noun.capitalize()} found.", extra={"result": orm_to_dict(result)})
             else:
                 logger.warning(f"{noun.capitalize()} not found.", extra=kwargs)
             return result
@@ -79,7 +73,10 @@ def log_db_find_all(action: str):
         @log_db_errors(action)
         async def wrapper(*args, **kwargs):
             result = await func(*args, **kwargs)
-            logger.debug(f"Retrieved {noun.lower()}.", extra={**kwargs, "count": len(result)})
+            if result:
+                logger.info(f"Retrieved {noun.lower()}.", extra={"count": len(result)})
+            else:
+                logger.warning(f"{noun.capitalize()} not found.", extra=kwargs)
             return result
 
         return wrapper
@@ -96,7 +93,7 @@ def log_db_add(action: str):
         @log_db_errors(action)
         async def wrapper(*args, **kwargs):
             result = await func(*args, **kwargs)
-            logger.debug(f"{noun.capitalize()} added.", extra={**kwargs, "result": orm_to_dict(result)})
+            logger.info(f"{noun.capitalize()} added.", extra={"result": orm_to_dict(result)})
             return result
 
         return wrapper
@@ -114,7 +111,7 @@ def log_db_update(action: str):
         async def wrapper(*args, **kwargs):
             result = await func(*args, **kwargs)
             if result > 0:
-                logger.debug(f"{noun.capitalize()} updated.", extra={**kwargs, "count": result})
+                logger.info(f"{noun.capitalize()} updated.", extra={"count": result})
             else:
                 logger.warning(f"{noun.capitalize()} not found.", extra=kwargs)
             return result
@@ -134,7 +131,7 @@ def log_db_delete(action: str):
         async def wrapper(*args, **kwargs):
             result = await func(*args, **kwargs)
             if result > 0:
-                logger.debug(f"{noun.capitalize()} deleted.", extra={**kwargs, "count": result})
+                logger.info(f"{noun.capitalize()} deleted.", extra={"count": result})
             else:
                 logger.warning(f"{noun.capitalize()} not found.", extra=kwargs)
             return result
@@ -154,9 +151,9 @@ def log_db_action(action: str):
         async def wrapper(*args, **kwargs):
             result = await func(*args, **kwargs)
             if result:
-                logger.debug(f"{noun.capitalize()} happened.", extra=kwargs)
+                logger.info(f"{noun.capitalize()} happened.", extra={"result": result})
             else:
-                logger.debug(f"{noun.capitalize()} not happened.", extra=kwargs)
+                logger.warning(f"{noun.capitalize()} not happened.", extra=kwargs)
             return result
 
         return wrapper
