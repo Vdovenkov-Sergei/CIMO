@@ -1,13 +1,13 @@
 from sqlalchemy.inspection import inspect
 
-EXCEPTIONS = ["hashed_password"]
+EXCEPTIONS = ["hashed_password", "description", "content"]
 
 
 def orm_to_dict(obj):
     try:
         return {c.key: getattr(obj, c.key) for c in inspect(obj).mapper.column_attrs if c.key not in EXCEPTIONS}
     except Exception:
-        return {"repr": repr(obj)}
+        return {"repr": str(obj)}
 
 
 def to_gerund(verb):

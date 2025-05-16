@@ -7,7 +7,6 @@ from app.config import settings
 
 logger = logging.getLogger()
 logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
-
 logHandler = logging.StreamHandler()
 
 
@@ -23,6 +22,7 @@ class CustomJsonFormatter(jsonlogger.JsonFormatter):
 
 
 formatter = CustomJsonFormatter("%(timestamp)s %(level)s %(message)s %(module)s %(funcName)s")
+formatter.json_ensure_ascii = False
 
 logHandler.setFormatter(formatter)
 logger.addHandler(logHandler)

@@ -35,3 +35,45 @@ FROM information_schema.columns
 WHERE table_schema = 'public' AND table_name = 'table_name'
 ORDER BY ordinal_position;
 ```
+
+---
+
+## Running CIMO with Docker
+
+### Basic Startup of All Services
+
+Build and start all main containers:
+
+```bash
+docker compose build
+docker compose up -d
+```
+
+This will start the following services:
+
+* `db` — PostgreSQL;
+* `redis` — Redis;
+* `backend` — Main application server;
+* `celery`, `beat`, `flower` — Workers and monitoring;
+* `frontend` — Frontend;
+
+The `load-data` container is not started automatically — it's launched manually.
+
+---
+
+### Manual Data Loading
+
+The `load-data` container is configured with the `manual` profile — it doesn't run automatically to prevent reloading data on each start.
+
+```bash
+docker compose --profile manual up
+```
+
+* The data will be loaded using an Alembic / Python script.
+* The container will be removed after execution.
+
+To show real-time logs from all running containers, you can use command below:
+
+```bash
+docker compose logs -f
+```
