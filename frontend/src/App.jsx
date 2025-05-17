@@ -13,6 +13,7 @@ const Profile = lazy(() => import('@/pages/Profile/Profile'));
 const MyMovies = lazy(() => import('@/pages/MyMovies/MyMovies'));
 const ChangeNickname = lazy(() => import('@/pages/ChangeNickname/ChangeNickname'));
 const SingleSession = lazy(() => import('@/pages/SingleSession/SingleSession'));
+const SessionMovies = lazy(() => import('@/pages/SessionMovies/SessionMovies'));
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
             <Route path="/myMovies" element={<MyMovies />} />
             <Route path="/changeNickname" element={<ChangeNickname />} />
             <Route path="/singleSession" element={<SingleSession />} />
+            <Route path="/sessionMovies" element={<SessionMovies />} />
           </Routes>
       </main>
     </BrowserRouter>

@@ -32,23 +32,6 @@ $primary-font: 'Inter', sans-serif;
     }
   }
 
-  .navigation {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 30px;
-
-    &__link {
-      color: $link-color;
-      text-decoration: none;
-
-      &:hover {
-        text-decoration: underline;
-      }
-    }
-  }
-
   // Меню профиля
   .profile-menu-container {
     display: flex;
@@ -140,8 +123,8 @@ $primary-font: 'Inter', sans-serif;
     display: flex;
     gap: 20px;
     overflow-x: auto;
-    padding-bottom: 20px;
     margin-top: 50px;
+    padding-bottom: 20px;
     scrollbar-width: 10px;
     scrollbar-color: $link-color transparent;
 
@@ -193,7 +176,36 @@ $primary-font: 'Inter', sans-serif;
     }
   }
 
-  .movie-button {
+  .buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 15px 15px;
+
+    .add-all-button, .end-session {
+      width: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 12px;
+      border: none;
+      border-radius: 4px;
+      font-family: $primary-font;
+      font-size: 14px;
+      cursor: pointer;
+
+      background-color: #615CF8;
+      color: #FFFFFF;
+
+      &:hover {
+        background-color: #4631D1;
+      }
+    }
+  }
+
+  .movie-button, .buttons .add-all-button, .buttons .end-session {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -203,33 +215,12 @@ $primary-font: 'Inter', sans-serif;
     font-family: $primary-font;
     font-size: 14px;
     cursor: pointer;
-    transition: opacity 0.2s;
 
-    &--primary {
-      background-color: #615CF8;
-      color: #FFFFFF;
+    background-color: #615CF8;
+    color: #FFFFFF;
 
-      &:hover {
-        background-color: #4631D1;
-      }
-    }
-
-    &--secondary {
-      background-color: rgba(255, 255, 255, 0.1);
-      color: $text-color;
-
-      &:hover {
-        opacity: 0.5;
-      }
-    }
-
-    &--danger {
-      background-color: #EF4444;
-      color: #FFFFFF;
-
-      &:hover {
-        background-color: #B91C1C;
-      }
+    &:hover {
+      background-color: #4631D1;
     }
   }
 
