@@ -58,7 +58,6 @@ const Verification = () => {
             </div>
 
             <button type="submit" className="form__button">Далее</button>
-            <Link to="/nickname" className="form__link">Никнейм</Link>
 
           </form>
         </section>

@@ -59,7 +59,6 @@ const Nickname = () => {
 
             <button type="submit" className="form__button">Сохранить</button>
             <button type="submit" className="form__button">Придумать позже</button>
-            <Link to="/modeSelection" className="form__link">Сессии</Link>
 
           </form>
         </section>

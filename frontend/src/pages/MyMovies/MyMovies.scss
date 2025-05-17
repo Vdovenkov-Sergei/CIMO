@@ -140,7 +140,7 @@ $primary-font: 'Inter', sans-serif;
     display: flex;
     gap: 20px;
     overflow-x: auto;
-    padding-bottom: 20px;
+    padding: 20px;
     margin-top: 50px;
     scrollbar-width: 10px;
     scrollbar-color: $link-color transparent;
@@ -161,11 +161,12 @@ $primary-font: 'Inter', sans-serif;
     flex-direction: column;
     border-radius: 8px;
     overflow: hidden;
-    transition: transform 0.2s;
+    transition: transform 0.3s, box-shadow 0.3s;
     min-width: 250px;
 
     &:hover {
       transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     }
 
     &__poster {

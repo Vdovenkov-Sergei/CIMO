@@ -58,7 +58,6 @@ const ForgotPassword = () => {
             </div>
 
             <button type="submit" className="form__button">Далее</button>
-            <Link to='/createPassword'>me</Link>
           </form>
         </section>
       </main>

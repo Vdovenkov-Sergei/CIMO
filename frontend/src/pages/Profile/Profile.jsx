@@ -81,7 +81,6 @@ const Profile = () => {
             <span className="profile-nav__icon">→</span>
           </Link>
         </nav>
-        <Link to='/sessionMovies'>фильмы после сессии</Link>
       </main>
 
       {/* Футер (оставляем как было) */}

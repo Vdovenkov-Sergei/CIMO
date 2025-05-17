@@ -79,7 +79,6 @@ const Signup = () => {
               Есть аккаунт?{' '}
               <Link to="/" className="form__link">Войти</Link>
             </p>
-            <Link to="/verification" className="form__link">Верификация</Link>
           </form>
         </section>
       </main>

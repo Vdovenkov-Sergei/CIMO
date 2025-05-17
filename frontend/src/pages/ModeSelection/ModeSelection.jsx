@@ -1,19 +1,48 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './ModeSelection.scss';
+import copyIconUrl from '../../../src/assets/images/copy.svg'
 
 const ModeSelection = () => {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [showSingleModal, setShowSingleModal] = useState(false);
+  const [showPairModal, setShowPairModal] = useState(false);
+  const [inviteLink] = useState('https://cinemood.app/invite/xyz123'); // Пример ссылки
+
+  const navigate = useNavigate();
 
   const toggleProfileMenu = () => {
     setIsProfileMenuOpen(!isProfileMenuOpen);
+  };
+
+  const handleStartSingle = () => {
+    setShowSingleModal(true);
+  };
+
+  const handleStartPair = () => {
+    setShowPairModal(true);
+  };
+
+  const confirmSingle = () => {
+    setShowSingleModal(false);
+    navigate('/singleSession');
+  };
+
+  const confirmPair = () => {
+    setShowPairModal(false);
+    navigate('/pairSession');
+  };
+
+  const copyInviteLink = () => {
+    navigator.clipboard.writeText(inviteLink);
+    alert('Ссылка скопирована!');
   };
 
   return (
     <div className="mode-selection-page">
       {/* Хэдер */}
       <header className="header">
-        <img src="./src/assets/images/CIMO_logo.svg" class="logo" alt="" />
+        <img src="./src/assets/images/CIMO_logo.svg" className="logo" alt="" />
         <div className="header__profile">
           <div className="profile-menu-container">
             {isProfileMenuOpen && (
@@ -23,10 +52,7 @@ const ModeSelection = () => {
                 <li><Link to="/">Выход</Link></li>
               </ul>
             )}
-            <div 
-              className="profile-icon"
-              onClick={toggleProfileMenu}
-            >
+            <div className="profile-icon" onClick={toggleProfileMenu}>
               <img 
                 src="src/assets/images/person-square.svg" 
                 alt="Профиль" 
@@ -51,7 +77,9 @@ const ModeSelection = () => {
             <div className="mode-card__image">
               <img src="src/assets/images/mode1.png" alt="" />
             </div>
-            <a href="/singleSession" className="mode-card__button">Начать одиночную сессию</a>
+            <button onClick={handleStartSingle} className="mode-card__button">
+              Начать одиночную сессию
+            </button>
           </div>
 
           {/* Парный режим */}
@@ -63,10 +91,45 @@ const ModeSelection = () => {
             <div className="mode-card__image">
               <img src="src/assets/images/mode2.png" alt="" />
             </div>
-            <a href="" className="mode-card__button">Начать парную сессию</a>
+            <button onClick={handleStartPair} className="mode-card__button">
+              Начать парную сессию
+            </button>
           </div>
         </div>
       </main>
+
+      {/* Модалка: одиночная сессия */}
+      {showSingleModal && (
+        <div className="modal">
+          <div className="modal__content">
+            <h3>Начать подбор фильмов?</h3>
+            <div className="modal__buttons">
+              <button className="modal__buttons-cancel" onClick={() => setShowSingleModal(false)}>Отмена</button>
+              <button className="modal__buttons-start" onClick={confirmSingle}>Начать</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Модалка: парная сессия */}
+      {showPairModal && (
+        <div className="modal">
+          <div className="modal__content">
+            <h3>Пригласите партнёра</h3>
+            <p>Отправьте ссылку для подключения:</p>
+            <div className="invite-link-container">
+              <input type="text" value={inviteLink} readOnly />
+              <button className="copy" onClick={copyInviteLink}>
+                <img src={copyIconUrl} alt="" />
+              </button>
+            </div>
+            <div className="modal__buttons">
+              <button className="modal__buttons-cancel" onClick={() => setShowPairModal(false)}>Отмена</button>
+              <button className="modal__buttons-start" onClick={confirmPair}>Начать</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Футер */}
       <footer className="footer">

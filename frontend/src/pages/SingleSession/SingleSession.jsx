@@ -141,7 +141,6 @@ const SingleSession = () => {
 
         {/* Session Controls */}
         <div className="session-controls">
-          <button className="secondary-btn">Покинуть сессию</button>
           <button className="secondary-btn">Завершить подбор</button>
         </div>
 
