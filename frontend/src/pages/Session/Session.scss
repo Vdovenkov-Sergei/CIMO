@@ -222,7 +222,9 @@
       display: flex;
       gap: 15px;
       overflow-x: auto;
-      padding: 10px 0;
+      padding: 10px;
+      scrollbar-width: 10px;
+      scrollbar-color: $link-color transparent;
       
       .liked-movie {
         flex: 0 0 120px;
@@ -346,19 +348,52 @@
   .main {
     padding: 20px;
   }
+}
+
+// Адаптивность
+@media (max-width: 600px) {
+  .session-container {
+    .header {
+      height: auto;
   
-  .movie-detail {
-    .detail-content {
-      grid-template-columns: 1fr;
+      .logo {
+        width: 120px;
+      }
+    }
+    
+  
+    .movie-detail {
+      .detail-content {
+        grid-template-columns: 1fr;
       
-      .detail-description {
-        grid-column: span 1;
+        .detail-description {
+          grid-column: span 1;
+        }
+      }
+    }
+
+    .movies-section__title {
+      text-align: center;
+    }
+    
+    .profile-menu__list {
+      flex-direction: column;
+      background-color: #18181B;
+      padding: 12px;
+      transform: translateY(20%) translateX(38%);
+    }
+
+    .footer {
+      padding: 20px;
+
+      .footer-title {
+        font-size: 16px;
+      }
+
+      .footer-email {
+        font-size: 14px;
       }
     }
   }
   
-  .session-controls {
-    flex-direction: column;
-    align-items: center;
-  }
 }

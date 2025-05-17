@@ -109,6 +109,7 @@ $primary-font: 'Inter', sans-serif;
     justify-content: center;
     gap: 10px;
     margin-bottom: 30px;
+    text-align: center;
   
     &__link {
       color: $link-color;
@@ -247,4 +248,42 @@ $primary-font: 'Inter', sans-serif;
   }
 }
 
+}
+
+// Адаптивность
+@media (max-width: 600px) {
+  .change-nickname-page {
+    .header {
+      height: auto;
+  
+      .logo {
+        width: 120px;
+      }
+    }
+  
+    .profile-menu__list {
+      flex-direction: column;
+      background-color: #18181B;
+      padding: 12px;
+      transform: translateY(20%) translateX(38%);
+    }
+  
+    .change-nickname {
+      padding: 20px;
+      min-width: 400px;
+    }
+
+    .footer {
+      padding: 20px;
+
+      .footer-title {
+        font-size: 16px;
+      }
+
+      .footer-email {
+        font-size: 14px;
+      }
+    }
+  }
+  
 }

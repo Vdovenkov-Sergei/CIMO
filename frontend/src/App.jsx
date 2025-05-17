@@ -12,7 +12,7 @@ const CreatePassword = lazy(() => import('@/pages/CreatePassword/CreatePassword'
 const Profile = lazy(() => import('@/pages/Profile/Profile'));
 const MyMovies = lazy(() => import('@/pages/MyMovies/MyMovies'));
 const ChangeNickname = lazy(() => import('@/pages/ChangeNickname/ChangeNickname'));
-const SingleSession = lazy(() => import('@/pages/SingleSession/SingleSession'));
+const Session = lazy(() => import('@/pages/Session/Session'));
 const SessionMovies = lazy(() => import('@/pages/SessionMovies/SessionMovies'));
 
 function App() {
@@ -30,7 +30,7 @@ function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/myMovies" element={<MyMovies />} />
             <Route path="/changeNickname" element={<ChangeNickname />} />
-            <Route path="/singleSession" element={<SingleSession />} />
+            <Route path="/session" element={<Session />} />
             <Route path="/sessionMovies" element={<SessionMovies />} />
           </Routes>
       </main>

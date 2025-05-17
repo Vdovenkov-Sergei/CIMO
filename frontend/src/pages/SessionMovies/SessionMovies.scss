@@ -7,7 +7,7 @@ $text-color: #FFFFFF;
 $link-color: #A1ACFF;
 $primary-font: 'Inter', sans-serif;
 
-.my-movies-page {
+.session-movies-page {
   min-height: 100vh;
   color: $text-color;
   font-family: $primary-font;
@@ -248,16 +248,38 @@ $primary-font: 'Inter', sans-serif;
 
 
 // Адаптивность
-@media (max-width: 768px) {
-  .movies-main {
-    padding: 20px;
-  }
-
-  .movie-card {
-    flex: 0 0 160px;
+@media (max-width: 600px) {
+  .session-movies-page {
+    .header {
+      height: auto;
+  
+      .logo {
+        width: 120px;
+      }
+    }
     
-    &__poster {
-      height: 240px;
+    .movies-section__title {
+      text-align: center;
+    }
+    
+    .profile-menu__list {
+      flex-direction: column;
+      background-color: #18181B;
+      padding: 12px;
+      transform: translateY(20%) translateX(38%);
+    }
+
+    .footer {
+      padding: 20px;
+
+      .footer-title {
+        font-size: 16px;
+      }
+
+      .footer-email {
+        font-size: 14px;
+      }
     }
   }
+  
 }

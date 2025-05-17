@@ -206,22 +206,6 @@ $primary-font: 'Inter', sans-serif;
   }
 }
 
-// Адаптивность
-@media (max-width: 768px) {
-  .modes-container {
-    flex-direction: column;
-  }
-
-  .main-title {
-    font-size: 24px;
-    margin-bottom: 30px;
-  }
-
-  .header {
-    padding: 15px 20px;
-  }
-}
-
 .modal {
   position: fixed;
   top: 0;
@@ -332,5 +316,120 @@ $primary-font: 'Inter', sans-serif;
   &:focus {
     outline: none;
     border-color: #A1ACFF;
+  }
+}
+
+// Адаптив для планшетов
+@media (max-width: 1024px) {
+  .mode-selection-page {
+    .modes-container {
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding: 0 20px;
+    }
+
+    .mode-card {
+      min-width: 400px;
+      &__image img {
+        width: 100%;
+        max-width: 100%;
+      }
+
+      &__button {
+        width: 400px;
+      }
+    }
+
+    .main-content-modes {
+      padding: 30px 20px;
+    }
+  }
+}
+
+// Адаптив для мобильных
+@media (max-width: 600px) {
+  .mode-selection-page {
+    .header {
+      height: auto;
+
+      .logo {
+        width: 120px;
+      }
+    }
+
+    .profile-menu__list {
+      flex-direction: column;
+      background-color: #18181B;
+      padding: 12px;
+      transform: translateY(20%) translateX(38%);
+    }
+
+    .main-title {
+      font-size: 20px;
+    }
+
+    .mode-card {
+      min-width: 300px;
+      padding: 20px;
+
+      &__image img {
+        width: 200px;
+      }
+
+      &__title {
+        font-size: 20px;
+      }
+
+      &__description {
+        font-size: 14px;
+      }
+
+      &__button {
+        font-size: 14px;
+        padding: 10px 16px;
+        width: 300px;
+      }
+    }
+
+    .footer {
+      padding: 20px;
+
+      .footer-title {
+        font-size: 16px;
+      }
+
+      .footer-email {
+        font-size: 14px;
+      }
+    }
+  }
+
+  .modal__content {
+    padding: 16px;
+    width: 95%;
+  }
+
+  .modal__buttons {
+    flex-direction: column;
+    gap: 10px;
+
+    &-cancel, &-start {
+      width: 100%;
+    }
+  }
+
+  .invite-link-container {
+    flex-direction: column;
+    gap: 8px;
+
+    input {
+      width: 100%;
+    }
+
+    .copy {
+      width: 100%;
+    }
   }
 }

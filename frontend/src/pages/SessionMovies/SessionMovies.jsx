@@ -35,7 +35,7 @@ const SessionMovies = () => {
   };
 
   return (
-    <div className="my-movies-page">
+    <div className="session-movies-page">
       <header className="header">
         <img src="./src/assets/images/CIMO_logo.svg" class="logo" alt="" />
         <div className="header__profile">

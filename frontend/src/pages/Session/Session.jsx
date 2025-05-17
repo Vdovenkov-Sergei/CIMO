@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import './SingleSession.scss';
+import './Session.scss';
 import xIconUrl from '../../../src/assets/images/x-circle.svg'
 import checkIconUrl from '../../../src/assets/images/check-circle.svg'
 
-const SingleSession = () => {
+const Session = () => {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [likedMovies, setLikedMovies] = useState([]);
@@ -218,4 +218,4 @@ const SingleSession = () => {
   );
 };
 
-export default SingleSession;
+export default Session;
