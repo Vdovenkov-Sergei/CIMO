@@ -124,7 +124,7 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env*
+.env
 .venv
 env/
 data
@@ -193,10 +193,10 @@ yarn-debug.log*
 yarn-error.log*
 
 # Environment variables
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env
+.env.development
+.env.test
+.env.production
 
 # TypeScript type declarations
 *.d.ts

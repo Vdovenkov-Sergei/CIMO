@@ -11,7 +11,7 @@ logHandler = logging.StreamHandler()
 
 
 class CustomJsonFormatter(jsonlogger.JsonFormatter):
-    def add_fields(self, log_record, record, message_dict):
+    def add_fields(self, log_record, record, message_dict) -> None:
         super(CustomJsonFormatter, self).add_fields(log_record, record, message_dict)
         if not log_record.get("timestamp"):
             log_record["timestamp"] = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%S.%fZ")

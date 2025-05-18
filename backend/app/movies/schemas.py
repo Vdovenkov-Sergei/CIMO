@@ -2,7 +2,7 @@ from typing import Optional, Self
 
 from pydantic import model_validator
 
-from app.config import settings
+from app.constants import URLs
 from app.movies.models import MovieType
 from app.schemas.base import BaseSchema
 
@@ -16,7 +16,7 @@ class SMovieRead(BaseSchema):
     @model_validator(mode="after")
     def postprocess_poster_url(self) -> Self:
         if not self.poster_url.startswith("http"):
-            self.poster_url = f"{settings.BASE_POSTER_URL}{self.poster_url}"
+            self.poster_url = f"{URLs.BASE_POSTER_URL}{self.poster_url}"
         return self
 
 

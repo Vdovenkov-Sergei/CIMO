@@ -3,6 +3,7 @@ from typing import Optional, Sequence
 
 from sqlalchemy import func, select
 
+from app.constants import General
 from app.dao.decorators import (
     log_db_action,
     log_db_add,
@@ -19,7 +20,6 @@ from app.session_movies.models import SessionMovie
 
 class SessionMovieDAO(MovieBaseDAO):
     model = SessionMovie
-    PAIR = 2
 
     @classmethod
     @log_db_action("Check movie match")
@@ -31,7 +31,7 @@ class SessionMovieDAO(MovieBaseDAO):
         async with async_session_maker() as session:
             result = await session.execute(query)
             user_count = result.scalar() or 0
-            return user_count == cls.PAIR
+            return user_count == General.PAIR
 
     @classmethod
     @log_db_update("Update movie match")

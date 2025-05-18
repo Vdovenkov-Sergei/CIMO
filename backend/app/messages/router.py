@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 
 from app.chats.dependencies import get_existing_chat
 from app.chats.models import Chat
-from app.config import settings
+from app.constants import Pagination
 from app.logger import logger
 from app.messages.dao import MessageDAO
 from app.messages.models import SenderType
@@ -14,7 +14,7 @@ router = APIRouter(prefix="/chats/message", tags=["Chats"])
 async def bot_generate_response(_: str) -> str:
     # TODO Здесь будет логика работы бота
     msg = "Я не знаю, что ответить =("
-    logger.debug("Bot generated response", extra={"message": msg})
+    logger.debug("Bot generated response", extra={"msg_content": msg})
     return msg
 
 
@@ -30,8 +30,8 @@ async def create_message(data: SMessageCreate, chat: Chat = Depends(get_existing
 
 @router.get("/", response_model=list[SMessageRead])
 async def get_messages(
-    limit: int = settings.DEFAULT_PAG_LIMIT,
-    offset: int = settings.DEFAULT_PAG_OFFSET,
+    limit: int = Pagination.PAG_LIMIT,
+    offset: int = Pagination.PAG_OFFSET,
     chat: Chat = Depends(get_existing_chat),
 ) -> list[SMessageRead]:
     messages = await MessageDAO.get_messages(chat_id=chat.id, limit=limit, offset=offset)

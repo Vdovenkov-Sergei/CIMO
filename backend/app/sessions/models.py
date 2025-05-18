@@ -23,11 +23,12 @@ class Session(Base):
     id: Mapped[uuid.UUID] = mapped_column(server_default=text("gen_random_uuid()"))
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE"))
     created_at: Mapped[datetime] = mapped_column(nullable=False, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(nullable=False, server_default=func.now(), onupdate=func.now())
     started_at: Mapped[datetime] = mapped_column(nullable=True)
     ended_at: Mapped[datetime] = mapped_column(nullable=True)
     is_pair: Mapped[bool] = mapped_column(nullable=False, server_default="false")
     status: Mapped[SessionStatus] = mapped_column(
-        Enum(SessionStatus), server_default=SessionStatus.PENDING.value, nullable=False
+        Enum(SessionStatus), server_default=SessionStatus.PENDING, nullable=False
     )
 
     __table_args__ = (PrimaryKeyConstraint("id", "user_id", name="sessions_pkey"),)

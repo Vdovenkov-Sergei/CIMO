@@ -4,9 +4,11 @@ from typing import Any, Optional
 
 from fastapi import APIRouter, Depends
 
+from app.constants import General
 from app.exceptions import (
     MaxParticipantsInSessionException,
     ParticipantsNotEnoughException,
+    SessionAlreadyStartedException,
     SessionNotFoundException,
     UserAlreadyInSessionException,
 )
@@ -18,7 +20,6 @@ from app.sessions.schemas import SSessionCreate, SSessionRead, SSessionUpdate
 from app.users.dependencies import get_current_user
 from app.users.models import User
 
-PAIR, SOLO = 2, 1
 router = APIRouter(prefix="/sessions", tags=["Sessions"])
 
 
@@ -54,7 +55,12 @@ async def join_session(session_id: uuid.UUID, user: User = Depends(get_current_u
     participants = await SessionDAO.get_participants(session_id=session_id)
     if not participants:
         raise SessionNotFoundException(session_id=str(session_id))
-    max_participants = PAIR if next(iter(participants)).is_pair else SOLO
+
+    session_record = next(iter(participants))
+    if session_record.started_at is not None:
+        logger.warning("Session already started.", extra={"session_id": session_id})
+        raise SessionAlreadyStartedException(session_id=str(session_id))
+    max_participants = General.PAIR if session_record.is_pair else General.SOLO
     if len(participants) >= max_participants:
         logger.warning("Session is full.", extra={"session_id": session_id, "count": len(participants)})
         raise MaxParticipantsInSessionException
@@ -68,7 +74,7 @@ async def check_ready_participants(session_id: uuid.UUID) -> bool:
     participants = await SessionDAO.get_participants(session_id=session_id)
     if not participants:
         raise SessionNotFoundException(session_id=str(session_id))
-    max_participants = PAIR if next(iter(participants)).is_pair else SOLO
+    max_participants = General.PAIR if next(iter(participants)).is_pair else General.SOLO
     if len(participants) < max_participants:
         logger.warning("Not enough participants.", extra={"session_id": session_id, "count": len(participants)})
         raise ParticipantsNotEnoughException
@@ -85,7 +91,7 @@ async def check_ready_participants(session_id: uuid.UUID) -> bool:
 async def change_session_status(
     data: SSessionUpdate, session: Session = Depends(get_current_session)
 ) -> dict[str, str]:
-    new_status = SessionStatus(data.status)
+    new_status = data.status
     update_fields: dict[str, Any] = {"status": new_status}
 
     if (session.status, new_status) == (SessionStatus.PREPARED, SessionStatus.ACTIVE):

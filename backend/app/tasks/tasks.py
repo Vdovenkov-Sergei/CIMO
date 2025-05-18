@@ -1,3 +1,5 @@
+# ruff: noqa: F403
+
 import asyncio
 import smtplib
 from email.message import EmailMessage
@@ -7,9 +9,9 @@ from typing import Any, Callable
 from celery import shared_task
 from pydantic import EmailStr
 
+from app.chats.models import *
 from app.config import settings
 from app.logger import logger
-from app.models import *
 from app.sessions.dao import SessionDAO
 from app.tasks.celery import celery_app
 from app.tasks.email_templates import create_reset_password_template, create_verification_template
@@ -47,13 +49,13 @@ def email_sender(func: Callable[..., EmailMessage]) -> Callable[..., None]:
 def log_task(func: Callable[..., None]) -> Callable[..., None]:
     @wraps(func)
     def wrapper(*args: tuple[Any], **kwargs: dict[str, Any]) -> None:
-        logger.info(f"Task started.", extra={"task_name": func.__name__})
+        logger.info("Task started.", extra={"task_name": func.__name__})
         try:
             result = func(*args, **kwargs)
-            logger.info(f"Task completed.", extra={"task_name": func.__name__})
+            logger.info("Task completed.", extra={"task_name": func.__name__})
             return result
         except Exception as err:
-            logger.error(f"Error: task failed.", extra={"task_name": func.__name__, "error": str(err)}, exc_info=True)
+            logger.error("Error: task failed.", extra={"task_name": func.__name__, "error": str(err)}, exc_info=True)
 
     return wrapper
 

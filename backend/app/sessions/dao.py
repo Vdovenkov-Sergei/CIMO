@@ -69,16 +69,15 @@ class SessionDAO(BaseDAO):
         return await cls.delete_record(
             filters=[
                 or_(
-                    # Удаляем AFK сессии старше 3 дней по started_at
+                    # Удаляем AFK сессии старше 3 дней по updated_at
                     and_(
                         cls.model.status == SessionStatus.AFK,
-                        cls.model.started_at.is_not(None),
-                        cls.model.started_at < afk_cutoff,
+                        cls.model.updated_at < afk_cutoff,
                     ),
-                    # Удаляем PENDING/PREPARED сессии старше 1 дня по created_at
+                    # Удаляем PENDING/PREPARED сессии старше 1 дня по updated_at
                     and_(
                         cls.model.status.in_([SessionStatus.PENDING, SessionStatus.PREPARED]),
-                        cls.model.created_at < pending_prepared_cutoff,
+                        cls.model.updated_at < pending_prepared_cutoff,
                     ),
                 )
             ]

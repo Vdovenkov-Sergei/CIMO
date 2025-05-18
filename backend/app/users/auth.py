@@ -4,6 +4,7 @@ from typing import Any, Optional
 from jose import ExpiredSignatureError, JWTError, jwt
 
 from app.config import settings
+from app.constants import RedisKeys, Verification
 from app.database import redis_client
 from app.exceptions import (
     IncorrectLoginOrPasswordException,
@@ -19,7 +20,7 @@ from app.logger import logger
 from app.users.dao import UserDAO
 from app.users.models import User
 from app.users.schemas import SUserVerification
-from app.users.utils import ATTEMPTS_ENTER_KEY, CODE_VERIFY_KEY, MAX_ATTEMPTS_ENTER, Hashing
+from app.users.utils import Hashing
 
 
 def create_jwt_token(data: dict[str, Any], expires_delta: timedelta) -> str:
@@ -73,14 +74,15 @@ async def authenticate_superuser(login: str, password: str) -> User:
 
 async def check_verification_code(user_data: SUserVerification) -> None:
     email, code = user_data.email, user_data.code
-    attempts_key, code_key = ATTEMPTS_ENTER_KEY.format(email=email), CODE_VERIFY_KEY.format(email=email)
+    attempts_key = RedisKeys.ATTEMPTS_ENTER_KEY.format(email=email)
+    code_key = RedisKeys.CODE_VERIFY_KEY.format(email=email)
 
     attempts = await redis_client.get(attempts_key)
     stored_code = await redis_client.get(code_key)
     if not stored_code:
         logger.warning("Verification code not found.", extra={"email": email})
         raise VerificationCodeExpiredException
-    if attempts and int(attempts) >= MAX_ATTEMPTS_ENTER:
+    if attempts and int(attempts) >= Verification.MAX_ATTEMPTS_ENTER:
         await redis_client.delete(code_key)
         await redis_client.delete(attempts_key)
         logger.warning("Max attempts to enter verification code exceeded.", extra={"email": email})

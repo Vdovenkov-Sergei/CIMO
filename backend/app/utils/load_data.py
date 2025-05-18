@@ -5,9 +5,11 @@ from app.logger import logger
 from app.movie_roles.models import MovieRole
 from app.movies.models import Movie
 from app.people.models import Person
+from app.users.models import User
 
 
-def load_data(path_to_file, table_name):
+# Optional
+def load_data(path_to_file: str, table_name: str) -> None:
     try:
         logger.info("Loading data into table.", extra={"table_name": table_name})
         df = pd.read_pickle(path_to_file)
@@ -25,3 +27,4 @@ def load_data(path_to_file, table_name):
 load_data(f"/app/data/{Movie.__tablename__}.pkl", Movie.__tablename__)
 load_data(f"/app/data/{Person.__tablename__}.pkl", Person.__tablename__)
 load_data(f"/app/data/{MovieRole.__tablename__}.pkl", MovieRole.__tablename__)
+load_data(f"/app/data/{User.__tablename__}.pkl", User.__tablename__)

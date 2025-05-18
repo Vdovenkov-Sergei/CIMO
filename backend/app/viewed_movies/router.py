@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 
-from app.config import settings
+from app.constants import Pagination
 from app.users.dependencies import get_current_user
 from app.users.models import User
 from app.viewed_movies.dao import ViewedMovieDAO
@@ -22,8 +22,8 @@ async def add_to_viewed_list(data: SViewedMovieCreate, user: User = Depends(get_
 
 @router.get("/", response_model=list[SViewedMovieRead])
 async def get_viewed_list(
-    limit: int = settings.DEFAULT_PAG_LIMIT,
-    offset: int = settings.DEFAULT_PAG_OFFSET,
+    limit: int = Pagination.PAG_LIMIT,
+    offset: int = Pagination.PAG_OFFSET,
     order_review: bool = False,
     user: User = Depends(get_current_user),
 ) -> list[SViewedMovieRead]:

@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 
-from app.config import settings
+from app.constants import Pagination
 from app.exceptions import InvalidSessionStatusException
 from app.logger import logger
 from app.movies.dao import MovieDAO
@@ -84,8 +84,8 @@ async def swipe_session_movie(
 
 @router.get("/", response_model=list[SSessionMovieRead])
 async def get_session_list(
-    limit: int = settings.DEFAULT_PAG_LIMIT,
-    offset: int = settings.DEFAULT_PAG_OFFSET,
+    limit: int = Pagination.PAG_LIMIT,
+    offset: int = Pagination.PAG_OFFSET,
     session: Session = Depends(get_current_session),
 ) -> list[SSessionMovieRead]:
     if session.status not in (SessionStatus.REVIEW, SessionStatus.ACTIVE):

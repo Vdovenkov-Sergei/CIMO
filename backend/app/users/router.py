@@ -5,6 +5,7 @@ from fastapi import APIRouter, Cookie, Depends, Response
 from pydantic import EmailStr
 
 from app.config import settings
+from app.constants import RedisKeys, Tokens, Verification
 from app.database import redis_client
 from app.exceptions import (
     EmailAlreadyExistsException,
@@ -30,22 +31,7 @@ from app.users.schemas import (
     SUserVerification,
     SUserVerifyPassword,
 )
-from app.users.utils import (
-    ACCESS_TOKEN,
-    ATTEMPTS_ENTER_KEY,
-    ATTEMPTS_SEND_KEY,
-    CODE_VERIFY_KEY,
-    MAX_ATTEMPTS_SEND,
-    MAX_TIME_PENDING_VERIFICATION,
-    REFRESH_TOKEN,
-    RESET_PASSWORD_TIME,
-    RESET_TOKEN_KEY,
-    RESET_TOKEN_LENGTH,
-    TIME_PENDING_VERIFICATION,
-    USER_EMAIL_KEY,
-    Hashing,
-    send_verification_code,
-)
+from app.users.utils import Hashing, send_verification_code
 
 router_auth = APIRouter(prefix="/auth", tags=["Authentication"])
 router_user = APIRouter(prefix="/users", tags=["User"])
@@ -54,16 +40,17 @@ router_user = APIRouter(prefix="/users", tags=["User"])
 @router_auth.post("/register/email", response_model=dict[str, str])
 async def register_email(user_data: SUserRegisterEmail) -> dict[str, str]:
     email = user_data.email
-    email_key, attempts_key = USER_EMAIL_KEY.format(email=email), ATTEMPTS_SEND_KEY.format(email=email)
+    email_key = RedisKeys.USER_EMAIL_KEY.format(email=email)
+    attempts_key = RedisKeys.ATTEMPTS_SEND_KEY.format(email=email)
     existing_user = await UserDAO.find_by_email(email=email) or await redis_client.get(email_key)
     if existing_user:
         logger.warning("Email already exists.", extra={"email": email})
         raise EmailAlreadyExistsException(email=email)
 
     hashed_password = Hashing.get_password_hash(user_data.password)
-    await redis_client.setex(email_key, timedelta(seconds=MAX_TIME_PENDING_VERIFICATION), hashed_password)
+    await redis_client.setex(email_key, timedelta(seconds=Verification.MAX_TIME_PENDING), hashed_password)
     logger.debug("User email & password stored in Redis.", extra={"email": email})
-    await redis_client.setex(attempts_key, timedelta(seconds=MAX_TIME_PENDING_VERIFICATION), 0)
+    await redis_client.setex(attempts_key, timedelta(seconds=Verification.MAX_TIME_PENDING), 0)
     logger.debug("Attempts to send verification code stored in Redis.", extra={"attempts_key": attempts_key})
     await send_verification_code(email)
 
@@ -72,20 +59,21 @@ async def register_email(user_data: SUserRegisterEmail) -> dict[str, str]:
 
 @router_auth.post("/register/resend", response_model=dict[str, str])
 async def resend_verification_code(email: EmailStr) -> dict[str, str]:
-    attempts_key, email_key = ATTEMPTS_SEND_KEY.format(email=email), USER_EMAIL_KEY.format(email=email)
+    attempts_key = RedisKeys.ATTEMPTS_SEND_KEY.format(email=email)
+    email_key = RedisKeys.USER_EMAIL_KEY.format(email=email)
     attempts = await redis_client.get(attempts_key)
     hashed_password = await redis_client.get(email_key)
     if not hashed_password:
         logger.warning("Max time to verify email reached.", extra={"email": email})
         raise MaxTimeVerifyEmailException
-    if attempts and int(attempts) >= MAX_ATTEMPTS_SEND:
+    if attempts and int(attempts) >= Verification.MAX_ATTEMPTS_SEND:
         logger.warning("Max attempts to send verification code reached.", extra={"email": email})
         await redis_client.delete(email_key)
         raise MaxAttemptsSendCodeException
 
     ttl_user_email = await redis_client.ttl(email_key)
     ttl_attempts = await redis_client.ttl(attempts_key)
-    new_ttl = max(ttl_user_email, ttl_attempts, TIME_PENDING_VERIFICATION)
+    new_ttl = max(ttl_user_email, ttl_attempts, Verification.TIME_PENDING)
     await redis_client.setex(email_key, timedelta(seconds=new_ttl), hashed_password)
     await redis_client.setex(attempts_key, timedelta(seconds=new_ttl), int(attempts) + 1)
     logger.debug(
@@ -100,13 +88,18 @@ async def resend_verification_code(email: EmailStr) -> dict[str, str]:
 @router_auth.post("/register/verify", response_model=dict[str, str | int])
 async def verify_email(user_data: SUserVerification) -> dict[str, str | int]:
     email = user_data.email
-    hashed_password = await redis_client.get(USER_EMAIL_KEY.format(email=email))
+    hashed_password = await redis_client.get(RedisKeys.USER_EMAIL_KEY.format(email=email))
     if not hashed_password:
         logger.warning("Max time to verify email reached.", extra={"email": email})
         raise MaxTimeVerifyEmailException
     await check_verification_code(user_data)
 
-    for key in [USER_EMAIL_KEY, CODE_VERIFY_KEY, ATTEMPTS_ENTER_KEY, ATTEMPTS_SEND_KEY]:
+    for key in [
+        RedisKeys.USER_EMAIL_KEY,
+        RedisKeys.CODE_VERIFY_KEY,
+        RedisKeys.ATTEMPTS_ENTER_KEY,
+        RedisKeys.ATTEMPTS_SEND_KEY,
+    ]:
         await redis_client.delete(key.format(email=email))
     logger.debug("Temporary Redis keys deleted after verification.", extra={"email": email})
 
@@ -140,10 +133,10 @@ async def forgot_password(user_data: SUserResetPassword) -> dict[str, str]:
     if not user:
         raise UserNotFoundException
 
-    reset_token = secrets.token_urlsafe(RESET_TOKEN_LENGTH)
+    reset_token = secrets.token_urlsafe(Verification.RESET_TOKEN_LENGTH)
     logger.debug("Reset token generated.")
-    reset_token_key = RESET_TOKEN_KEY.format(token=reset_token)
-    await redis_client.setex(reset_token_key, timedelta(seconds=RESET_PASSWORD_TIME), user.id)  # type: ignore
+    reset_token_key = RedisKeys.RESET_TOKEN_KEY.format(token=reset_token)
+    await redis_client.setex(reset_token_key, timedelta(seconds=Verification.RESET_PASSWORD_TIME), user.id)  # type: ignore
     logger.debug("Reset token stored in Redis.")
 
     reset_link = f"{settings.FRONTEND_URL}/resetPassword?token={reset_token}"
@@ -154,7 +147,7 @@ async def forgot_password(user_data: SUserResetPassword) -> dict[str, str]:
 
 @router_auth.post("/password/reset", response_model=dict[str, str])
 async def reset_password(user_data: SUserVerifyPassword) -> dict[str, str]:
-    reset_token_key = RESET_TOKEN_KEY.format(token=user_data.token)
+    reset_token_key = RedisKeys.RESET_TOKEN_KEY.format(token=user_data.token)
     user_id = await redis_client.get(reset_token_key)
     if not user_id:
         logger.warning("Reset token not found in Redis.", extra={"reset_token": user_data.token})
@@ -178,9 +171,9 @@ async def login_user(response: Response, user_data: SUserAuth) -> dict[str, str]
     user = await authenticate_user(user_data.login, user_data.password)
     access_token = create_jwt_token({"sub": str(user.id)}, timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
     refresh_token = create_jwt_token({"sub": str(user.id)}, timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS))
-    response.set_cookie(ACCESS_TOKEN, access_token, httponly=True)
+    response.set_cookie(Tokens.ACCESS_TOKEN, access_token, httponly=True)
     logger.debug("Access token set in cookie.")
-    response.set_cookie(REFRESH_TOKEN, refresh_token, httponly=True)
+    response.set_cookie(Tokens.REFRESH_TOKEN, refresh_token, httponly=True)
     logger.debug("Refresh token set in cookie.")
 
     logger.info("User logged in.", extra={"user_id": user.id})
@@ -194,7 +187,7 @@ async def refresh_token(
     payload = check_jwt_token(refresh_token)
     user_id = payload.get("sub")
     access_token = create_jwt_token({"sub": user_id}, timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
-    response.set_cookie(ACCESS_TOKEN, access_token, httponly=True)
+    response.set_cookie(Tokens.ACCESS_TOKEN, access_token, httponly=True)
     logger.debug("New access token set in cookie.", extra={"access_token": access_token})
 
     logger.info("Access token refreshed.", extra={"user_id": user_id})
@@ -203,9 +196,9 @@ async def refresh_token(
 
 @router_auth.post("/logout", response_model=dict[str, str])
 async def logout_user(response: Response) -> dict[str, str]:
-    response.delete_cookie(ACCESS_TOKEN)
+    response.delete_cookie(Tokens.ACCESS_TOKEN)
     logger.debug("Access token deleted from cookie.")
-    response.delete_cookie(REFRESH_TOKEN)
+    response.delete_cookie(Tokens.REFRESH_TOKEN)
     logger.debug("Refresh token deleted from cookie.")
 
     logger.info("User logged out.")

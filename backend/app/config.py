@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env.development")
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="allow")
 
     MODE: Literal["DEV", "TEST", "PROD"]
     LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
@@ -22,7 +22,7 @@ class Settings(BaseSettings):
 
     REDIS_HOST: str
     REDIS_PORT: int
-    CACHE_EXPIRE: int
+    CACHE_TTL: int
 
     SMTP_HOST: str
     SMTP_PORT: int
@@ -30,13 +30,8 @@ class Settings(BaseSettings):
     SMTP_PASS: str
 
     FRONTEND_URL: str
-    BASE_PHOTO_URL: str
-    BASE_POSTER_URL: str
 
     SENTRY_DSN: str
-
-    DEFAULT_PAG_LIMIT: int = 20
-    DEFAULT_PAG_OFFSET: int = 0
 
     @property
     def async_database_url(self) -> str:

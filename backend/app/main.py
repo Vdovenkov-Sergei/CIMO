@@ -1,9 +1,12 @@
+# type: ignore
+
 import logging
 import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import AsyncIterator
 
+import sentry_sdk
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -11,6 +14,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
+from sentry_sdk.integrations.fastapi import FastApiIntegration
+from sentry_sdk.integrations.logging import LoggingIntegration
 from sqladmin import Admin
 from sqlalchemy import select
 
@@ -41,10 +46,6 @@ from app.users.router import router_auth, router_user
 from app.viewed_movies.router import router as router_viewed_movies
 from app.watch_later_movies.router import router as router_watch_later_movies
 
-import sentry_sdk
-from sentry_sdk.integrations.logging import LoggingIntegration
-from sentry_sdk.integrations.fastapi import FastApiIntegration
-
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
@@ -64,7 +65,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 
     try:
         await redis_client.ping()
-        FastAPICache.init(RedisBackend(redis_client), prefix="cache", expire=settings.CACHE_EXPIRE)
+        FastAPICache.init(RedisBackend(redis_client), prefix="cache", expire=settings.CACHE_TTL)
         logger.info("Successfully connected to Redis and initialized cache.")
     except Exception as err:
         logger.critical(

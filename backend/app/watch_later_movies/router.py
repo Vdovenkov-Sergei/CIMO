@@ -1,12 +1,11 @@
 from fastapi import APIRouter, Depends
 
-from app.config import settings
+from app.constants import Pagination
+from app.logger import logger
 from app.users.dependencies import get_current_user
 from app.users.models import User
 from app.watch_later_movies.dao import WatchLaterMovieDAO
 from app.watch_later_movies.schemas import SWatchLaterMovieCreate, SWatchLaterMovieRead
-
-from app.logger import logger
 
 router = APIRouter(prefix="/movies/later", tags=["Watch Later Movies"])
 
@@ -28,8 +27,8 @@ async def add_to_watch_later_list(
 
 @router.get("/", response_model=list[SWatchLaterMovieRead])
 async def get_watch_later_list(
-    limit: int = settings.DEFAULT_PAG_LIMIT,
-    offset: int = settings.DEFAULT_PAG_OFFSET,
+    limit: int = Pagination.PAG_LIMIT,
+    offset: int = Pagination.PAG_OFFSET,
     user: User = Depends(get_current_user),
 ) -> list[SWatchLaterMovieRead]:
     movies = await WatchLaterMovieDAO.find_movies(user_id=user.id, limit=limit, offset=offset)

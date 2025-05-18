@@ -6,8 +6,6 @@ from app.users.auth import check_jwt_token
 from app.users.dao import UserDAO
 from app.users.models import User
 
-from app.logger import logger
-
 
 async def get_current_user(access_token: str = Cookie(include_in_schema=False, default=None)) -> User:
     payload = check_jwt_token(access_token)

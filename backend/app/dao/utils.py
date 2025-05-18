@@ -1,18 +1,19 @@
+from typing import Any
+
 from sqlalchemy.inspection import inspect
 
-EXCEPTIONS = ["hashed_password", "description", "content"]
+from app.constants import General
 
 
-def orm_to_dict(obj):
+def orm_to_dict(obj: Any) -> dict[str, Any]:
     try:
-        return {c.key: getattr(obj, c.key) for c in inspect(obj).mapper.column_attrs if c.key not in EXCEPTIONS}
+        return {c.key: getattr(obj, c.key) for c in inspect(obj).mapper.column_attrs if c.key not in General.EXCEPTIONS}
     except Exception:
         return {"repr": str(obj)}
 
 
-def to_gerund(verb):
-    vowels, l = "aeiou", len(verb)
-    mask_cvc = [False, True, False]
+def to_gerund(verb: str) -> str:
+    len_verb = len(verb)
 
     # Handle 'die' -> 'dying'
     if verb.endswith("ie"):
@@ -23,7 +24,9 @@ def to_gerund(verb):
         return verb[:-1] + "ing"
 
     # Handle 'run' -> 'running' + consonant-vowel-consonant (CVC) rule
-    elif (l == 3 or (l > 3 and [verb[-i - 1] in vowels for i in range(3)] == mask_cvc)) and verb[-1] not in "wxy":
+    elif verb[-1] not in "wxy" and (
+        len_verb == 3 or (len_verb > 3 and [verb[-i - 1] in General.VOWELS for i in range(3)] == General.CVC_MASK)
+    ):
         return verb + verb[-1] + "ing"
 
     return verb + "ing"
