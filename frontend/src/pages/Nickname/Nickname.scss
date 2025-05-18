@@ -116,7 +116,13 @@ $primary-font: 'Inter', sans-serif;
         border-color: #A1ACFF;
       }
     }
-    
+    &__buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      
+    }
     &__button {
       text-align: center;
       padding: 12px 24px;
@@ -131,6 +137,24 @@ $primary-font: 'Inter', sans-serif;
       
       &:hover {
         background-color: $button-hover-color;
+      }
+    }
+
+    .secondary-btn {
+      background-color: transparent;
+      color: $button-color;
+      border: 1px solid $button-color;
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      text-align: center;
+      
+      &:hover {
+        background-color: $secondary-button-hover;
       }
     }
   }
