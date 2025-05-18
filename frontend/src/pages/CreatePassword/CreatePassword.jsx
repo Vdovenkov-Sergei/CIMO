@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination } from 'swiper/modules';
@@ -11,6 +11,7 @@ import onboarding3 from '@/assets/images/onboarding3.png';
 import Footer from '../../components/Footer';
 import HeaderReg from '../../components/HeaderReg';
 import Onboarding from '../../components/Onboarding';
+import PasswordResetForm from '../../components/PasswordResetForm';
 
 const CreatePassword = () => {
   const onboardingImages = [
@@ -18,6 +19,32 @@ const CreatePassword = () => {
     { id: 2, src: onboarding2, alt: 'Демонстрация функционала 2' },
     { id: 3, src: onboarding3, alt: 'Демонстрация функционала 3' },
   ];
+
+  const [formData, setFormData] = useState({
+    password: '',
+    confirmPassword: ''
+  });
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    if (formData.password !== formData.confirmPassword) {
+      alert('Пароли не совпадают!');
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    // Здесь будет логика сохранения пароля
+    console.log('Новый пароль:', formData.password);
+    
+    // Имитация запроса
+    setTimeout(() => {
+      setIsLoading(false);
+      alert('Пароль успешно изменен!');
+    }, 1500);
+  };
 
   return (
     <div className="create-password-page">
@@ -30,29 +57,14 @@ const CreatePassword = () => {
           className="custom-onboarding"
         />
 
-        <section className="auth-form">
-          <h2 className="auth-form__title">Придумайте новый пароль</h2>
-          <p className="auth-form__subtitle">Пароль должен включать заглавные и строчные буквы и цифры</p>
-
-          <form className="form">
-            <div className="form__group">
-              <input 
-                type="password" 
-                placeholder="Пароль" 
-                className="form__input"
-              />
-            </div>
-            <div className="form__group">
-              <input 
-                type="password" 
-                placeholder="Пароль" 
-                className="form__input"
-              />
-            </div>
-
-            <button type="submit" className="form__button">Сохранить</button>
-          </form>
-        </section>
+        <PasswordResetForm
+          password={formData.password}
+          confirmPassword={formData.confirmPassword}
+          onPasswordChange={(e) => setFormData({...formData, password: e.target.value})}
+          onConfirmPasswordChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+          onSubmit={handleSubmit}
+          isLoading={isLoading}
+        />
       </main>
 
       <Footer />
