@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination } from 'swiper/modules';
 import './Signup.scss';
 
-// Импортируем изображения (предположим, они лежат в src/assets/images/onboarding/)
 import onboarding1 from '@/assets/images/onboarding1.png';
 import onboarding2 from '@/assets/images/onboarding2.png';
 import onboarding3 from '@/assets/images/onboarding3.png';
+import Onboarding from '../../components/Onboarding';
+import HeaderReg from '../../components/HeaderReg';
+import Footer from '../../components/Footer';
+import RegisterForm from '../../components/RegisterForm';
 
 const Signup = () => {
   const onboardingImages = [
@@ -16,77 +19,58 @@ const Signup = () => {
     { id: 3, src: onboarding3, alt: 'Демонстрация функционала 3' },
   ];
 
+  const [formData, setFormData] = useState({
+    login: '',
+    password: '',
+    confirmPassword: ''
+  });
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    // Здесь будет логика регистрации
+    console.log('Отправка данных:', formData);
+    
+    // Имитация запроса
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 2000);
+  };
+
   return (
     <div className="signup-page">
-      <header className="header">
-        <img src="./src/assets/images/CIMO_logo.svg" class="logo" alt="" />
-      </header>
+      <HeaderReg className="header" />
 
       <main className="main-content container">
-        <section className="onboarding">
-          <Swiper
-            modules={[Autoplay, Pagination]}
-            spaceBetween={30}
-            slidesPerView={1}
-            autoplay={{ delay: 3000 }}
-            pagination={{ clickable: true }}
-            loop={true}
-          >
-            {onboardingImages.map((image) => (
-              <SwiperSlide key={image.id}>
-                <img 
-                  src={image.src} 
-                  alt={image.alt}
-                  className="onboarding__image" 
-                />
-              </SwiperSlide>
-            ))}
-          </Swiper>
-        </section>
+        <Onboarding 
+          images={onboardingImages}
+          autoplayDelay={4000}
+          className="custom-onboarding"
+        />
 
-        <section className="auth-form">
-          <h2 className="auth-form__title">Добро пожаловать!</h2>
-          <p className="auth-form__subtitle">Пожалуйста, заполните форму</p>
-
-          <form className="form">
-            <div className="form__group">
-              <input 
-                type="text" 
-                placeholder="Логин" 
-                className="form__input"
-              />
-            </div>
-
-            <div className="form__group">
-              <input 
-                type="password" 
-                placeholder="Пароль" 
-                className="form__input"
-              />
-            </div>
-
-            <div className="form__group">
-              <input 
-                type="password" 
-                placeholder="Пароль" 
-                className="form__input"
-              />
-            </div>
-
-            <button type="submit" className="form__button">Далее</button>
-
-            <p className="form__footer-text">
-              Есть аккаунт?{' '}
-              <Link to="/" className="form__link">Войти</Link>
-            </p>
-          </form>
-        </section>
+        <RegisterForm
+          login={formData.login}
+          password={formData.password}
+          confirmPassword={formData.confirmPassword}
+          onLoginChange={(e) => handleChange({ ...e, target: { ...e.target, name: 'login' }})}
+          onPasswordChange={(e) => handleChange({ ...e, target: { ...e.target, name: 'password' }})}
+          onConfirmPasswordChange={(e) => handleChange({ ...e, target: { ...e.target, name: 'confirmPassword' }})}
+          onSubmit={handleSubmit}
+          isLoading={isLoading}
+        />
       </main>
 
-      <footer className="footer">
-        <h2 className="footer__title">Наши контакты</h2>
-        <a href="mailto:cinemood.corp@gmail.com" className="footer__email">cinemood.corp@gmail.com</a>
-      </footer>
+      <Footer />
     </div>
   );
 };
