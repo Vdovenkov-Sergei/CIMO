@@ -1,17 +1,13 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './MyMovies.scss';
-import eyeIconUrl from '../../../src/assets/images/eye.svg'
-import eyeSlashIconUrl from '../../../src/assets/images/eye-slash.svg'
-import trashIconUrl from '../../../src/assets/images/trash.svg'
+import Footer from '../../components/Footer';
+import Header from '../../components/Header';
+import WatchListScroll from '../../components/WatchListScroll';
+import WatchedScroll from '../../components/WatchedScroll';
 
 const MyMovies = () => {
-  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   
-  const toggleProfileMenu = () => {
-    setIsProfileMenuOpen(!isProfileMenuOpen);
-  };
-  // Пример данных фильмов
   const [movies, setMovies] = useState({
     watchlist: [
       { id: 1, title: 'Фильм1', poster: '/movies/poster1.jpg', watched: false },
@@ -58,30 +54,7 @@ const MyMovies = () => {
 
   return (
     <div className="my-movies-page">
-      <header className="header">
-        <img src="./src/assets/images/CIMO_logo.svg" class="logo" alt="" />
-        <div className="header__profile">
-          <div className="profile-menu-container">
-            {isProfileMenuOpen && (
-              <ul className="profile-menu__list">
-                <li><Link to="/profile">Профиль</Link></li>
-                <li><Link to="/myMovies">Мои фильмы</Link></li>
-                <li><Link to="/">Выход</Link></li>
-              </ul>
-            )}
-            <div 
-              className="profile-icon"
-              onClick={toggleProfileMenu}
-            >
-              <img 
-                src="src/assets/images/person-square.svg" 
-                alt="Профиль" 
-                className="profile-icon__image"
-              />
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Основная часть */}
       <main className="movies-main container">
@@ -96,65 +69,25 @@ const MyMovies = () => {
         {/* Секция отложенных фильмов */}
         <section className="movies-section">
           <h2 className="movies-section__title">Отложенные фильмы</h2>
-          <div className="movies-scroll">
-            {movies.watchlist.map(movie => (
-              <div key={movie.id} className="movie-card">
-                <img 
-                  src={movie.poster} 
-                  alt={movie.title} 
-                  className="movie-card__poster"
-                />
-                <h3 className="movie-card__title">{movie.title}</h3>
-                <div className="movie-card__buttons">
-                  <button 
-                    onClick={() => markAsWatched(movie.id)}
-                    className="movie-button movie-button--primary"
-                  >
-                    <img src={eyeIconUrl} alt="" />
-                  </button>
-                  <button 
-                    onClick={() => removeMovie(movie.id, false)}
-                    className="movie-button movie-button--danger"
-                  >
-                    <img src={trashIconUrl} alt="" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+          <WatchListScroll 
+            movies={movies.watchlist} 
+            onWatch={markAsWatched}
+            onDelete={(id) => removeMovie(id, false)}
+          />
         </section>
 
         {/* Секция просмотренных фильмов */}
         <section className="movies-section">
           <h2 className="movies-section__title">Просмотренные фильмы</h2>
-          <div className="movies-scroll">
-            {movies.watched.map(movie => (
-              <div key={movie.id} className="movie-card">
-                <img 
-                  src={movie.poster} 
-                  alt={movie.title} 
-                  className="movie-card__poster"
-                />
-                <h3 className="movie-card__title">{movie.title}</h3>
-                <div className="movie-card__buttons">
-                  <button 
-                    onClick={() => markAsUnwatched(movie.id)}
-                    className="movie-button movie-button--secondary"
-                  >
-                    <img src={eyeSlashIconUrl} alt="" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+          <WatchedScroll 
+            movies={movies.watched} 
+            onUnwatch={markAsUnwatched}
+          />
         </section>
       </main>
 
       {/* Футер (оставляем как было) */}
-      <footer className="footer">
-        <h2 className="footer__title">Наши контакты</h2>
-        <a href="mailto:cinemood.corp@gmail.com" className="footer__email">cinemood.corp@gmail.com</a>
-      </footer>
+      <Footer />
     </div>
   );
 };
