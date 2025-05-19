@@ -5,7 +5,7 @@ from app.dao.movie_base import MovieBaseDAO
 from app.watch_later_movies.models import WatchLaterMovie
 
 
-class WatchLaterMovieDAO(MovieBaseDAO):
+class WatchLaterMovieDAO(MovieBaseDAO[WatchLaterMovie]):
     model = WatchLaterMovie
 
     @classmethod

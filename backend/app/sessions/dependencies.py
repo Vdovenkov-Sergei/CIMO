@@ -11,4 +11,4 @@ async def get_current_session(user: User = Depends(get_current_user)) -> Session
     session = await SessionDAO.find_existing_session(user_id=user.id)
     if not session:
         raise UserNotInSessionException(user_id=user.id)
-    return session  # type: ignore
+    return session

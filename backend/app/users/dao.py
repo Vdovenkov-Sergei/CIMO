@@ -8,7 +8,7 @@ from app.dao.decorators import log_db_add, log_db_find_one, log_db_update
 from app.users.models import User
 
 
-class UserDAO(BaseDAO):
+class UserDAO(BaseDAO[User]):
     model = User
 
     @classmethod

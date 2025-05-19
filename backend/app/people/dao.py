@@ -5,7 +5,7 @@ from app.dao.decorators import log_db_find_one
 from app.people.models import Person
 
 
-class PersonDAO(BaseDAO):
+class PersonDAO(BaseDAO[Person]):
     model = Person
 
     @classmethod

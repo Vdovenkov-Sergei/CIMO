@@ -18,7 +18,7 @@ from app.database import async_session_maker
 from app.session_movies.models import SessionMovie
 
 
-class SessionMovieDAO(MovieBaseDAO):
+class SessionMovieDAO(MovieBaseDAO[SessionMovie]):
     model = SessionMovie
 
     @classmethod

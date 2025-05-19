@@ -17,7 +17,7 @@ from app.database import async_session_maker
 from app.sessions.models import Session, SessionStatus
 
 
-class SessionDAO(BaseDAO):
+class SessionDAO(BaseDAO[Session]):
     model = Session
 
     @classmethod

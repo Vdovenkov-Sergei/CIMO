@@ -7,7 +7,7 @@ from app.dao.base import BaseDAO
 from app.dao.decorators import log_db_add, log_db_find_one
 
 
-class ChatDAO(BaseDAO):
+class ChatDAO(BaseDAO[Chat]):
     model = Chat
 
     @classmethod

@@ -7,7 +7,7 @@ from app.dao.decorators import log_db_find_all
 from app.movie_roles.models import MovieRole
 
 
-class MovieRoleDAO(BaseDAO):
+class MovieRoleDAO(BaseDAO[MovieRole]):
     model = MovieRole
 
     @classmethod

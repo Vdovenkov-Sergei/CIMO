@@ -5,7 +5,7 @@ from app.dao.decorators import log_db_add, log_db_find_all
 from app.messages.models import Message, SenderType
 
 
-class MessageDAO(BaseDAO):
+class MessageDAO(BaseDAO[Message]):
     model = Message
 
     @classmethod

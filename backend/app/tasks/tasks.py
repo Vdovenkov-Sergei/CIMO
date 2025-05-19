@@ -4,7 +4,7 @@ import asyncio
 import smtplib
 from email.message import EmailMessage
 from functools import wraps
-from typing import Any, Callable
+from typing import Any, Callable, ParamSpec, TypeVar
 
 from celery import shared_task
 from pydantic import EmailStr
@@ -27,9 +27,13 @@ def run_async_safely(coro: Any) -> Any:
         return asyncio.run(coro)
 
 
-def email_sender(func: Callable[..., EmailMessage]) -> Callable[..., None]:
+P = ParamSpec("P")
+R = TypeVar("R")
+
+
+def email_sender(func: Callable[P, EmailMessage]) -> Callable[P, EmailMessage]:
     @wraps(func)
-    def wrapper(*args: tuple[Any], **kwargs: dict[str, Any]) -> None:
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> EmailMessage:
         msg_content = func(*args, **kwargs)
         try:
             with smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT) as server:
@@ -46,9 +50,9 @@ def email_sender(func: Callable[..., EmailMessage]) -> Callable[..., None]:
     return wrapper
 
 
-def log_task(func: Callable[..., None]) -> Callable[..., None]:
+def log_task(func: Callable[P, R]) -> Callable[P, R]:
     @wraps(func)
-    def wrapper(*args: tuple[Any], **kwargs: dict[str, Any]) -> None:
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
         logger.info("Task started.", extra={"task_name": func.__name__})
         try:
             result = func(*args, **kwargs)
@@ -56,6 +60,7 @@ def log_task(func: Callable[..., None]) -> Callable[..., None]:
             return result
         except Exception as err:
             logger.error("Error: task failed.", extra={"task_name": func.__name__, "error": str(err)}, exc_info=True)
+            raise
 
     return wrapper
 
@@ -78,12 +83,14 @@ def send_email_with_reset_link(email_to: EmailStr, reset_link: str) -> EmailMess
 @log_task
 def clean_completed_sessions() -> None:
     run_async_safely(_clean_completed_sessions())
+    return None
 
 
 @shared_task  # type: ignore
 @log_task
 def clean_old_sessions() -> None:
     run_async_safely(_clean_old_sessions())
+    return None
 
 
 async def _clean_completed_sessions() -> None:

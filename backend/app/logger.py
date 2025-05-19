@@ -1,7 +1,8 @@
 import logging
 from datetime import UTC, datetime
+from typing import Any
 
-from pythonjsonlogger import jsonlogger
+from pythonjsonlogger.jsonlogger import JsonFormatter  # type: ignore
 
 from app.config import settings
 
@@ -10,8 +11,8 @@ logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
 logHandler = logging.StreamHandler()
 
 
-class CustomJsonFormatter(jsonlogger.JsonFormatter):
-    def add_fields(self, log_record, record, message_dict) -> None:
+class CustomJsonFormatter(JsonFormatter):
+    def add_fields(self, log_record: dict[str, Any], record: logging.LogRecord, message_dict: dict[str, Any]) -> None:
         super(CustomJsonFormatter, self).add_fields(log_record, record, message_dict)
         if not log_record.get("timestamp"):
             log_record["timestamp"] = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%S.%fZ")

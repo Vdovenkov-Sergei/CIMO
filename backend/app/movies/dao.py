@@ -5,7 +5,7 @@ from app.dao.decorators import log_db_find_one
 from app.movies.models import Movie
 
 
-class MovieDAO(BaseDAO):
+class MovieDAO(BaseDAO[Movie]):
     model = Movie
 
     @classmethod
