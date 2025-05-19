@@ -1,4 +1,4 @@
-###VS code###
+### VS code ###
 .vscode
 
 ### Python ###
@@ -127,6 +127,7 @@ celerybeat.pid
 .env
 .venv
 env/
+data
 venv/
 ENV/
 env.bak/
@@ -192,10 +193,10 @@ yarn-debug.log*
 yarn-error.log*
 
 # Environment variables
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env
+.env.development
+.env.test
+.env.production
 
 # TypeScript type declarations
 *.d.ts
@@ -209,10 +210,6 @@ yarn-error.log*
 
 # Storybook
 storybook-static/
-
-# Vite specific
-vite.config.js
-vite.config.ts
 
 # IDEs and editors (optional, depending on your team)
 .idea/

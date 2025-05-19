@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pkl
+*.sqlite3
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# Logs and temp files
+*.log
+*.tmp
+*.bak
+
+# Git
+.git/
+.gitignore
+
+# Docker
+.dockerignore
+Dockerfile
+docker-compose.yml
+
+# Secrets
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
