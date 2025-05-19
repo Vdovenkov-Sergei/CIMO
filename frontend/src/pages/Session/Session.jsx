@@ -48,7 +48,6 @@ const Session = () => {
     <div className="session-container">
       <Header />
 
-      {/* Main Content */}
       <main className="main">
         <div className="movie-card-container">
           <AnimatePresence>
@@ -71,18 +70,15 @@ const Session = () => {
           </AnimatePresence>
         </div>
 
-        {/* Action Buttons */}
         <div className="action-buttons">
           <XControlButton onClick={() => handleSwipe("left")} />
           <CheckControlButton onClick={() => handleSwipe("right")} />
         </div>
 
-        {/* Session Controls */}
         <div className="session-controls">
           <FinishSelectionButton onClick={() => console.log('Подбор завершен')} />
         </div>
 
-        {/* Liked Movies */}
         <div className="liked-movies">
           <h3>Понравившиеся фильмы</h3>
           <LikedMoviesScroll movies={likedMovies} />

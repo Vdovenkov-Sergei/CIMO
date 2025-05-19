@@ -21,7 +21,6 @@ const MyMovies = () => {
     ]
   });
 
-  // Пометить фильм как просмотренный
   const markAsWatched = (id) => {
     setMovies(prev => {
       const film = prev.watchlist.find(m => m.id === id);
@@ -32,7 +31,6 @@ const MyMovies = () => {
     });
   };
 
-  // Пометить фильм как непросмотренный
   const markAsUnwatched = (id) => {
     setMovies(prev => {
       const film = prev.watched.find(m => m.id === id);
@@ -43,7 +41,6 @@ const MyMovies = () => {
     });
   };
 
-  // Удалить фильм
   const removeMovie = (id, isWatched) => {
     setMovies(prev => ({
       ...prev,
@@ -56,7 +53,6 @@ const MyMovies = () => {
     <div className="my-movies-page">
       <Header />
 
-      {/* Основная часть */}
       <main className="movies-main container">
         <div className="navigation">
           <Link to='/modeSelection' className="navigation__link">Главная страница</Link>
@@ -66,7 +62,6 @@ const MyMovies = () => {
           <Link to='/myMovies' className="navigation__link">Мои фильмы</Link>
         </div>
 
-        {/* Секция отложенных фильмов */}
         <section className="movies-section">
           <h2 className="movies-section__title">Отложенные фильмы</h2>
           <WatchListScroll 
@@ -76,7 +71,6 @@ const MyMovies = () => {
           />
         </section>
 
-        {/* Секция просмотренных фильмов */}
         <section className="movies-section">
           <h2 className="movies-section__title">Просмотренные фильмы</h2>
           <WatchedScroll 
@@ -86,7 +80,6 @@ const MyMovies = () => {
         </section>
       </main>
 
-      {/* Футер (оставляем как было) */}
       <Footer />
     </div>
   );

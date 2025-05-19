@@ -8,7 +8,7 @@ import SingleModeCard from '../../components/SingleModeCard';
 import PairModeCard from '../../components/PairModeCard';
 
 const ModeSelection = () => {
-  const [inviteLink] = useState('https://cinemood.app/invite/xyz123'); // Пример ссылки
+  const [inviteLink] = useState('https://cinemood.app/invite/xyz123');
 
   const handleStartSingleSession = () => {
     console.log('Одиночная сессия начата');
@@ -24,7 +24,6 @@ const ModeSelection = () => {
     <div className="mode-selection-page">
       <Header />
 
-      {/* Основная часть */}
       <main className="main-content-modes container">
         <h2 className="main-title">Хотите подобрать фильм?</h2>
         

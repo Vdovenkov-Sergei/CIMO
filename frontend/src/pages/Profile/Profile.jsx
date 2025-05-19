@@ -16,7 +16,6 @@ const Profile = () => {
     <div className="profile-page">
       <Header />
 
-      {/* Основная часть - полностью переписываем */}
       <main className="profile-main container">
         <div className="navigation">
           <Link to='/modeSelection' className="navigation__link">Главная страница</Link>
