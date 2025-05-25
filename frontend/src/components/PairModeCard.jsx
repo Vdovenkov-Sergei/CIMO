@@ -5,7 +5,7 @@ const PairModeCard = ({
   title = "Парный режим",
   description = "Парный режим помогает подобрать фильмы для совместного просмотра исходя из предпочтений в паре.",
   imageSrc = "src/assets/images/mode2.png",
-  buttonText = "Начать парную сессию",
+  buttonText = "Парная сессия",
   inviteLink = "https://example.com/invite/partner",
   copyIconUrl = "src/assets/images/copy-icon.svg",
   onStartSession

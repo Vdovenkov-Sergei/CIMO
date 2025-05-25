@@ -5,7 +5,7 @@ const SingleModeCard = ({
   title = "Одиночный режим",
   description = "Данный режим позволяет осуществлять подбор фильмов под Ваше настроение и предпочтения.",
   imageSrc = "src/assets/images/mode1.png",
-  buttonText = "Начать одиночную сессию",
+  buttonText = "Одиночная сессия",
   confirmText = "Начать",
   onStartSession
 }) => {

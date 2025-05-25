@@ -8,7 +8,7 @@ const Verification = lazy(() => import('@/pages/Verification/Verification'));
 const Nickname = lazy(() => import('@/pages/Nickname/Nickname'));
 const ModeSelection = lazy(() => import('@/pages/ModeSelection/ModeSelection'));
 const ForgotPassword = lazy(() => import('@/pages/ForgotPassword/ForgotPassword'));
-const CreatePassword = lazy(() => import('@/pages/CreatePassword/CreatePassword'));
+const ResetPassword = lazy(() => import('@/pages/ResetPassword/ResetPassword'));
 const Profile = lazy(() => import('@/pages/Profile/Profile'));
 const MyMovies = lazy(() => import('@/pages/MyMovies/MyMovies'));
 const ChangeNickname = lazy(() => import('@/pages/ChangeNickname/ChangeNickname'));
@@ -26,7 +26,7 @@ function App() {
             <Route path="/nickname" element={<Nickname />} />
             <Route path="/modeSelection" element={<ModeSelection />} />
             <Route path="/forgotPassword" element={<ForgotPassword />} />
-            <Route path="/createPassword" element={<CreatePassword />} />
+            <Route path="/resetPassword" element={<ResetPassword />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/myMovies" element={<MyMovies />} />
             <Route path="/changeNickname" element={<ChangeNickname />} />

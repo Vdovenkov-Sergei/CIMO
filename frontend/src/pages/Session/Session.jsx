@@ -32,7 +32,7 @@ const Session = () => {
     },
     // другие фильмы
   ];
-
+ 
   const currentMovie = movies[currentIndex];
 
   const handleSwipe = (direction) => {

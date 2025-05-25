@@ -5,9 +5,11 @@ import Footer from '../../components/Footer';
 import Header from '../../components/Header';
 import WatchListScroll from '../../components/WatchListScroll';
 import WatchedScroll from '../../components/WatchedScroll';
+import MovieDetailsModal from '../../components/MovieDetailsModal';
 
 const MyMovies = () => {
-  
+  const [showDetails, setShowDetails] = useState(null);
+
   const [movies, setMovies] = useState({
     watchlist: [
       { id: 1, title: 'Фильм1', poster: '/movies/poster1.jpg', watched: false },

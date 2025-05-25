@@ -1,6 +1,7 @@
 import React from 'react';
-import Input from './Input'; // Ваш компонент Input
-import SubmitButton from './SubmitButton'; // Ваш компонент Button
+import Input from './Input';
+import SubmitButton from './SubmitButton';
+import SecondaryButton from './SecondaryButton';
 
 const VerificationCodeForm = ({
   code = '',
@@ -34,6 +35,14 @@ const VerificationCodeForm = ({
         >
           {isLoading ? 'Проверка...' : 'Далее'}
         </SubmitButton>
+
+        <SecondaryButton
+          className='secondary-btn'
+          type="button"
+          disabled={isLoading}
+        >
+          Отправить повторно
+        </SecondaryButton>
 
       </form>
     </section>

@@ -30,10 +30,28 @@ const SessionMovies = () => {
     }));
   };
 
-  const watchLaterAll = () => {
+  /*const watchLaterAll = () => {
     setMovies(prev => ({
       ...prev,
       watchlist: prev.watchlist.map(movie => ({ ...movie, watchedLater: true }))
+    }));
+  };*/
+
+  const markAsWatched = (id) => {
+    setMovies(prev => {
+      const film = prev.watchlist.find(m => m.id === id);
+      return {
+        watchlist: prev.watchlist.filter(m => m.id !== id),
+        watched: [...prev.watched, { ...film, watched: true }]
+      };
+    });
+  };
+
+  const removeMovie = (id, isWatched) => {
+    setMovies(prev => ({
+      ...prev,
+      [isWatched ? 'watched' : 'watchlist']: 
+        prev[isWatched ? 'watched' : 'watchlist'].filter(m => m.id !== id)
     }));
   };
 
@@ -52,11 +70,12 @@ const SessionMovies = () => {
           <WatchLaterScroll 
             movies={movies.watchlist} 
             onToggleWatchLater={toggleWatchLater}
+            onWatch={markAsWatched}
+            onDelete={(id) => removeMovie(id, false)}
           />
         </section>
 
         <div className="buttons">
-          <WatchLaterAllButton onClick={watchLaterAll} />
           <FinishSessionButton onClick={finishSession} />
         </div>
       </main>
