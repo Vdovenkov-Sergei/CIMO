@@ -27,6 +27,7 @@ const Verification = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const [error, setError] = useState('');
+  const [backendError, setBackendError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [countdown, setCountdown] = useState(120);
 
@@ -44,16 +45,8 @@ const Verification = () => {
 
     setIsLoading(true);
     setError('');
+    setBackendError('');
 
-    console.log(email);
-    console.log(typeof email);
-    console.log(code);
-    console.log(typeof code);
-    console.log(JSON.stringify({
-      email: email,
-      code: code
-    }))
-    
     try {
       const response = await fetch('http://localhost:8000/auth/register/verify', {
         method: 'POST',
@@ -68,7 +61,9 @@ const Verification = () => {
 
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.message || 'Неверный код подтверждения');
+        const errorMessage = data.detail || data.message || 'Неверный код подтверждения';
+        setBackendError(errorMessage);
+        throw new Error(errorMessage);
       }
 
       setSuccessMessage('Код подтверждён! Перенаправляем...');
@@ -80,7 +75,6 @@ const Verification = () => {
       
     } catch (err) {
       console.error('Ошибка верификации:', err);
-      setError(err.message || 'Произошла ошибка при проверке кода');
     } finally {
       setIsLoading(false);
     }
@@ -90,6 +84,7 @@ const Verification = () => {
   const handleResendCode = async () => {
     setIsResending(true);
     setError('');
+    setBackendError('');
     
     try {
       const response = await fetch('http://localhost:8000/auth/register/resend', {
@@ -103,7 +98,9 @@ const Verification = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Ошибка при повторной отправке кода');
+        const errorMessage = data.detail || data.message || 'Ошибка при повторной отправке кода';
+        setBackendError(errorMessage);
+        throw new Error(errorMessage);
       }
 
       setCountdown(120);
@@ -112,7 +109,6 @@ const Verification = () => {
       
     } catch (err) {
       console.error('Ошибка при повторной отправке:', err);
-      setError(err.message || 'Не удалось отправить код повторно');
     } finally {
       setIsResending(false);
     }
@@ -141,12 +137,17 @@ const Verification = () => {
         <VerificationCodeForm
           email={email}
           code={code}
-          onCodeChange={(e) => setCode(e.target.value)}
+          onCodeChange={(e) => {
+            setCode(e.target.value);
+            if (error) setError('');
+            if (backendError) setBackendError('');
+          }}
           onSubmit={handleSubmit}
           onResend={handleResendCode}
           isLoading={isLoading}
           isResending={isResending}
           error={error}
+          backendError={backendError}
           successMessage={successMessage}
           countdown={countdown}
         />

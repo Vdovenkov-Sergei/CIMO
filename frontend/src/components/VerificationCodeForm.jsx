@@ -12,6 +12,7 @@ const VerificationCodeForm = ({
   isLoading = false,
   isResending = false,
   error = '',
+  backendError = '',
   successMessage = '',
   countdown = 0
 }) => {
@@ -21,14 +22,25 @@ const VerificationCodeForm = ({
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
+  const getSubtitleText = () => {
+    if (backendError) return backendError;
+    if (error) return error;
+    if (successMessage) return successMessage;
+    return `На ${email} отправлен код подтверждения`;
+  };
+
+  const getSubtitleClass = () => {
+    let className = "auth-form__subtitle";
+    if (backendError || error) className += " auth-form__subtitle--error";
+    if (successMessage) className += " auth-form__subtitle--success";
+    return className;
+  };
+
   return (
     <section className="auth-form">
       <h2 className="auth-form__title">Введите код верификации</h2>
-      <p className={`auth-form__subtitle ${
-        error ? 'auth-form__subtitle--error' : 
-        successMessage ? 'auth-form__subtitle--success' : ''
-      }`}>
-        {error || successMessage || `На ${email} отправлен код подтверждения`}
+      <p className={getSubtitleClass()}>
+        {getSubtitleText()}
       </p>
 
       <form className="form" onSubmit={onSubmit}>
