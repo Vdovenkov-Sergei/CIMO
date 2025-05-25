@@ -4,7 +4,7 @@ from markupsafe import Markup
 from sqladmin import ModelView
 
 from app.chats.models import Chat
-from app.config import settings
+from app.constants import Pagination, URLs
 from app.messages.models import Message
 from app.movie_roles.models import MovieRole
 from app.movies.models import Movie
@@ -15,16 +15,13 @@ from app.users.models import User
 from app.viewed_movies.models import ViewedMovie
 from app.watch_later_movies.models import WatchLaterMovie
 
-PREFIX_MOVIE = settings.BASE_POSTER_URL
-PREFIX_PERSON = settings.BASE_PHOTO_URL
-
 
 def movie_url(m: Movie) -> str:
-    return f"{PREFIX_MOVIE}/{m.poster_url}"
+    return f"{URLs.BASE_POSTER_URL}{m.poster_url}"
 
 
 def person_url(p: Person) -> str:
-    return f"{PREFIX_PERSON}/{p.photo_url}"
+    return f"{URLs.BASE_PHOTO_URL}{p.photo_url}"
 
 
 class BaseAdmin(ModelView):
@@ -33,9 +30,10 @@ class BaseAdmin(ModelView):
     can_edit = False
     can_view_details = True
     can_export = True
-    page_size = 25
+    page_size = Pagination.PAG_LIMIT
     column_formatters = {
         "created_at": lambda m, a: m.created_at.strftime("%Y-%m-%d %H:%M:%S") if m.created_at else "-",
+        "updated_at": lambda m, a: m.updated_at.strftime("%Y-%m-%d %H:%M:%S") if m.updated_at else "-",
         "ended_at": lambda m, a: m.ended_at.strftime("%Y-%m-%d %H:%M:%S") if m.ended_at else "-",
     }
     column_formatters_detail = column_formatters.copy()
@@ -59,7 +57,7 @@ class MessageAdmin(BaseAdmin, model=Message):
 
 class MovieRoleAdmin(BaseAdmin, model=MovieRole):
     column_list = [MovieRole.movie, MovieRole.person, MovieRole.role]
-    column_default_sort = [(MovieRole.movie_id, False), (MovieRole.person_id, False)]
+    column_default_sort = [(MovieRole.movie_id, False), (MovieRole.person_id, False), (MovieRole.priority, False)]
     icon = "fa-solid fa-address-card"
 
 
@@ -90,7 +88,7 @@ class MovieAdmin(BaseAdmin, model=Movie):
         "runtime": lambda m, a: f"{m.runtime} min" if m.runtime else "-",
         "age_rating": lambda m, a: f"{int(m.age_rating)}+" if m.age_rating else "-",
         "poster_url": lambda m, a: (
-            Markup(f'<a href="{movie_url(m)}" target="_blank">{movie_url(m)}</a>') if m.poster_url else "-"
+            Markup(f'<a href="{movie_url(m)}" target="_blank">Постер</a>') if m.poster_url else "-"
         ),
     }
     column_formatters_detail = column_formatters.copy()
@@ -105,10 +103,27 @@ class PersonAdmin(BaseAdmin, model=Person):
 
     column_formatters = {
         "photo_url": lambda m, a: (
-            Markup(f'<a href="{person_url(m)}" target="_blank">{person_url(m)}</a>') if m.photo_url else "-"
+            Markup(f'<a href="{person_url(m)}" target="_blank">Фото</a>') if m.photo_url else "-"
         ),
     }
     column_formatters_detail = column_formatters.copy()
+
+
+class SessionMovieAdmin(BaseAdmin, model=SessionMovie):
+    column_list = [
+        SessionMovie.session,
+        SessionMovie.user_id,
+        SessionMovie.movie,
+        SessionMovie.created_at,
+        SessionMovie.is_matched,
+    ]
+    column_default_sort = [
+        (SessionMovie.session_id, False),
+        (SessionMovie.user_id, False),
+        (SessionMovie.is_matched, True),
+    ]
+    column_sortable_list = [SessionMovie.created_at]
+    icon = "fa-solid fa-bookmark"
 
 
 class SessionAdmin(BaseAdmin, model=Session):
@@ -124,25 +139,8 @@ class UserAdmin(BaseAdmin, model=User):
     column_sortable_list = [User.id, User.user_name, User.email, User.created_at]
     column_searchable_list = [User.id, User.user_name, User.email]
     column_default_sort = (User.id, False)
-    column_details_list = [User.viewed_movies, User.watch_later_movies, User.sessions, User.chat]
+    column_details_list = [User.viewed_movies, User.watch_later_movies, User.sessions, User.chat, User.is_superuser]
     icon = "fa-solid fa-circle-user"
-
-
-class SessionMovieAdmin(BaseAdmin, model=SessionMovie):
-    column_list = [
-        SessionMovie.session,
-        SessionMovie.user_id,
-        SessionMovie.movie,
-        SessionMovie.created_at,
-        SessionMovie.is_matched,
-    ]
-    column_default_sort = [
-        (SessionMovie.session_id, False),
-        (SessionMovie.user_id, False),
-        (SessionMovie.movie_id, False),
-    ]
-    column_sortable_list = [SessionMovie.created_at]
-    icon = "fa-solid fa-bookmark"
 
 
 class ViewedMovieAdmin(BaseAdmin, model=ViewedMovie):

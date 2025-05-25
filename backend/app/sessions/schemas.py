@@ -19,6 +19,7 @@ class SSessionRead(BaseSchema):
     user_id: int
     created_at: datetime
     started_at: Optional[datetime]
+    updated_at: datetime
     ended_at: Optional[datetime]
     status: SessionStatus
     is_pair: bool

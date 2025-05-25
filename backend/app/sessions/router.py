@@ -4,12 +4,15 @@ from typing import Any, Optional
 
 from fastapi import APIRouter, Depends
 
+from app.constants import General
 from app.exceptions import (
     MaxParticipantsInSessionException,
     ParticipantsNotEnoughException,
+    SessionAlreadyStartedException,
     SessionNotFoundException,
     UserAlreadyInSessionException,
 )
+from app.logger import logger
 from app.sessions.dao import SessionDAO
 from app.sessions.dependencies import get_current_session
 from app.sessions.models import Session, SessionStatus
@@ -17,7 +20,6 @@ from app.sessions.schemas import SSessionCreate, SSessionRead, SSessionUpdate
 from app.users.dependencies import get_current_user
 from app.users.models import User
 
-PAIR, SOLO = 2, 1
 router = APIRouter(prefix="/sessions", tags=["Sessions"])
 
 
@@ -31,10 +33,12 @@ async def get_user_session(user: User = Depends(get_current_user)) -> Optional[S
 async def create_session(data: SSessionCreate, user: User = Depends(get_current_user)) -> SSessionRead:
     existing_session = await SessionDAO.find_existing_session(user_id=user.id)
     if existing_session and existing_session.is_pair == data.is_pair:
+        logger.info("Returning existing session of same type.", extra={"pair": data.is_pair})
         return SSessionRead.model_validate(existing_session)
     if existing_session:
+        logger.warning("User already in a session.", extra={"session_id": existing_session.id, "user_id": user.id})
         raise UserAlreadyInSessionException(user_id=user.id, session_id=str(existing_session.id))
-    session = await SessionDAO.add_record(user_id=user.id, is_pair=data.is_pair)
+    session = await SessionDAO.add_session(user_id=user.id, is_pair=data.is_pair)
     return SSessionRead.model_validate(session)
 
 
@@ -42,18 +46,26 @@ async def create_session(data: SSessionCreate, user: User = Depends(get_current_
 async def join_session(session_id: uuid.UUID, user: User = Depends(get_current_user)) -> SSessionRead:
     existing_session = await SessionDAO.find_existing_session(user_id=user.id)
     if existing_session and existing_session.id == session_id:
+        logger.info("User rejoining same session.")
         return SSessionRead.model_validate(existing_session)
     if existing_session:
+        logger.warning("User already in a session.", extra={"session_id": existing_session.id, "user_id": user.id})
         raise UserAlreadyInSessionException(user_id=user.id, session_id=str(existing_session.id))
 
     participants = await SessionDAO.get_participants(session_id=session_id)
     if not participants:
         raise SessionNotFoundException(session_id=str(session_id))
-    max_participants = PAIR if next(iter(participants)).is_pair else SOLO
+
+    session_record = next(iter(participants))
+    if session_record.started_at is not None:
+        logger.warning("Session already started.", extra={"session_id": session_id})
+        raise SessionAlreadyStartedException(session_id=str(session_id))
+    max_participants = General.PAIR if session_record.is_pair else General.SOLO
     if len(participants) >= max_participants:
+        logger.warning("Session is full.", extra={"session_id": session_id, "count": len(participants)})
         raise MaxParticipantsInSessionException
 
-    joined_session = await SessionDAO.add_record(id=session_id, user_id=user.id, is_pair=True)
+    joined_session = await SessionDAO.add_session(session_id=session_id, user_id=user.id, is_pair=True)
     return SSessionRead.model_validate(joined_session)
 
 
@@ -62,23 +74,32 @@ async def check_ready_participants(session_id: uuid.UUID) -> bool:
     participants = await SessionDAO.get_participants(session_id=session_id)
     if not participants:
         raise SessionNotFoundException(session_id=str(session_id))
-    max_participants = PAIR if next(iter(participants)).is_pair else SOLO
+    max_participants = General.PAIR if next(iter(participants)).is_pair else General.SOLO
     if len(participants) < max_participants:
+        logger.warning("Not enough participants.", extra={"session_id": session_id, "count": len(participants)})
         raise ParticipantsNotEnoughException
-    return all(p.status == SessionStatus.PREPARED for p in participants)
+
+    ready_flag = all(p.status == SessionStatus.PREPARED for p in participants)
+    if ready_flag:
+        logger.info("All participants are ready.")
+    else:
+        logger.warning("Not all participants are ready.", extra={"session_id": session_id})
+    return ready_flag
 
 
 @router.patch("/status", response_model=dict[str, str])
 async def change_session_status(
     data: SSessionUpdate, session: Session = Depends(get_current_session)
 ) -> dict[str, str]:
-    new_status = SessionStatus(data.status)
+    new_status = data.status
     update_fields: dict[str, Any] = {"status": new_status}
 
     if (session.status, new_status) == (SessionStatus.PREPARED, SessionStatus.ACTIVE):
         update_fields["started_at"] = datetime.now(UTC)
+        logger.info("User started session.", extra={"time": update_fields["started_at"], "user_id": session.user_id})
     elif (session.status, new_status) == (SessionStatus.REVIEW, SessionStatus.COMPLETED):
         update_fields["ended_at"] = datetime.now(UTC)
+        logger.info("User ended session.", extra={"time": update_fields["ended_at"], "user_id": session.user_id})
 
     await SessionDAO.update_session(session_id=session.id, user_id=session.user_id, update_data=update_fields)
     return {"message": "Session status updated successfully."}

@@ -18,7 +18,7 @@ class Message(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     chat_id: Mapped[int] = mapped_column(ForeignKey("chats.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
-    sender: Mapped[SenderType] = mapped_column(Enum(SenderType), server_default=SenderType.BOT.value, nullable=False)
+    sender: Mapped[SenderType] = mapped_column(Enum(SenderType), server_default=SenderType.BOT, nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
 
     chat = relationship("Chat", back_populates="messages")

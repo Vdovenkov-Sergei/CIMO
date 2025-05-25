@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Depends
 
+from app.constants import Pagination
+from app.logger import logger
 from app.users.dependencies import get_current_user
 from app.users.models import User
 from app.watch_later_movies.dao import WatchLaterMovieDAO
@@ -14,15 +16,20 @@ async def add_to_watch_later_list(
 ) -> dict[str, str]:
     existing_movie = await WatchLaterMovieDAO.find_by_user_movie_id(user_id=user.id, movie_id=data.movie_id)
     if existing_movie:
+        logger.warning(
+            "Movie already exists in watch later list.", extra={"user_id": user.id, "movie_id": data.movie_id}
+        )
         return {"message": "The movie is already in the watch later list."}
 
-    await WatchLaterMovieDAO.add_record(user_id=user.id, movie_id=data.movie_id)
+    await WatchLaterMovieDAO.add_movie(user_id=user.id, movie_id=data.movie_id)
     return {"message": "The movie was successfully added."}
 
 
 @router.get("/", response_model=list[SWatchLaterMovieRead])
 async def get_watch_later_list(
-    limit: int = 20, offset: int = 0, user: User = Depends(get_current_user)
+    limit: int = Pagination.PAG_LIMIT,
+    offset: int = Pagination.PAG_OFFSET,
+    user: User = Depends(get_current_user),
 ) -> list[SWatchLaterMovieRead]:
     movies = await WatchLaterMovieDAO.find_movies(user_id=user.id, limit=limit, offset=offset)
     return [SWatchLaterMovieRead.model_validate(movie) for movie in movies]

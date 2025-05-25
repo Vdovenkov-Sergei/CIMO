@@ -21,11 +21,13 @@ backend-clean:
 
 ## -------------------- FRONTEND --------------------
 
+FRONTEND_MODE ?= development
+
 frontend-dev:
-	cd $(FRONTEND_DIR) && npm run dev
+	cd $(FRONTEND_DIR) && npm run dev -- --mode $(FRONTEND_MODE)
 
 frontend-build:
-	cd $(FRONTEND_DIR) && npm run build
+	cd $(FRONTEND_DIR) && npm run build -- --mode $(FRONTEND_MODE)
 
 frontend-lint:
 	cd $(FRONTEND_DIR) && npm run lint

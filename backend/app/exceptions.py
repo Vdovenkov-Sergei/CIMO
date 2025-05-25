@@ -116,7 +116,7 @@ class ChatNotFoundException(ApiException):
 
 class ChatAlreadyExistsException(ApiException):
     status_code: int = status.HTTP_409_CONFLICT
-    error_message: str = "Chat already exists"
+    error_message: str = "Chat with id={chat_id} already exists"
 
 
 class InvalidSessionStatusException(ApiException):
@@ -127,3 +127,13 @@ class InvalidSessionStatusException(ApiException):
 class NotSuperUserException(ApiException):
     status_code: int = status.HTTP_403_FORBIDDEN
     error_message: str = "Superuser privileges are required."
+
+
+class MaxTimeVerifyPasswordException(ApiException):
+    status_code: int = status.HTTP_403_FORBIDDEN
+    error_message: str = "Max time to verify password exceeded"
+
+
+class SessionAlreadyStartedException(ApiException):
+    status_code: int = status.HTTP_403_FORBIDDEN
+    error_message: str = "Session with id={session_id} already started"

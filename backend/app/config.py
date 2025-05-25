@@ -1,8 +1,13 @@
+from typing import Literal
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env")
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="allow")
+
+    MODE: Literal["DEV", "TEST", "PROD"]
+    LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
     DB_HOST: str
     DB_PORT: int
@@ -17,19 +22,24 @@ class Settings(BaseSettings):
 
     REDIS_HOST: str
     REDIS_PORT: int
+    CACHE_TTL: int
 
     SMTP_HOST: str
     SMTP_PORT: int
     SMTP_USER: str
     SMTP_PASS: str
 
-    BASE_URL: str
-    BASE_PHOTO_URL: str
-    BASE_POSTER_URL: str
+    FRONTEND_URL: str
+
+    SENTRY_DSN: str
 
     @property
-    def database_url(self) -> str:
+    def async_database_url(self) -> str:
         return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}" f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+
+    @property
+    def sync_database_url(self) -> str:
+        return f"postgresql+psycopg2://{self.DB_USER}:{self.DB_PASS}" f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
     @property
     def redis_url(self) -> str:

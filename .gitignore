@@ -1,4 +1,4 @@
-###VS code###
+### VS code ###
 .vscode
 
 ### Python ###
@@ -127,6 +127,7 @@ celerybeat.pid
 .env*
 .venv
 env/
+data
 venv/
 ENV/
 env.bak/
@@ -184,15 +185,41 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
+# Node modules
+node_modules/
+
+# Build output
+dist/
+build/
 dist-ssr
 *.local
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+# Vite cache
+.vite/
+
+# Environment variables
+.env
+.env.development
+.env.test
+.env.production
+
+# TypeScript type declarations
+*.d.ts
+
+# React Native
+# .expo/
+# .expo-shared/
+
+# Next.js
+.next/
+
+# Storybook
+storybook-static/
+
+# IDEs and editors (optional, depending on your team)
+.idea/
+
+# Misc
 .DS_Store
 *.suo
 *.ntvs*
