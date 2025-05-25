@@ -1,7 +1,7 @@
 import React from 'react';
-import Input from './Input'; // Предполагаем, что у вас есть компонент Input
-import SubmitButton from './SubmitButton'; // Предполагаем, что у вас есть компонент Button
-import SecondaryButton from './SecondaryButton'; // Предполагаем, что у вас есть компонент SecondaryButton
+import Input from './Input';
+import SubmitButton from './SubmitButton';
+import SecondaryButton from './SecondaryButton';
 
 const NicknameForm = ({
   nickname = '',
@@ -9,22 +9,40 @@ const NicknameForm = ({
   onSubmit = () => {},
   onSkip = () => {},
   isLoading = false,
-  isSkippable = true
+  isSkippable = true,
+  error = '',
+  successMessage = ''
 }) => {
+  const getSubtitleText = () => {
+    if (error) return error;
+    if (successMessage) return successMessage;
+    return 'Никнейм должен быть уникальным';
+  };
+
+  const getSubtitleClass = () => {
+    let className = "auth-form__subtitle";
+    if (error) className += " auth-form__subtitle--error";
+    if (successMessage) className += " auth-form__subtitle--success";
+    return className;
+  };
+
   return (
     <section className="auth-form">
       <h2 className="auth-form__title">Придумайте никнейм</h2>
-      <p className="auth-form__subtitle">Никнейм должен быть уникальным</p>
+      <p className={getSubtitleClass()}>
+        {getSubtitleText()}
+      </p>
 
       <form className="form" onSubmit={onSubmit}>
         <div className="form__group">
           <Input
             type="text"
-            placeholder="Никнейм"
+            placeholder="Введите ваш никнейм"
             value={nickname}
             onChange={onNicknameChange}
             className="form__input"
-            maxLength={20} // Ограничение длины никнейма
+            maxLength={20}
+            required
           />
         </div>
 
@@ -39,10 +57,10 @@ const NicknameForm = ({
 
           {isSkippable && (
             <SecondaryButton
-              className='secondary-btn'
               type="button"
               onClick={onSkip}
               disabled={isLoading}
+              className="secondary-btn"
             >
               Придумать позже
             </SecondaryButton>
