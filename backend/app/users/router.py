@@ -26,6 +26,7 @@ from app.users.schemas import (
     SUserRead,
     SUserRegisterEmail,
     SUserRegisterUsername,
+    SUserResendVerification,
     SUserResetPassword,
     SUserUpdate,
     SUserVerification,
@@ -58,7 +59,8 @@ async def register_email(user_data: SUserRegisterEmail) -> dict[str, str]:
 
 
 @router_auth.post("/register/resend", response_model=dict[str, str])
-async def resend_verification_code(email: EmailStr) -> dict[str, str]:
+async def resend_verification_code(user_data: SUserResendVerification) -> dict[str, str]:
+    email = user_data.email
     attempts_key = RedisKeys.ATTEMPTS_SEND_KEY.format(email=email)
     email_key = RedisKeys.USER_EMAIL_KEY.format(email=email)
     attempts = await redis_client.get(attempts_key)
