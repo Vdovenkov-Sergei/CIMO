@@ -83,7 +83,7 @@ const RegisterForm = ({
 
         <p className="form__footer-text">
           Есть аккаунт?{' '}
-          <Link to="/login" className="form__link">Войти</Link>
+          <Link to="/" className="form__link">Войти</Link>
         </p>
       </form>
     </section>
