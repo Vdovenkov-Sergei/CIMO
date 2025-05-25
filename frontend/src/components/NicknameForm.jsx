@@ -11,9 +11,11 @@ const NicknameForm = ({
   isLoading = false,
   isSkippable = true,
   error = '',
+  backendError = '',
   successMessage = ''
 }) => {
   const getSubtitleText = () => {
+    if (backendError) return backendError;
     if (error) return error;
     if (successMessage) return successMessage;
     return 'Никнейм должен быть уникальным';
@@ -21,7 +23,7 @@ const NicknameForm = ({
 
   const getSubtitleClass = () => {
     let className = "auth-form__subtitle";
-    if (error) className += " auth-form__subtitle--error";
+    if (backendError || error) className += " auth-form__subtitle--error";
     if (successMessage) className += " auth-form__subtitle--success";
     return className;
   };

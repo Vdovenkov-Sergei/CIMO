@@ -25,6 +25,7 @@ const Nickname = () => {
   const [nickname, setNickname] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [backendError, setBackendError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
   const handleSubmit = async (e) => {
@@ -32,11 +33,13 @@ const Nickname = () => {
     
     if (!nickname.trim()) {
       setError('Введите никнейм');
+      setBackendError('');
       return;
     }
 
     setIsLoading(true);
     setError('');
+    setBackendError('');
     setSuccessMessage('');
 
     try {
@@ -54,7 +57,9 @@ const Nickname = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.detail || data.message || 'Ошибка сохранения никнейма');
+        const errorMessage = data.detail || data.message || 'Ошибка сохранения никнейма';
+        setBackendError(errorMessage);
+        throw new Error(errorMessage);
       }
 
       setSuccessMessage('Никнейм успешно сохранен!');
@@ -62,7 +67,6 @@ const Nickname = () => {
       
     } catch (err) {
       console.error('Ошибка сохранения никнейма:', err);
-      setError(err.message || 'Произошла ошибка при сохранении никнейма');
     } finally {
       setIsLoading(false);
     }
@@ -88,12 +92,14 @@ const Nickname = () => {
           onNicknameChange={(e) => {
             setNickname(e.target.value);
             if (error) setError('');
+            if (backendError) setBackendError('');
           }}
           onSubmit={handleSubmit}
           onSkip={handleSkip}
           isLoading={isLoading}
           isSkippable={true}
           error={error}
+          backendError={backendError}
           successMessage={successMessage}
         />
       </main>
