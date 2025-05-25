@@ -27,6 +27,7 @@ const Signup = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [backendError, setBackendError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
   const handleChange = (e) => {
@@ -36,6 +37,7 @@ const Signup = () => {
       [name]: value
     }));
     if (error) setError('');
+    if (backendError) setBackendError('');
   };
 
   const handleSubmit = async (e) => {
@@ -44,17 +46,20 @@ const Signup = () => {
     // Валидация формы
     if (!formData.email || !formData.password || !formData.confirmPassword) {
       setError('Все поля обязательны для заполнения');
+      setBackendError('');
       return;
     }
     
     if (formData.password !== formData.confirmPassword) {
       setError('Пароли не совпадают');
+      setBackendError('');
       return;
     }
 
     setIsLoading(true);
     setError('');
-    setSuccessMessage(''); // Очищаем предыдущие успешные сообщения
+    setBackendError('');
+    setSuccessMessage('');
     
     try {
       const response = await fetch('http://localhost:8000/auth/register/email', {
@@ -71,7 +76,10 @@ const Signup = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Ошибка регистрации');
+        // Используем detail или message из ответа сервера
+        const errorMessage = data.detail || data.message || 'Ошибка регистрации';
+        setBackendError(errorMessage);
+        throw new Error(errorMessage);
       }
 
       setSuccessMessage('Регистрация прошла успешно! Перенаправляем на верификацию...');
@@ -84,7 +92,7 @@ const Signup = () => {
       
     } catch (err) {
       console.error('Ошибка регистрации:', err);
-      setError(err.message || 'Произошла ошибка при регистрации. Попробуйте ещё раз.');
+      // Не устанавливаем error, так как используем backendError
     } finally {
       setIsLoading(false);
     }
@@ -111,6 +119,7 @@ const Signup = () => {
           onSubmit={handleSubmit}
           isLoading={isLoading}
           error={error}
+          backendError={backendError}
           successMessage={successMessage}
           buttonText={isLoading ? 'Регистрация...' : 'Далее'}
         />

@@ -13,20 +13,22 @@ const RegisterForm = ({
   onSubmit,
   isLoading = false,
   error = '',
+  backendError = '',
   successMessage = '',
   buttonText = 'Далее'
 }) => {
   // Определяем текст подзаголовка в зависимости от состояния
   const getSubtitleText = () => {
+    if (backendError) return backendError;
     if (error) return error;
     if (successMessage) return successMessage;
     return "Пожалуйста, заполните форму";
   };
 
   // Определяем класс для подзаголовка в зависимости от состояния
-  const subtitleClass = () => {
+  const getSubtitleClass = () => {
     let className = "auth-form__subtitle";
-    if (error) className += " auth-form__subtitle--error";
+    if (backendError || error) className += " auth-form__subtitle--error";
     if (successMessage) className += " auth-form__subtitle--success";
     return className;
   };
@@ -34,7 +36,7 @@ const RegisterForm = ({
   return (
     <section className="auth-form">
       <h2 className="auth-form__title">Добро пожаловать!</h2>
-      <p className={subtitleClass()}>
+      <p className={getSubtitleClass()}>
         {getSubtitleText()}
       </p>
 
