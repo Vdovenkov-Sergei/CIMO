@@ -11,9 +11,11 @@ const AuthForm = ({
   onSubmit, 
   isLoading = false,
   error = '',
+  backendError = '',
   successMessage = ''
 }) => {
   const getSubtitleText = () => {
+    if (backendError) return backendError;
     if (error) return error;
     if (successMessage) return successMessage;
     return 'Пожалуйста, авторизуйтесь';
@@ -21,7 +23,7 @@ const AuthForm = ({
 
   const getSubtitleClass = () => {
     let className = "auth-form__subtitle";
-    if (error) className += " auth-form__subtitle--error";
+    if (backendError || error) className += " auth-form__subtitle--error";
     if (successMessage) className += " auth-form__subtitle--success";
     return className;
   };
