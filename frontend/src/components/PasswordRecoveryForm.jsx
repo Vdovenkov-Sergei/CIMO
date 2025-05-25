@@ -1,35 +1,51 @@
 import React from 'react';
-import Input from './Input'; // Ваш существующий компонент Input
-import SubmitButton from './SubmitButton'; // Ваш существующий компонент Button
+import Input from './Input';
+import SubmitButton from './SubmitButton';
 
 const PasswordRecoveryForm = ({
   email = '',
   onEmailChange = () => {},
   onSubmit = () => {},
-  isLoading = false
+  isLoading = false,
+  error = '',
+  successMessage = ''
 }) => {
+  const getSubtitleText = () => {
+    if (error) return error;
+    if (successMessage) return successMessage;
+    return 'На Ваш электронный адрес будет отправлена ссылка для восстановления пароля';
+  };
+
+  const getSubtitleClass = () => {
+    let className = "auth-form__subtitle";
+    if (error) className += " auth-form__subtitle--error";
+    if (successMessage) className += " auth-form__subtitle--success";
+    return className;
+  };
+
   return (
     <section className="auth-form">
-      <h2 className="auth-form__title">Введите почту</h2>
-      <p className="auth-form__subtitle">
-        На Ваш электронный адрес будет отправлена ссылка для восстановления пароля
+      <h2 className="auth-form__title">Восстановление пароля</h2>
+      <p className={getSubtitleClass()}>
+        {getSubtitleText()}
       </p>
 
       <form className="form" onSubmit={onSubmit}>
         <div className="form__group">
           <Input
             type="email"
-            placeholder="Почта"
+            placeholder="Введите ваш email"
             value={email}
             onChange={onEmailChange}
             className="form__input"
+            required
           />
         </div>
 
         <SubmitButton
           type="submit"
           className="form__button"
-          disabled={isLoading}
+          disabled={isLoading || !email.trim()}
         >
           {isLoading ? 'Отправка...' : 'Далее'}
         </SubmitButton>
