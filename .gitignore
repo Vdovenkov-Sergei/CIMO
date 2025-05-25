@@ -124,7 +124,7 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
+.env*
 .venv
 env/
 data
@@ -176,21 +176,26 @@ pyrightconfig.json
 
 ### Frontend (React, Vite) ###
 
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
 # Node modules
 node_modules/
 
 # Build output
 dist/
 build/
+dist-ssr
+*.local
 
 # Vite cache
 .vite/
-
-# Logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 
 # Environment variables
 .env
@@ -216,4 +221,8 @@ storybook-static/
 
 # Misc
 .DS_Store
-Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
