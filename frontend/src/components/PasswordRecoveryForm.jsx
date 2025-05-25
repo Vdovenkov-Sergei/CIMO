@@ -8,9 +8,11 @@ const PasswordRecoveryForm = ({
   onSubmit = () => {},
   isLoading = false,
   error = '',
+  backendError = '',
   successMessage = ''
 }) => {
   const getSubtitleText = () => {
+    if (backendError) return backendError;
     if (error) return error;
     if (successMessage) return successMessage;
     return 'На Ваш электронный адрес будет отправлена ссылка для восстановления пароля';
@@ -18,7 +20,7 @@ const PasswordRecoveryForm = ({
 
   const getSubtitleClass = () => {
     let className = "auth-form__subtitle";
-    if (error) className += " auth-form__subtitle--error";
+    if (backendError || error) className += " auth-form__subtitle--error";
     if (successMessage) className += " auth-form__subtitle--success";
     return className;
   };

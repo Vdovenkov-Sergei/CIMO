@@ -10,6 +10,7 @@ const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [backendError, setBackendError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
   const handleSubmit = async (e) => {
@@ -17,11 +18,13 @@ const ForgotPassword = () => {
     
     if (!email.trim()) {
       setError('Введите email');
+      setBackendError('');
       return;
     }
 
     setIsLoading(true);
     setError('');
+    setBackendError('');
     setSuccessMessage('');
 
     try {
@@ -38,14 +41,15 @@ const ForgotPassword = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.detail || data.message || 'Ошибка отправки письма');
+        const errorMessage = data.detail || data.message || 'Ошибка отправки письма';
+        setBackendError(errorMessage);
+        throw new Error(errorMessage);
       }
 
       setSuccessMessage('Письмо отправлено! Проверьте вашу почту');
       
     } catch (err) {
       console.error('Ошибка восстановления пароля:', err);
-      setError(err.message || 'Произошла ошибка при отправке письма');
     } finally {
       setIsLoading(false);
     }
@@ -61,10 +65,12 @@ const ForgotPassword = () => {
           onEmailChange={(e) => {
             setEmail(e.target.value);
             if (error) setError('');
+            if (backendError) setBackendError('');
           }}
           onSubmit={handleSubmit}
           isLoading={isLoading}
           error={error}
+          backendError={backendError}
           successMessage={successMessage}
         />
       </main>

@@ -10,9 +10,11 @@ const PasswordResetForm = ({
   onSubmit = () => {},
   isLoading = false,
   error = '',
+  backendError = '',
   successMessage = ''
 }) => {
   const getSubtitleText = () => {
+    if (backendError) return backendError;
     if (error) return error;
     if (successMessage) return successMessage;
     return 'Пароль должен включать заглавные и строчные буквы и цифры';
@@ -20,7 +22,7 @@ const PasswordResetForm = ({
 
   const getSubtitleClass = () => {
     let className = "auth-form__subtitle";
-    if (error) className += " auth-form__subtitle--error";
+    if (backendError || error) className += " auth-form__subtitle--error";
     if (successMessage) className += " auth-form__subtitle--success";
     return className;
   };

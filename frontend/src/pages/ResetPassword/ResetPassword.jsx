@@ -10,7 +10,7 @@ import PasswordResetForm from '../../components/PasswordResetForm';
 const ResetPassword = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const token = searchParams.get('token'); // Получаем токен из query-параметра
+  const token = searchParams.get('token');
   
   const [formData, setFormData] = useState({
     password: '',
@@ -18,6 +18,7 @@ const ResetPassword = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [backendError, setBackendError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
   const handleSubmit = async (e) => {
@@ -25,21 +26,25 @@ const ResetPassword = () => {
     
     if (!token) {
       setError('Недействительная ссылка для сброса пароля');
+      setBackendError('');
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
       setError('Пароли не совпадают');
+      setBackendError('');
       return;
     }
 
     if (formData.password.length < 8) {
       setError('Пароль должен содержать минимум 8 символов');
+      setBackendError('');
       return;
     }
 
     setIsLoading(true);
     setError('');
+    setBackendError('');
     setSuccessMessage('');
 
     try {
@@ -57,7 +62,9 @@ const ResetPassword = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.detail || data.message || 'Ошибка сброса пароля');
+        const errorMessage = data.detail || data.message || 'Ошибка сброса пароля';
+        setBackendError(errorMessage);
+        throw new Error(errorMessage);
       }
 
       setSuccessMessage('Пароль успешно изменен! Перенаправляем...');
@@ -65,7 +72,6 @@ const ResetPassword = () => {
       
     } catch (err) {
       console.error('Ошибка сброса пароля:', err);
-      setError(err.message || 'Произошла ошибка при сбросе пароля');
     } finally {
       setIsLoading(false);
     }
@@ -82,14 +88,17 @@ const ResetPassword = () => {
           onPasswordChange={(e) => {
             setFormData({...formData, password: e.target.value});
             if (error) setError('');
+            if (backendError) setBackendError('');
           }}
           onConfirmPasswordChange={(e) => {
             setFormData({...formData, confirmPassword: e.target.value});
             if (error) setError('');
+            if (backendError) setBackendError('');
           }}
           onSubmit={handleSubmit}
           isLoading={isLoading}
           error={error}
+          backendError={backendError}
           successMessage={successMessage}
         />
       </main>
