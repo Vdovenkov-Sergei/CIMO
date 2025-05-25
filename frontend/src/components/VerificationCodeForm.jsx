@@ -35,7 +35,7 @@ const VerificationCodeForm = ({
         <div className="form__group">
           <Input
             type="text"
-            placeholder="Введите 6-значный код"
+            placeholder="Введите код"
             value={code}
             onChange={onCodeChange}
             className="form__input"

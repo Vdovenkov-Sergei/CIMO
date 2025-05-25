@@ -67,13 +67,16 @@ const Verification = () => {
       });
 
       const data = await response.json();
-
       if (!response.ok) {
         throw new Error(data.message || 'Неверный код подтверждения');
       }
 
       setSuccessMessage('Код подтверждён! Перенаправляем...');
-      setTimeout(() => navigate('/nickname'), 2000);
+      setTimeout(() => {
+        navigate('/nickname', { 
+          state: { user_id: data.id }
+        });
+      }, 2000);
       
     } catch (err) {
       console.error('Ошибка верификации:', err);

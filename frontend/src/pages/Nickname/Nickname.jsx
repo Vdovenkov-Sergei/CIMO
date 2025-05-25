@@ -19,6 +19,7 @@ const Nickname = () => {
     { id: 3, src: onboarding3, alt: 'Демонстрация функционала 3' },
   ];
 
+
   const [nickname, setNickname] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 

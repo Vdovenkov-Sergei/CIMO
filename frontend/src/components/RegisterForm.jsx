@@ -42,7 +42,7 @@ const RegisterForm = ({
         <div className="form__group">
           <Input
             type="email"
-            placeholder="Email"
+            placeholder="Почта"
             value={email}
             onChange={onEmailChange}
             className="form__input"
