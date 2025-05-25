@@ -1,6 +1,6 @@
 import React from 'react';
-import Input from './Input'; // Импорт вашего компонента Input
-import SubmitButton from './SubmitButton'; // Импорт вашего компонента Button
+import Input from './Input';
+import SubmitButton from './SubmitButton';
 
 const PasswordResetForm = ({
   password = '',
@@ -8,23 +8,40 @@ const PasswordResetForm = ({
   onPasswordChange = () => {},
   onConfirmPasswordChange = () => {},
   onSubmit = () => {},
-  isLoading = false
+  isLoading = false,
+  error = '',
+  successMessage = ''
 }) => {
+  const getSubtitleText = () => {
+    if (error) return error;
+    if (successMessage) return successMessage;
+    return 'Пароль должен включать заглавные и строчные буквы и цифры';
+  };
+
+  const getSubtitleClass = () => {
+    let className = "auth-form__subtitle";
+    if (error) className += " auth-form__subtitle--error";
+    if (successMessage) className += " auth-form__subtitle--success";
+    return className;
+  };
+
   return (
     <section className="auth-form">
       <h2 className="auth-form__title">Придумайте новый пароль</h2>
-      <p className="auth-form__subtitle">
-        Пароль должен включать заглавные и строчные буквы и цифры
+      <p className={getSubtitleClass()}>
+        {getSubtitleText()}
       </p>
 
       <form className="form" onSubmit={onSubmit}>
         <div className="form__group">
           <Input
             type="password"
-            placeholder="Пароль"
+            placeholder="Новый пароль"
             value={password}
             onChange={onPasswordChange}
             className="form__input"
+            required
+            minLength="8"
           />
         </div>
         
@@ -35,13 +52,15 @@ const PasswordResetForm = ({
             value={confirmPassword}
             onChange={onConfirmPasswordChange}
             className="form__input"
+            required
+            minLength="8"
           />
         </div>
 
         <SubmitButton
           type="submit"
           className="form__button"
-          disabled={isLoading}
+          disabled={isLoading || !password || !confirmPassword}
         >
           {isLoading ? 'Сохранение...' : 'Сохранить'}
         </SubmitButton>
