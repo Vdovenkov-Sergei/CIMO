@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination } from 'swiper/modules';
 import './Login.scss';
@@ -9,10 +9,11 @@ import onboarding2 from '@/assets/images/onboarding2.png';
 import onboarding3 from '@/assets/images/onboarding3.png';
 import AuthForm from '../../components/AuthForm';
 import HeaderReg from '../../components/HeaderReg';
-import Footer from '../../components/Footer'
+import Footer from '../../components/Footer';
 import Onboarding from '../../components/Onboarding';
 
 const Login = () => {
+  const navigate = useNavigate();
   const onboardingImages = [
     { id: 1, src: onboarding1, alt: 'Демонстрация функционала 1' },
     { id: 2, src: onboarding2, alt: 'Демонстрация функционала 2' },
@@ -22,12 +23,48 @@ const Login = () => {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!login.trim() || !password.trim()) {
+      setError('Заполните все поля');
+      return;
+    }
+
     setIsLoading(true);
-    console.log('Отправка:', { login, password });
-    setTimeout(() => setIsLoading(false), 2000);
+    setError('');
+    setSuccessMessage('');
+
+    try {
+      const response = await fetch('http://localhost:8000/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          login: login.trim(),
+          password: password.trim()
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || data.message || 'Ошибка авторизации');
+      }
+
+      setSuccessMessage('Вход выполнен успешно!');
+      setTimeout(() => navigate('/modeSelection'), 1500);
+      
+    } catch (err) {
+      console.error('Ошибка авторизации:', err);
+      setError(err.message || 'Произошла ошибка при входе');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -44,10 +81,18 @@ const Login = () => {
         <AuthForm
           login={login}
           password={password}
-          onLoginChange={(e) => setLogin(e.target.value)}
-          onPasswordChange={(e) => setPassword(e.target.value)}
+          onLoginChange={(e) => {
+            setLogin(e.target.value);
+            if (error) setError('');
+          }}
+          onPasswordChange={(e) => {
+            setPassword(e.target.value);
+            if (error) setError('');
+          }}
           onSubmit={handleSubmit}
           isLoading={isLoading}
+          error={error}
+          successMessage={successMessage}
         />
       </main>
 

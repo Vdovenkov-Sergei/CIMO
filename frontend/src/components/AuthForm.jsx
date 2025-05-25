@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import Input from './Input'; // Предполагается, что Input уже реализован
-import SubmitButton from './SubmitButton'; // Предполагается, что SubmitButton уже реализован
+import Input from './Input';
+import SubmitButton from './SubmitButton';
 
 const AuthForm = ({ 
   login, 
@@ -9,20 +9,38 @@ const AuthForm = ({
   onLoginChange, 
   onPasswordChange, 
   onSubmit, 
-  isLoading = false 
+  isLoading = false,
+  error = '',
+  successMessage = ''
 }) => {
+  const getSubtitleText = () => {
+    if (error) return error;
+    if (successMessage) return successMessage;
+    return 'Пожалуйста, авторизуйтесь';
+  };
+
+  const getSubtitleClass = () => {
+    let className = "auth-form__subtitle";
+    if (error) className += " auth-form__subtitle--error";
+    if (successMessage) className += " auth-form__subtitle--success";
+    return className;
+  };
+
   return (
     <section className="auth-form">
       <h2 className="auth-form__title">С возвращением!</h2>
-      <p className="auth-form__subtitle">Пожалуйста, авторизуйтесь</p>
+      <p className={getSubtitleClass()}>
+        {getSubtitleText()}
+      </p>
 
       <form className="form" onSubmit={onSubmit}>
         <div className="form__group">
           <Input
             type="text"
-            placeholder="Логин"
+            placeholder="Почта или никнейм"
             value={login}
             onChange={onLoginChange}
+            required
           />
         </div>
 
@@ -32,6 +50,7 @@ const AuthForm = ({
             placeholder="Пароль"
             value={password}
             onChange={onPasswordChange}
+            required
           />
           <Link to="/forgotPassword" className="form__link">
             Забыли пароль?
@@ -39,7 +58,7 @@ const AuthForm = ({
         </div>
 
         <SubmitButton disabled={isLoading}>
-          {isLoading ? 'Загрузка...' : 'Войти'}
+          {isLoading ? 'Вход...' : 'Войти'}
         </SubmitButton>
 
         <p className="form__footer-text">
