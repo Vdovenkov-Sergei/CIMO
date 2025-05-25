@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination } from 'swiper/modules';
 import './ForgotPassword.scss';
@@ -8,7 +7,6 @@ import HeaderReg from '../../components/HeaderReg';
 import PasswordRecoveryForm from '../../components/PasswordRecoveryForm';
 
 const ForgotPassword = () => {
-  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
