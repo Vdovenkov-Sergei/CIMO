@@ -1,4 +1,3 @@
-// WatchedScroll.js
 import React, { useEffect, useRef } from 'react';
 import WatchedCard from './WatchedCard';
 
@@ -28,7 +27,7 @@ const WatchedScroll = ({ movies, onUnwatch, loadMore, hasMore }) => {
     <div className="movies-scroll" ref={scrollRef}>
       {movies.map(obj => (
         <WatchedCard 
-          key={`watched-${obj.movie.id}`} // Уникальный ключ с префиксом
+          key={`watched-${obj.movie.id}`}
           movie={obj.movie} 
           onUnwatch={() => onUnwatch(obj.movie)}
         />

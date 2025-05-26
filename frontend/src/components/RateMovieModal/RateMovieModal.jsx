@@ -1,4 +1,3 @@
-// RateMovieModal.js
 import React, { useState } from 'react';
 import './RateMovieModal.scss';
 
@@ -8,8 +7,8 @@ const RateMovieModal = ({ isOpen, onClose, onSubmit, movie, isLoading }) => {
   if (!isOpen || !movie) return null;
 
   const handleSubmit = () => {
-    onSubmit(rating); // Передаем только рейтинг (число)
-    setRating(5); // Сбрасываем рейтинг после отправки
+    onSubmit(rating);
+    setRating(5);
   };
 
   return (

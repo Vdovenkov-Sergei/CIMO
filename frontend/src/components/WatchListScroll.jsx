@@ -1,4 +1,3 @@
-// WatchListScroll.js
 import React, { useEffect, useRef } from 'react';
 import WatchlistCard from './WatchListCard';
 
@@ -28,7 +27,7 @@ const WatchListScroll = ({ movies, onWatch, onDelete, loadMore, hasMore }) => {
     <div className="movies-scroll" ref={scrollRef}>
       {movies.map(obj => (
         <WatchlistCard
-          key={`watchlist-${obj.movie.id}`} // Уникальный ключ с префиксом
+          key={`watchlist-${obj.movie.id}`}
           movie={obj.movie}
           onWatch={() => onWatch(obj.movie)}
           onDelete={onDelete}

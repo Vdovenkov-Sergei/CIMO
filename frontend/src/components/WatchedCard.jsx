@@ -1,4 +1,3 @@
-// WatchedCard.js
 import React from 'react';
 import UnwatchButton from './UnwatchButton';
 

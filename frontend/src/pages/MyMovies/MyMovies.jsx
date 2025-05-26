@@ -1,4 +1,3 @@
-// MyMovies.js
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './MyMovies.scss';
@@ -90,12 +89,11 @@ const MyMovies = () => {
     setRatingModalOpen(true);
   };
 
-  const handleRatingSubmit = async (rating) => { // Принимаем только рейтинг
+  const handleRatingSubmit = async (rating) => {
     setIsLoading(true);
     setError('');
     
     try {
-      // 1. Добавляем фильм в просмотренные с рейтингом
       const addResponse = await fetch('/api/movies/viewed/', {
         method: 'POST',
         credentials: 'include',
@@ -104,7 +102,7 @@ const MyMovies = () => {
         },
         body: JSON.stringify({
           movie_id: movieToRate.id,
-          review: rating.toString() // Конвертируем число в строку
+          review: rating.toString()
         }),
       });
   
@@ -112,7 +110,6 @@ const MyMovies = () => {
         throw new Error('Ошибка добавления рецензии');
       }
   
-      // 2. Удаляем из отложенных
       const deleteResponse = await fetch(`/api/movies/later/${movieToRate.id}`, {
         method: 'DELETE',
         credentials: 'include',
@@ -121,8 +118,7 @@ const MyMovies = () => {
       if (!deleteResponse.ok) {
         throw new Error('Ошибка удаления из отложенных');
       }
-  
-      // 3. Обновляем списки
+
       await Promise.all([fetchWatchlist(0), fetchWatched(0)]);
       
     } catch (err) {
@@ -140,7 +136,6 @@ const MyMovies = () => {
     setError('');
     
     try {
-      // Добавляем фильм в отложенные
       const addResponse = await fetch('/api/movies/later/', {
         method: 'POST',
         credentials: 'include',
@@ -156,7 +151,6 @@ const MyMovies = () => {
         throw new Error('Ошибка добавления в отложенные');
       }
 
-      // Удаляем фильм из просмотренных
       const deleteResponse = await fetch(`/api/movies/viewed/${movie.id}`, {
         method: 'DELETE',
         credentials: 'include',
@@ -166,7 +160,6 @@ const MyMovies = () => {
         throw new Error('Ошибка удаления из просмотренных');
       }
 
-      // Обновляем списки
       await fetchWatchlist(0);
       await fetchWatched(0);
     } catch (err) {
@@ -177,7 +170,7 @@ const MyMovies = () => {
     }
   };
 
-  const removeMovie = async (movieId, isWatched) => {
+  const removeMovie = async (movieId) => {
     setIsLoading(true);
     setError('');
     
@@ -186,17 +179,16 @@ const MyMovies = () => {
         method: 'DELETE',
         credentials: 'include',
       });
-
+  
       if (!response.ok) {
         throw new Error('Ошибка удаления фильма');
       }
-
-      // Обновляем соответствующий список
-      if (isWatched) {
-        setWatchedMovies(prev => prev.filter(m => m.id !== movieId));
-      } else {
-        setWatchlistMovies(prev => prev.filter(m => m.id !== movieId));
-      }
+  
+      await Promise.all([
+        fetchWatchlist(0),
+        fetchWatched(0)
+      ]);
+      
     } catch (err) {
       console.error('Error removing movie:', err);
       setError(err.message);
@@ -238,7 +230,7 @@ const MyMovies = () => {
           <WatchListScroll
             movies={watchlistMovies}
             onWatch={handleWatchClick}
-            onDelete={(id) => removeMovie(id, false)}
+            onDelete={removeMovie}
             loadMore={loadMoreWatchlist}
             hasMore={hasMoreWatchlist}
           />

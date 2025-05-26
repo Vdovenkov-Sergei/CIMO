@@ -1,4 +1,3 @@
-// WatchListCard.js
 import React from 'react';
 import WatchButton from './WatchButton';
 import DeleteButton from './DeleteButton';
@@ -10,7 +9,7 @@ const WatchlistCard = ({ movie, onWatch, onDelete }) => {
       <h3 className="movie-card__title">{movie.name}</h3>
       <div className="movie-card__buttons">
         <WatchButton onClick={() => onWatch(movie)} />
-        <DeleteButton onClick={() => onDelete(movie.id)} />
+        <DeleteButton onClick={() => onDelete(movie.id)} /> {/* Передаем только id */}
       </div>
     </div>
   );
