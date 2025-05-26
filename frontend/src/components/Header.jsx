@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import CimoLogo from '../assets/images/CIMO_logo.svg'; // Импорт логотипа
-import ProfileIcon from '../assets/images/person-square.svg'; // Импорт иконки профиля
+import { Link, useNavigate } from 'react-router-dom';
+import CimoLogo from '../assets/images/CIMO_logo.svg';
+import ProfileIcon from '../assets/images/person-square.svg';
 
 const Header = () => {
+  const navigate = useNavigate();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
   const toggleProfileMenu = () => {
@@ -12,6 +13,29 @@ const Header = () => {
 
   const closeProfileMenu = () => {
     setIsProfileMenuOpen(false);
+  };
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Ошибка выхода');
+      }
+
+      localStorage.removeItem('token');
+      navigate('/');
+    } catch (err) {
+      console.error('Ошибка выхода:', err);
+    } finally {
+      closeProfileMenu();
+    }
   };
 
   return (
@@ -29,7 +53,15 @@ const Header = () => {
                 <Link to="/myMovies" onClick={closeProfileMenu}>Мои фильмы</Link>
               </li>
               <li>
-                <Link to="/" onClick={closeProfileMenu}>Выход</Link>
+                <a 
+                  href="#" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleLogout();
+                  }}
+                >
+                  Выход
+                </a>
               </li>
             </ul>
           )}
