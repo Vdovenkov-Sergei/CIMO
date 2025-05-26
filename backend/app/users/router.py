@@ -2,7 +2,6 @@ import secrets
 from datetime import timedelta
 
 from fastapi import APIRouter, Cookie, Depends, Response
-from pydantic import EmailStr
 
 from app.config import settings
 from app.constants import RedisKeys, Tokens, Verification
