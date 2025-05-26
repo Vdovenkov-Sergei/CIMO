@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+// MyMovies.js
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './MyMovies.scss';
 import Footer from '../../components/Footer';
@@ -8,59 +9,213 @@ import WatchedScroll from '../../components/WatchedScroll';
 import RateMovieModal from '../../components/RateMovieModal/RateMovieModal';
 
 const MyMovies = () => {
-  const [showDetails, setShowDetails] = useState(null);
-
-  const [movies, setMovies] = useState({
-    watchlist: [
-      { id: 1, title: 'Фильм1', poster: '/movies/poster1.jpg', watched: false },
-      { id: 2, title: 'Фильм2', poster: '/movies/poster2.jpg', watched: false },
-      { id: 3, title: 'Фильм3', poster: '/movies/poster3.jpg', watched: false },
-      { id: 4, title: 'Фильм4', poster: '/movies/poster4.jpg', watched: false },
-    ],
-    watched: [
-      { id: 5, title: 'Фильм5', poster: '/movies/poster5.jpg', watched: true },
-      { id: 6, title: 'Фильм6', poster: '/movies/poster6.jpg', watched: true },
-    ]
-  });
-
+  const [watchlistMovies, setWatchlistMovies] = useState([]);
+  const [watchedMovies, setWatchedMovies] = useState([]);
+  const [watchlistOffset, setWatchlistOffset] = useState(0);
+  const [watchedOffset, setWatchedOffset] = useState(0);
+  const [hasMoreWatchlist, setHasMoreWatchlist] = useState(true);
+  const [hasMoreWatched, setHasMoreWatched] = useState(true);
   const [ratingModalOpen, setRatingModalOpen] = useState(false);
   const [movieToRate, setMovieToRate] = useState(null);
+  const [reviewSort, setReviewSort] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleWatchClick = (id) => {
-    const movie = movies.watchlist.find(m => m.id === id);
+  const fetchWatchlist = async (offset = 0, limit = 10) => {
+    setIsLoading(true);
+    setError('');
+    
+    try {
+      const response = await fetch(`/api/movies/later/?offset=${offset}&limit=${limit}`, {
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Ошибка загрузки отложенных фильмов');
+      }
+
+      const data = await response.json();
+      
+      if (offset === 0) {
+        setWatchlistMovies(data);
+      } else {
+        setWatchlistMovies(prev => [...prev, ...data]);
+      }
+      setHasMoreWatchlist(data.length === limit);
+    } catch (err) {
+      console.error('Error fetching watchlist:', err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchWatched = async (offset = 0, limit = 10) => {
+    setIsLoading(true);
+    setError('');
+    
+    try {
+      const response = await fetch(
+        `/api/movies/viewed/?offset=${offset}&limit=${limit}&order_review=${reviewSort}`, 
+        { credentials: 'include' }
+      );
+
+      if (!response.ok) {
+        throw new Error('Ошибка загрузки просмотренных фильмов');
+      }
+
+      const data = await response.json();
+      
+      if (offset === 0) {
+        setWatchedMovies(data);
+      } else {
+        setWatchedMovies(prev => [...prev, ...data]);
+      }
+      setHasMoreWatched(data.length === limit);
+    } catch (err) {
+      console.error('Error fetching watched movies:', err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchWatchlist();
+    fetchWatched();
+  }, [reviewSort]);
+
+  const handleWatchClick = (movie) => {
     setMovieToRate(movie);
     setRatingModalOpen(true);
   };
 
-  const handleRatingSubmit = (id, rating) => {
-    setMovies(prev => {
-      const movie = prev.watchlist.find(m => m.id === id);
-      const ratedMovie = { ...movie, watched: true, rating };
-      return {
-        watchlist: prev.watchlist.filter(m => m.id !== id),
-        watched: [...prev.watched, ratedMovie]
-      };
-    });
-    setRatingModalOpen(false);
-    setMovieToRate(null);
+  const handleRatingSubmit = async (review) => {
+    setIsLoading(true);
+    setError('');
+    
+    try {
+      // Добавляем фильм в просмотренные
+      const addResponse = await fetch('/api/movies/viewed/', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          movie_id: movieToRate.id,
+          review: review
+        }),
+      });
+
+      if (!addResponse.ok) {
+        throw new Error('Ошибка добавления рецензии');
+      }
+
+      // Удаляем фильм из отложенных
+      const deleteResponse = await fetch(`/api/movies/later/${movieToRate.id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (!deleteResponse.ok) {
+        throw new Error('Ошибка удаления из отложенных');
+      }
+
+      // Обновляем списки
+      await fetchWatchlist(0);
+      await fetchWatched(0);
+      
+      setRatingModalOpen(false);
+      setMovieToRate(null);
+    } catch (err) {
+      console.error('Error submitting rating:', err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const markAsUnwatched = (id) => {
-    setMovies(prev => {
-      const film = prev.watched.find(m => m.id === id);
-      return {
-        watched: prev.watched.filter(m => m.id !== id),
-        watchlist: [...prev.watchlist, { ...film, watched: false }]
-      };
-    });
+  const markAsUnwatched = async (movie) => {
+    setIsLoading(true);
+    setError('');
+    
+    try {
+      // Добавляем фильм в отложенные
+      const addResponse = await fetch('/api/movies/later/', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          movie_id: movie.id
+        }),
+      });
+
+      if (!addResponse.ok) {
+        throw new Error('Ошибка добавления в отложенные');
+      }
+
+      // Удаляем фильм из просмотренных
+      const deleteResponse = await fetch(`/api/movies/viewed/${movie.id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (!deleteResponse.ok) {
+        throw new Error('Ошибка удаления из просмотренных');
+      }
+
+      // Обновляем списки
+      await fetchWatchlist(0);
+      await fetchWatched(0);
+    } catch (err) {
+      console.error('Error marking as unwatched:', err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const removeMovie = (id, isWatched) => {
-    setMovies(prev => ({
-      ...prev,
-      [isWatched ? 'watched' : 'watchlist']:
-        prev[isWatched ? 'watched' : 'watchlist'].filter(m => m.id !== id)
-    }));
+  const removeMovie = async (movieId, isWatched) => {
+    setIsLoading(true);
+    setError('');
+    
+    try {
+      const response = await fetch(`/api/movies/later/${movieId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Ошибка удаления фильма');
+      }
+
+      // Обновляем соответствующий список
+      if (isWatched) {
+        setWatchedMovies(prev => prev.filter(m => m.id !== movieId));
+      } else {
+        setWatchlistMovies(prev => prev.filter(m => m.id !== movieId));
+      }
+    } catch (err) {
+      console.error('Error removing movie:', err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadMoreWatchlist = () => {
+    const newOffset = watchlistOffset + 10;
+    setWatchlistOffset(newOffset);
+    fetchWatchlist(newOffset);
+  };
+
+  const loadMoreWatched = () => {
+    const newOffset = watchedOffset + 10;
+    setWatchedOffset(newOffset);
+    fetchWatched(newOffset);
   };
 
   return (
@@ -76,20 +231,29 @@ const MyMovies = () => {
           <Link to='/myMovies' className="navigation__link">Мои фильмы</Link>
         </div>
 
+        {error && <div className="error-message">{error}</div>}
+        {isLoading && <div className="loading-indicator">Загрузка...</div>}
+
         <section className="movies-section">
           <h2 className="movies-section__title">Отложенные фильмы</h2>
           <WatchListScroll
-            movies={movies.watchlist}
+            movies={watchlistMovies}
             onWatch={handleWatchClick}
             onDelete={(id) => removeMovie(id, false)}
+            loadMore={loadMoreWatchlist}
+            hasMore={hasMoreWatchlist}
           />
         </section>
 
         <section className="movies-section">
-          <h2 className="movies-section__title">Просмотренные фильмы</h2>
+          <div className="movies-section__header">
+            <h2 className="movies-section__title">Просмотренные фильмы</h2>
+          </div>
           <WatchedScroll
-            movies={movies.watched}
+            movies={watchedMovies}
             onUnwatch={markAsUnwatched}
+            loadMore={loadMoreWatched}
+            hasMore={hasMoreWatched}
           />
         </section>
       </main>
@@ -99,6 +263,7 @@ const MyMovies = () => {
         onClose={() => setRatingModalOpen(false)}
         onSubmit={handleRatingSubmit}
         movie={movieToRate}
+        isLoading={isLoading}
       />
 
       <Footer />

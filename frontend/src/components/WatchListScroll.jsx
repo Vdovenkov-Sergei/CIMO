@@ -1,14 +1,36 @@
-import React from 'react';
+// WatchListScroll.js
+import React, { useEffect, useRef } from 'react';
 import WatchlistCard from './WatchListCard';
 
-const WatchListScroll = ({ movies, onWatch, onDelete }) => {
+const WatchListScroll = ({ movies, onWatch, onDelete, loadMore, hasMore }) => {
+  const scrollRef = useRef();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        scrollRef.current &&
+        scrollRef.current.scrollLeft + scrollRef.current.clientWidth >= 
+        scrollRef.current.scrollWidth - 100 &&
+        hasMore
+      ) {
+        loadMore();
+      }
+    };
+
+    const scrollContainer = scrollRef.current;
+    if (scrollContainer) {
+      scrollContainer.addEventListener('scroll', handleScroll);
+      return () => scrollContainer.removeEventListener('scroll', handleScroll);
+    }
+  }, [loadMore, hasMore]);
+
   return (
-    <div className="movies-scroll">
-      {movies.map(movie => (
+    <div className="movies-scroll" ref={scrollRef}>
+      {movies.map(obj => (
         <WatchlistCard
-          key={movie.id}
-          movie={movie}
-          onWatch={onWatch}
+          key={`watchlist-${obj.movie.id}`} // Уникальный ключ с префиксом
+          movie={obj.movie}
+          onWatch={() => onWatch(obj.movie)}
           onDelete={onDelete}
         />
       ))}
