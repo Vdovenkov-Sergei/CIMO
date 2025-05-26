@@ -3,6 +3,7 @@ from datetime import timedelta
 
 from fastapi import APIRouter, Cookie, Depends, Response
 from pydantic import EmailStr
+import numpy as np
 
 from app.config import settings
 from app.constants import RedisKeys, Tokens, Verification
@@ -32,6 +33,7 @@ from app.users.schemas import (
     SUserVerifyPassword,
 )
 from app.users.utils import Hashing, send_verification_code
+from app.recommendation.index import faiss_index
 
 router_auth = APIRouter(prefix="/auth", tags=["Authentication"])
 router_user = APIRouter(prefix="/users", tags=["User"])
@@ -106,6 +108,10 @@ async def verify_email(user_data: SUserVerification) -> dict[str, str | int]:
     user = await UserDAO.add_user(email=email, hashed_password=hashed_password)
     await UserDAO.update_user(user_id=user.id, update_data={"user_name": f"user_{user.id}"})
     logger.debug("Default username set for user.", extra={"user_id": user.id, "user_name": f"user_{user.id}"})
+
+    empty_user_vector = np.zeros(faiss_index.index.d, dtype=np.float32)
+    await redis_client.set(f"user_vector:{user.id}", empty_user_vector.tobytes())
+    logger.info("Initialized empty user embedding vector in Redis.", extra={"user_id": user.id})
 
     logger.info("User registered successfully.", extra={"user_id": user.id, "email": email})
     return {"message": "Email successfully verified and user registered.", "id": user.id}

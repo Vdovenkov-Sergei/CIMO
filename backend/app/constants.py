@@ -46,3 +46,4 @@ class General:
     ROUND: int = 4
     VOWELS: str = "aeiou"
     CVC_MASK: list[bool] = [False, True, False]
+    N_CLUSTERS: int = 100

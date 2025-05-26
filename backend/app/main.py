@@ -1,5 +1,3 @@
-# type: ignore
-
 import logging
 import time
 from contextlib import asynccontextmanager
@@ -45,6 +43,7 @@ from app.sessions.router import router as router_sessions
 from app.users.router import router_auth, router_user
 from app.viewed_movies.router import router as router_viewed_movies
 from app.watch_later_movies.router import router as router_watch_later_movies
+from app.recommendation.index import faiss_index
 
 
 @asynccontextmanager
@@ -75,6 +74,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
         )
         raise
 
+    faiss_index.load()
     yield
 
     logger.info("Shutting down application...")

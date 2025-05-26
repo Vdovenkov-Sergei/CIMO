@@ -24,7 +24,7 @@ def load_data(path_to_file: str, table_name: str) -> None:
         raise
 
 
-load_data(f"/app/data/{Movie.__tablename__}.pkl", Movie.__tablename__)
-load_data(f"/app/data/{Person.__tablename__}.pkl", Person.__tablename__)
-load_data(f"/app/data/{MovieRole.__tablename__}.pkl", MovieRole.__tablename__)
-load_data(f"/app/data/{User.__tablename__}.pkl", User.__tablename__)
+load_data(f"./app/data/{Movie.__tablename__}.pkl", Movie.__tablename__)
+load_data(f"./app/data/{Person.__tablename__}.pkl", Person.__tablename__)
+load_data(f"./app/data/{MovieRole.__tablename__}.pkl", MovieRole.__tablename__)
+load_data(f"./app/data/{User.__tablename__}.pkl", User.__tablename__)
