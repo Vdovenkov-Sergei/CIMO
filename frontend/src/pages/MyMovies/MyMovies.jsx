@@ -90,12 +90,12 @@ const MyMovies = () => {
     setRatingModalOpen(true);
   };
 
-  const handleRatingSubmit = async (review) => {
+  const handleRatingSubmit = async (rating) => { // Принимаем только рейтинг
     setIsLoading(true);
     setError('');
     
     try {
-      // Добавляем фильм в просмотренные
+      // 1. Добавляем фильм в просмотренные с рейтингом
       const addResponse = await fetch('/api/movies/viewed/', {
         method: 'POST',
         credentials: 'include',
@@ -104,35 +104,34 @@ const MyMovies = () => {
         },
         body: JSON.stringify({
           movie_id: movieToRate.id,
-          review: review
+          review: rating.toString() // Конвертируем число в строку
         }),
       });
-
+  
       if (!addResponse.ok) {
         throw new Error('Ошибка добавления рецензии');
       }
-
-      // Удаляем фильм из отложенных
+  
+      // 2. Удаляем из отложенных
       const deleteResponse = await fetch(`/api/movies/later/${movieToRate.id}`, {
         method: 'DELETE',
         credentials: 'include',
       });
-
+  
       if (!deleteResponse.ok) {
         throw new Error('Ошибка удаления из отложенных');
       }
-
-      // Обновляем списки
-      await fetchWatchlist(0);
-      await fetchWatched(0);
+  
+      // 3. Обновляем списки
+      await Promise.all([fetchWatchlist(0), fetchWatched(0)]);
       
-      setRatingModalOpen(false);
-      setMovieToRate(null);
     } catch (err) {
       console.error('Error submitting rating:', err);
       setError(err.message);
     } finally {
       setIsLoading(false);
+      setRatingModalOpen(false);
+      setMovieToRate(null);
     }
   };
 
