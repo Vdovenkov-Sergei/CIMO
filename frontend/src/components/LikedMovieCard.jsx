@@ -7,6 +7,7 @@ const LikedMovieCard = ({ movie, onClick }) => {
       onClick={onClick}
     >
       <img src={movie.poster} alt={movie.title} />
+      <h3 className="liked-movie__title">{movie.title}</h3>
     </div>
   );
 };

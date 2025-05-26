@@ -21,7 +21,6 @@ const SwipeableMovieCard = ({ movie, onClick, onSwipe, className }) => {
         <h3>{movie.title}</h3>
         <div className="movie-meta">
           <span>{movie.year}</span>
-          <span>★ {movie.kpRating}</span>
         </div>
       </div>
     </motion.div>
