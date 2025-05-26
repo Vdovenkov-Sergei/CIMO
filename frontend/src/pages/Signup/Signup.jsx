@@ -62,7 +62,7 @@ const Signup = () => {
     setSuccessMessage('');
     
     try {
-      const response = await fetch('http://localhost:8000/auth/register/email', {
+      const response = await fetch('/api/auth/register/email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

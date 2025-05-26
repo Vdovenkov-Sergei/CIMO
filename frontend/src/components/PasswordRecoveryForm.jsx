@@ -49,7 +49,7 @@ const PasswordRecoveryForm = ({
           className="form__button"
           disabled={isLoading || !email.trim()}
         >
-          {isLoading ? 'Отправка...' : 'Далее'}
+          {isLoading ? 'Отправка...' : 'Отправить'}
         </SubmitButton>
       </form>
     </section>

@@ -20,10 +20,11 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: EnvironmentPlugin.VITE_API_URL,
+        target: 'http://localhost:8000',
         changeOrigin: true,
+        secure: false,
         rewrite: (path) => path.replace(/^\/api/, ''),
-      },
+      }
     },
   },
 });

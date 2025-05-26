@@ -48,7 +48,7 @@ const Verification = () => {
     setBackendError('');
 
     try {
-      const response = await fetch('http://localhost:8000/auth/register/verify', {
+      const response = await fetch('/api/auth/register/verify', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -87,7 +87,7 @@ const Verification = () => {
     setBackendError('');
     
     try {
-      const response = await fetch('http://localhost:8000/auth/register/resend', {
+      const response = await fetch('/api/auth/register/resend', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

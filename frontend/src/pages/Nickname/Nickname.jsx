@@ -43,7 +43,7 @@ const Nickname = () => {
     setSuccessMessage('');
 
     try {
-      const response = await fetch('http://localhost:8000/auth/register/username', {
+      const response = await fetch('/api/auth/register/username', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
