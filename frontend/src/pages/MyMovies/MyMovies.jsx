@@ -5,7 +5,7 @@ import Footer from '../../components/Footer';
 import Header from '../../components/Header';
 import WatchListScroll from '../../components/WatchListScroll';
 import WatchedScroll from '../../components/WatchedScroll';
-import MovieDetailsModal from '../../components/MovieDetailsModal';
+import RateMovieModal from '../../components/RateMovieModal/RateMovieModal';
 
 const MyMovies = () => {
   const [showDetails, setShowDetails] = useState(null);
@@ -23,14 +23,26 @@ const MyMovies = () => {
     ]
   });
 
-  const markAsWatched = (id) => {
+  const [ratingModalOpen, setRatingModalOpen] = useState(false);
+  const [movieToRate, setMovieToRate] = useState(null);
+
+  const handleWatchClick = (id) => {
+    const movie = movies.watchlist.find(m => m.id === id);
+    setMovieToRate(movie);
+    setRatingModalOpen(true);
+  };
+
+  const handleRatingSubmit = (id, rating) => {
     setMovies(prev => {
-      const film = prev.watchlist.find(m => m.id === id);
+      const movie = prev.watchlist.find(m => m.id === id);
+      const ratedMovie = { ...movie, watched: true, rating };
       return {
         watchlist: prev.watchlist.filter(m => m.id !== id),
-        watched: [...prev.watched, { ...film, watched: true }]
+        watched: [...prev.watched, ratedMovie]
       };
     });
+    setRatingModalOpen(false);
+    setMovieToRate(null);
   };
 
   const markAsUnwatched = (id) => {
@@ -46,7 +58,7 @@ const MyMovies = () => {
   const removeMovie = (id, isWatched) => {
     setMovies(prev => ({
       ...prev,
-      [isWatched ? 'watched' : 'watchlist']: 
+      [isWatched ? 'watched' : 'watchlist']:
         prev[isWatched ? 'watched' : 'watchlist'].filter(m => m.id !== id)
     }));
   };
@@ -66,21 +78,28 @@ const MyMovies = () => {
 
         <section className="movies-section">
           <h2 className="movies-section__title">Отложенные фильмы</h2>
-          <WatchListScroll 
-            movies={movies.watchlist} 
-            onWatch={markAsWatched}
+          <WatchListScroll
+            movies={movies.watchlist}
+            onWatch={handleWatchClick}
             onDelete={(id) => removeMovie(id, false)}
           />
         </section>
 
         <section className="movies-section">
           <h2 className="movies-section__title">Просмотренные фильмы</h2>
-          <WatchedScroll 
-            movies={movies.watched} 
+          <WatchedScroll
+            movies={movies.watched}
             onUnwatch={markAsUnwatched}
           />
         </section>
       </main>
+
+      <RateMovieModal
+        isOpen={ratingModalOpen}
+        onClose={() => setRatingModalOpen(false)}
+        onSubmit={handleRatingSubmit}
+        movie={movieToRate}
+      />
 
       <Footer />
     </div>

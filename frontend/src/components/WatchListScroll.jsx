@@ -5,9 +5,9 @@ const WatchListScroll = ({ movies, onWatch, onDelete }) => {
   return (
     <div className="movies-scroll">
       {movies.map(movie => (
-        <WatchlistCard 
-          key={movie.id} 
-          movie={movie} 
+        <WatchlistCard
+          key={movie.id}
+          movie={movie}
           onWatch={onWatch}
           onDelete={onDelete}
         />

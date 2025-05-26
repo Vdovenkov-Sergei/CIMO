@@ -1,0 +1,99 @@
+@import '../../styles/variables';
+
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .modal {
+    background: $modal-color;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    width: 90%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+
+    h2 {
+        font-size: 22px;
+    }
+    input {
+        margin-top: 20px;
+    }
+  }
+  
+  .rating-display {
+    margin-top: 20px;
+    font-size: 18px;
+  }
+  
+  .modal-buttons {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+
+    &-cancel {
+        width: 150px;
+        padding: 12px 24px;
+        text-decoration: none;
+        background-color: $red-button;
+        color: #FFFFFF;
+        border-radius: 6px;
+        border: none;
+        font-family: $primary-font;
+        font-weight: 500;
+        cursor: pointer;
+        font-size: 16px;
+        text-align: center;
+    
+        &:hover {
+          background-color: $red-button-hover;
+        }
+      }
+
+      &-save {
+        width: 150px;
+        padding: 12px 24px;
+        text-decoration: none;
+        background-color: $button-color;
+        color: #FFFFFF;
+        border-radius: 6px;
+        border: none;
+        font-family: $primary-font;
+        font-weight: 500;
+        cursor: pointer;
+        font-size: 16px;
+        text-align: center;
+    
+        &:hover {
+          background-color: #4631D1;
+        }
+      }
+  }
+  
+  @media (max-width: 600px) {
+    .modal {
+      padding: 16px;
+      width: 95%;
+    }
+  
+    .modal-buttons {
+      flex-direction: column;
+      gap: 10px;
+  
+      &-cancel, &-save {
+        width: 100%;
+      }
+    }
+  }
