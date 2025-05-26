@@ -50,10 +50,12 @@ class SessionDAO(BaseDAO[Session]):
 
     @classmethod
     @log_db_add("Add session")
-    async def add_session(cls, *, user_id: int, is_pair: bool, session_id: Optional[uuid.UUID] = None) -> Session:
+    async def add_session(
+        cls, *, user_id: int, session_id: Optional[uuid.UUID] = None, is_pair: bool = False, is_onboarding: bool = False
+    ) -> Session:
         if session_id is None:
-            return await cls.add_record(user_id=user_id, is_pair=is_pair)
-        return await cls.add_record(id=session_id, user_id=user_id, is_pair=is_pair)
+            return await cls.add_record(user_id=user_id, is_pair=is_pair, is_onboarding=is_onboarding)
+        return await cls.add_record(id=session_id, user_id=user_id, is_pair=is_pair, is_onboarding=is_onboarding)
 
     @classmethod
     @log_db_delete("Clean completed sessions")

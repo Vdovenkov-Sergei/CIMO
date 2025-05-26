@@ -19,6 +19,7 @@ from app.sessions.models import Session, SessionStatus
 from app.sessions.schemas import SSessionCreate, SSessionRead, SSessionUpdate
 from app.users.dependencies import get_current_user
 from app.users.models import User
+from app.recommendation.service import recommender
 
 router = APIRouter(prefix="/sessions", tags=["Sessions"])
 
@@ -33,12 +34,14 @@ async def get_user_session(user: User = Depends(get_current_user)) -> Optional[S
 async def create_session(data: SSessionCreate, user: User = Depends(get_current_user)) -> SSessionRead:
     existing_session = await SessionDAO.find_existing_session(user_id=user.id)
     if existing_session and existing_session.is_pair == data.is_pair:
-        logger.info("Returning existing session of same type.", extra={"pair": data.is_pair})
+        logger.info(
+            "Returning existing session of same type.", extra={"pair": data.is_pair, "onboarding": data.is_onboarding}
+        )
         return SSessionRead.model_validate(existing_session)
     if existing_session:
         logger.warning("User already in a session.", extra={"session_id": existing_session.id, "user_id": user.id})
         raise UserAlreadyInSessionException(user_id=user.id, session_id=str(existing_session.id))
-    session = await SessionDAO.add_session(user_id=user.id, is_pair=data.is_pair)
+    session = await SessionDAO.add_session(user_id=user.id, is_pair=data.is_pair, is_onboarding=data.is_onboarding)
     return SSessionRead.model_validate(session)
 
 
@@ -87,10 +90,10 @@ async def check_ready_participants(session_id: uuid.UUID) -> bool:
     return ready_flag
 
 
-@router.patch("/status", response_model=dict[str, str])
+@router.patch("/status", response_model=dict[str, str | int])
 async def change_session_status(
     data: SSessionUpdate, session: Session = Depends(get_current_session)
-) -> dict[str, str]:
+) -> dict[str, str | int]:
     new_status = data.status
     update_fields: dict[str, Any] = {"status": new_status}
 
@@ -102,7 +105,14 @@ async def change_session_status(
         logger.info("User ended session.", extra={"time": update_fields["ended_at"], "user_id": session.user_id})
 
     await SessionDAO.update_session(session_id=session.id, user_id=session.user_id, update_data=update_fields)
-    return {"message": "Session status updated successfully."}
+
+    response_data: dict[str, str | int] = {"message": "Session status updated successfully."}
+    if new_status == SessionStatus.ACTIVE:
+        first_movie_id = await recommender.get_new_movie(
+            user_id=session.user_id, is_pair=session.is_pair, is_onboarding=session.is_onboarding
+        )
+        response_data["movie_id"] = first_movie_id
+    return response_data
 
 
 @router.delete("/leave", response_model=dict[str, str])

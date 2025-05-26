@@ -8,6 +8,7 @@ from app.sessions.models import SessionStatus
 
 class SSessionCreate(BaseSchema):
     is_pair: bool = False
+    is_onboarding: bool = False
 
 
 class SSessionUpdate(BaseSchema):
@@ -23,3 +24,4 @@ class SSessionRead(BaseSchema):
     ended_at: Optional[datetime]
     status: SessionStatus
     is_pair: bool
+    is_onboarding: bool

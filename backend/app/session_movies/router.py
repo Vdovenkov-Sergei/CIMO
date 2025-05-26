@@ -1,4 +1,3 @@
-import random
 import uuid
 from datetime import UTC, datetime
 
@@ -13,6 +12,7 @@ from app.session_movies.dao import SessionMovieDAO
 from app.session_movies.schemas import MatchNotification, SSessionMovieCreate, SSessionMovieRead
 from app.sessions.dependencies import get_current_session
 from app.sessions.models import Session, SessionStatus
+from app.recommendation.service import recommender
 
 router = APIRouter(prefix="/movies/session", tags=["Session Movies"])
 active_sessions: dict[uuid.UUID, list[WebSocket]] = {}
@@ -75,9 +75,10 @@ async def swipe_session_movie(
                 },
             )
 
-    # TODO Здесь будет логика обновления рекомендаций и отдачи new_movie_id
-    new_movie_id = random.randint(1, 10000)
-
+    await recommender.update_user_vector(
+        session.user_id, data.movie_id, data.is_liked, data.is_open_full_info, data.time_swiped
+    )
+    new_movie_id = await recommender.get_new_movie(session.user_id, session.is_pair, session.is_onboarding)
     logger.info("Swipe completed.", extra={"user_id": session.user_id, "new_movie_id": new_movie_id})
     return {"message": "The movie was successfully swiped.", "movie_id": new_movie_id}
 

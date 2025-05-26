@@ -3,6 +3,7 @@ import numpy as np
 from pathlib import Path
 
 from app.logger import logger
+from app.constants import General
 
 
 class FaissIndex:
@@ -20,7 +21,7 @@ class FaissIndex:
             )
             raise
 
-    def search(self, vector: np.ndarray, k: int = 10) -> tuple[np.ndarray, np.ndarray]:
+    def search(self, vector: np.ndarray, k: int = General.K_NEAREST) -> tuple[np.ndarray, np.ndarray]:
         if self.index is None:
             logger.warning("FAISS index not loaded, attempting to load it now.")
             self.load()
