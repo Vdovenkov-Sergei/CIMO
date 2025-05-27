@@ -24,6 +24,7 @@ const MyMovies = () => {
   const [isPatchMode, setIsPatchMode] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const limit = 10;
 
   const refreshToken = async () => {
     try {
@@ -76,7 +77,9 @@ const MyMovies = () => {
     }
   };
 
-  const fetchWatchlist = async (offset = 0, limit = 10) => {
+  const fetchWatchlist = async (offset = 0, shouldReset = false) => {
+    if (isLoading && !shouldReset) return;
+    
     setIsLoading(true);
     setError('');
 
@@ -87,10 +90,21 @@ const MyMovies = () => {
 
       const data = await response.json();
 
-      if (offset === 0) {
+      if (!Array.isArray(data)) {
+        throw new Error('Invalid data format for watchlist');
+      }
+
+      if (shouldReset || offset === 0) {
         setWatchlistMovies(data);
+        setWatchlistOffset(data.length);
       } else {
-        setWatchlistMovies(prev => [...prev, ...data]);
+        const newMovies = data.filter(newMovie => 
+          !watchlistMovies.some(existingMovie => 
+            existingMovie.movie.id === newMovie.movie.id
+          )
+        );
+        setWatchlistMovies(prev => [...prev, ...newMovies]);
+        setWatchlistOffset(prev => prev + newMovies.length);
       }
       setHasMoreWatchlist(data.length === limit);
     } catch (err) {
@@ -101,7 +115,9 @@ const MyMovies = () => {
     }
   };
 
-  const fetchWatched = async (offset = 0, limit = 10) => {
+  const fetchWatched = async (offset = 0, shouldReset = false) => {
+    if (isLoading && !shouldReset) return;
+    
     setIsLoading(true);
     setError('');
 
@@ -112,10 +128,21 @@ const MyMovies = () => {
 
       const data = await response.json();
 
-      if (offset === 0) {
+      if (!Array.isArray(data)) {
+        throw new Error('Invalid data format for watched movies');
+      }
+
+      if (shouldReset || offset === 0) {
         setWatchedMovies(data);
+        setWatchedOffset(data.length);
       } else {
-        setWatchedMovies(prev => [...prev, ...data]);
+        const newMovies = data.filter(newMovie => 
+          !watchedMovies.some(existingMovie => 
+            existingMovie.movie.id === newMovie.movie.id
+          )
+        );
+        setWatchedMovies(prev => [...prev, ...newMovies]);
+        setWatchedOffset(prev => prev + newMovies.length);
       }
       setHasMoreWatched(data.length === limit);
     } catch (err) {
@@ -127,8 +154,16 @@ const MyMovies = () => {
   };
 
   useEffect(() => {
-    fetchWatchlist();
-    fetchWatched();
+    const loadData = async () => {
+      setWatchlistMovies([]);
+      setWatchedMovies([]);
+      setWatchlistOffset(0);
+      setWatchedOffset(0);
+      await fetchWatchlist(0, true);
+      await fetchWatched(0, true);
+    };
+    
+    loadData();
   }, [reviewSort]);
 
   const handleWatchClick = (movie) => {
@@ -141,7 +176,7 @@ const MyMovies = () => {
     setError('');
 
     try {
-      const addResponse = await fetchWithTokenRefresh('/api/movies/viewed/', {
+      await fetchWithTokenRefresh('/api/movies/viewed/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -152,12 +187,11 @@ const MyMovies = () => {
         }),
       });
 
-      const deleteResponse = await fetchWithTokenRefresh(`/api/movies/later/${movieToRate.id}`, {
+      await fetchWithTokenRefresh(`/api/movies/later/${movieToRate.id}`, {
         method: 'DELETE',
       });
 
-      await Promise.all([fetchWatchlist(0), fetchWatched(0)]);
-
+      await Promise.all([fetchWatchlist(0, true), fetchWatched(0, true)]);
     } catch (err) {
       console.error('Error submitting rating:', err);
       setError(err.message);
@@ -173,7 +207,7 @@ const MyMovies = () => {
     setError('');
 
     try {
-      const response = await fetchWithTokenRefresh(`/api/movies/viewed/${movieToRate.movie.id}`, {
+      await fetchWithTokenRefresh(`/api/movies/viewed/${movieToRate.movie.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -184,7 +218,7 @@ const MyMovies = () => {
         }),
       });
 
-      await fetchWatched(0);
+      await fetchWatched(0, true);
     } catch (err) {
       console.error('Error updating review:', err);
       setError(err.message);
@@ -200,7 +234,7 @@ const MyMovies = () => {
     setError('');
 
     try {
-      const addResponse = await fetchWithTokenRefresh('/api/movies/later/', {
+      await fetchWithTokenRefresh('/api/movies/later/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -210,12 +244,11 @@ const MyMovies = () => {
         }),
       });
 
-      const deleteResponse = await fetchWithTokenRefresh(`/api/movies/viewed/${movie.id}`, {
+      await fetchWithTokenRefresh(`/api/movies/viewed/${movie.id}`, {
         method: 'DELETE',
       });
 
-      await fetchWatchlist(0);
-      await fetchWatched(0);
+      await Promise.all([fetchWatchlist(0, true), fetchWatched(0, true)]);
     } catch (err) {
       console.error('Error marking as unwatched:', err);
       setError(err.message);
@@ -229,15 +262,11 @@ const MyMovies = () => {
     setError('');
 
     try {
-      const response = await fetchWithTokenRefresh(`/api/movies/later/${movieId}`, {
+      await fetchWithTokenRefresh(`/api/movies/later/${movieId}`, {
         method: 'DELETE',
       });
 
-      await Promise.all([
-        fetchWatchlist(0),
-        fetchWatched(0)
-      ]);
-
+      await Promise.all([fetchWatchlist(0, true), fetchWatched(0, true)]);
     } catch (err) {
       console.error('Error removing movie:', err);
       setError(err.message);
@@ -247,15 +276,13 @@ const MyMovies = () => {
   };
 
   const loadMoreWatchlist = () => {
-    const newOffset = watchlistOffset + 10;
-    setWatchlistOffset(newOffset);
-    fetchWatchlist(newOffset);
+    if (!hasMoreWatchlist || isLoading) return;
+    fetchWatchlist(watchlistOffset);
   };
 
   const loadMoreWatched = () => {
-    const newOffset = watchedOffset + 10;
-    setWatchedOffset(newOffset);
-    fetchWatched(newOffset);
+    if (!hasMoreWatched || isLoading) return;
+    fetchWatched(watchedOffset);
   };
 
   const handleMovieCardClick = async (movieId) => {
@@ -265,7 +292,7 @@ const MyMovies = () => {
       setSelectedMovie(data);
       setIsDetailsModalOpen(true);
     } catch (err) {
-      console.error('Ошибка при получении подробной информации:', err);
+      console.error('Error fetching movie details:', err);
       setError(err.message);
     }
   };

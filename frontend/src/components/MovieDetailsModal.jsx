@@ -1,6 +1,23 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
-const MovieDetailsModal = ({ movie, onClose }) => {
+const MovieDetailsModal = ({ movie, onClose, onSwipeLeft, onSwipeRight }) => {
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'ArrowLeft') {
+        onSwipeLeft?.();
+        onClose();
+      } else if (e.key === 'ArrowRight') {
+        onSwipeRight?.();
+        onClose();
+      } else if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose, onSwipeLeft, onSwipeRight]);
+
   if (!movie) return null;
 
   const formatList = (items) => {
@@ -58,7 +75,7 @@ const MovieDetailsModal = ({ movie, onClose }) => {
               </div>
             </div>
             <div className="detail-poster">
-              <img src={movie.poster_url || ''} alt={movie.title || 'poster'} />
+              <img src={movie.poster_url || ''} alt={movie.name || 'poster'} />
             </div>
           </div>
           <div className="detail-description">

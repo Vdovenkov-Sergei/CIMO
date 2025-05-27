@@ -11,6 +11,10 @@ const WatchlistCard = ({ movie, onWatch, onDelete, onCardClick }) => {
         className="movie-card__poster"
         onClick={() => onCardClick(movie.id)}
         style={{ cursor: 'pointer' }}
+        onError={(e) => {
+          e.target.src = '/path-to-default-poster.jpg';
+          e.target.onerror = null;
+        }}
       />
       <h3 className="movie-card__title">{movie.name}</h3>
       <div className="movie-card__buttons">
@@ -20,6 +24,5 @@ const WatchlistCard = ({ movie, onWatch, onDelete, onCardClick }) => {
     </div>
   );
 };
-
 
 export default WatchlistCard;

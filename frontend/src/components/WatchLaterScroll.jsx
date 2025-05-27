@@ -1,14 +1,18 @@
+// WatchLaterScroll.jsx
 import React from 'react';
 import WatchLaterCard from './WatchLaterCard';
 
-const WatchLaterScroll = ({ movies, onToggleWatchLater }) => {
+const WatchLaterScroll = ({ movies, onToggleWatchLater, onWatch, onDelete, onCardClick }) => {
   return (
     <div className="movies-scroll">
-      {movies.map(movie => (
+      {movies.map(obj => (
         <WatchLaterCard 
-          key={movie.id} 
-          movie={movie} 
+          key={obj.movie.id} 
+          movie={obj.movie} 
           onToggleWatchLater={onToggleWatchLater}
+          onWatch={onWatch}
+          onDelete={onDelete}
+          onClick={() => onCardClick(obj.movie.id)}
         />
       ))}
     </div>

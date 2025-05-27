@@ -2,6 +2,8 @@ import { motion } from 'framer-motion';
 import React from 'react';
 
 const SwipeableMovieCard = ({ movie, onClick, onSwipe, className }) => {
+  if (!movie) return null;
+
   return (
     <motion.div
       className={`movie-card ${className}`}
@@ -12,17 +14,50 @@ const SwipeableMovieCard = ({ movie, onClick, onSwipe, className }) => {
       drag="x"
       dragConstraints={{ left: 0, right: 0 }}
       onDragEnd={(e, info) => {
-        if (info.offset.x > 100) onSwipe("right");
-        else if (info.offset.x < -100) onSwipe("left");
+        if (info.offset.x > 100) {
+          // Свайп вправо - лайк
+          onSwipe("right");
+        } else if (info.offset.x < -100) {
+          // Свайп влево - дизлайк
+          onSwipe("left");
+        }
       }}
+      whileTap={{ scale: 0.95 }}
     >
-      <img src={movie.poster} alt={movie.title} />
+      <img 
+        src={movie.poster_url} 
+        alt={movie.name} 
+        className="movie-card__poster"
+        onError={(e) => {
+          e.target.src = '/path-to-default-poster.jpg';
+          e.target.onerror = null;
+        }}
+      />
       <div className="movie-info">
-        <h3>{movie.title}</h3>
+        <h3 className="movie-card__title">{movie.name}</h3>
         <div className="movie-meta">
-          <span>{movie.year}</span>
+          <span>{movie.release_year}</span>
         </div>
       </div>
+      
+      {/* Индикаторы свайпа */}
+      <motion.div 
+        className="swipe-indicator right"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0 }}
+        whileDrag={{ opacity: 1 }}
+      >
+        👍
+      </motion.div>
+      
+      <motion.div 
+        className="swipe-indicator left"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0 }}
+        whileDrag={{ opacity: 1 }}
+      >
+        👎
+      </motion.div>
     </motion.div>
   );
 };

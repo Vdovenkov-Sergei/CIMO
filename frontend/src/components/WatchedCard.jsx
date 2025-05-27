@@ -9,6 +9,10 @@ const WatchedCard = ({ review, movie, onUnwatch, onClick, onCardClick }) => {
         alt={movie.name}
         className="movie-card__poster"
         onClick={() => onCardClick(movie.id)}
+        onError={(e) => {
+          e.target.src = '/path-to-default-poster.jpg';
+          e.target.onerror = null;
+        }}
       />
       <h3 className="movie-card__title">{movie.name}</h3>
       {review && (
