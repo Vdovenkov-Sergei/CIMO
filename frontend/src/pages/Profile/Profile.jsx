@@ -15,20 +15,66 @@ const Profile = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const refreshToken = async () => {
+    try {
+      const response = await fetch('/api/auth/refresh', {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        navigate('/');
+        throw new Error('Token refresh failed');
+      }
+      return response;
+    } catch (error) {
+      console.error('Token refresh error:', error);
+      navigate('/');
+      throw error;
+    }
+  };
+
+  const fetchWithTokenRefresh = async (url, options = {}) => {
+    try {
+      const response = await fetch(url, {
+        ...options,
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        if (errorData.detail === "Token expired") {
+          await refreshToken();
+          const retryResponse = await fetch(url, {
+            ...options,
+            credentials: 'include',
+          });
+          if (!retryResponse.ok) {
+            navigate('/');
+            throw new Error('Request failed after token refresh');
+          }
+          return retryResponse;
+        }
+        throw new Error(errorData.detail || 'Request failed');
+      }
+      return response;
+    } catch (error) {
+      if (error.message === 'Token refresh failed') {
+        navigate('/');
+      }
+      throw error;
+    }
+  };
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetch('/api/users/me', {
+        const response = await fetchWithTokenRefresh('/api/users/me', {
           method: 'GET',
-          credentials: "include",
           headers: {
             'Content-Type': 'application/json'
           },
         });
-
-        if (!response.ok) {
-          throw new Error('Ошибка загрузки данных пользователя');
-        }
 
         const data = await response.json();
         setUser({
@@ -48,17 +94,12 @@ const Profile = () => {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch('/api/auth/logout', {
+      const response = await fetchWithTokenRefresh('/api/auth/logout', {
         method: 'POST',
-        credentials: "include",
         headers: {
           'Content-Type': 'application/json'
         },
       });
-
-      if (!response.ok) {
-        throw new Error('Ошибка выхода');
-      }
 
       localStorage.removeItem('token');
       navigate('/');
