@@ -6,6 +6,7 @@ import Header from '../../components/Header';
 import WatchListScroll from '../../components/WatchListScroll';
 import WatchedScroll from '../../components/WatchedScroll';
 import RateMovieModal from '../../components/RateMovieModal/RateMovieModal';
+import MovieDetailsModal from '../../components/MovieDetailsModal';
 
 const MyMovies = () => {
   const [watchlistMovies, setWatchlistMovies] = useState([]);
@@ -20,6 +21,8 @@ const MyMovies = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [isPatchMode, setIsPatchMode] = useState(false);
+  const [selectedMovie, setSelectedMovie] = useState(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
 
   const fetchWatchlist = async (offset = 0, limit = 10) => {
@@ -248,6 +251,27 @@ const MyMovies = () => {
     fetchWatched(newOffset);
   };
 
+  const handleMovieCardClick = async (movieId) => {
+    try {
+      const response = await fetch(`/api/movies/${movieId}/detailed`, {
+        credentials: 'include',
+      });
+      if (!response.ok) {
+        throw new Error('Ошибка загрузки деталей фильма');
+      }
+      const data = await response.json();
+      setSelectedMovie(data);
+      setIsDetailsModalOpen(true);
+    } catch (err) {
+      console.error('Ошибка при получении подробной информации:', err);
+      setError(err.message);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setSelectedMovie(null);
+  };
+
   return (
     <div className="my-movies-page">
       <Header />
@@ -272,6 +296,7 @@ const MyMovies = () => {
             onDelete={removeMovie}
             loadMore={loadMoreWatchlist}
             hasMore={hasMoreWatchlist}
+            onCardClick={handleMovieCardClick}
           />
         </section>
 
@@ -302,6 +327,11 @@ const MyMovies = () => {
         }
         movie={movieToRate?.movie || movieToRate}
         isLoading={isLoading}
+      />
+
+      <MovieDetailsModal
+        movie={selectedMovie}
+        onClose={handleCloseModal}
       />
 
       <Footer />

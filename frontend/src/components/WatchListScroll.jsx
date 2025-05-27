@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import WatchlistCard from './WatchListCard';
 
-const WatchListScroll = ({ movies, onWatch, onDelete, loadMore, hasMore }) => {
+const WatchListScroll = ({ movies, onWatch, onDelete, loadMore, hasMore, onCardClick }) => {
   const scrollRef = useRef();
 
   useEffect(() => {
@@ -31,6 +31,7 @@ const WatchListScroll = ({ movies, onWatch, onDelete, loadMore, hasMore }) => {
           movie={obj.movie}
           onWatch={() => onWatch(obj.movie)}
           onDelete={onDelete}
+          onCardClick={() => onCardClick(obj.movie.id)}
         />
       ))}
     </div>
