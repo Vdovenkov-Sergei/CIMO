@@ -2,9 +2,7 @@ import numpy as np
 import faiss
 from pathlib import Path
 
-N_CLUSTERS = 100
 BASE_DIR = Path(__file__).parent.parent
-
 MOVIE_EMBEDDINGS_FILE = BASE_DIR / "data" / "movie_embeddings.csv"
 FAISS_INDEX_FILE = BASE_DIR / "data" / "index.faiss"
 
@@ -14,11 +12,12 @@ try:
     n, dim = movie_vectors.shape
     print(f"Successfully loaded movie embeddings from {MOVIE_EMBEDDINGS_FILE}: count={n}, dim={dim}.")
 
-    quantizer = faiss.IndexFlatIP(dim)
-    index = faiss.IndexIVFFlat(quantizer, dim, N_CLUSTERS, faiss.METRIC_INNER_PRODUCT)
-    index.train(movie_vectors)
-    index.add(movie_vectors)
-    print(f"Successfully created FAISS index with {N_CLUSTERS} clusters.")
+    ids = np.arange(1, n + 1).astype(np.int64)
+
+    base_index = faiss.IndexFlatIP(dim)
+    index = faiss.IndexIDMap2(base_index)
+    index.add_with_ids(movie_vectors, ids)
+    print(f"Successfully created FAISS index with external IDs.")
 
     faiss.write_index(index, str(FAISS_INDEX_FILE))
     print(f"Successfully saved FAISS index to {FAISS_INDEX_FILE}.")

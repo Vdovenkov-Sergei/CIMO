@@ -21,13 +21,13 @@ class FaissIndex:
             )
             raise
 
-    def search(self, vector: np.ndarray, k: int = General.K_NEAREST) -> tuple[np.ndarray, np.ndarray]:
+    def search(self, vector: np.ndarray, k: int = General.K_NEAREST) -> np.ndarray:
         if self.index is None:
             logger.warning("FAISS index not loaded, attempting to load it now.")
             self.load()
-        distances, indices = self.index.search(vector, k)
+        _, indices = self.index.search(vector, k)
         logger.debug("Search completed in FAISS index.", extra={"result_count": len(indices), "k": k})
-        return distances, indices
+        return indices
 
 
 faiss_index = FaissIndex()

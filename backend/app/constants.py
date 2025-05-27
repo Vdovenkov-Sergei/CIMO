@@ -32,12 +32,18 @@ class Tokens:
 
 
 class RedisKeys:
-    USER_EMAIL_KEY: str = "#user_{email}"
-    CODE_VERIFY_KEY: str = "#code_verify_{email}"
-    ATTEMPTS_ENTER_KEY: str = "#attempts_enter_{email}"
-    ATTEMPTS_SEND_KEY: str = "#attempts_send_{email}"
-    RESET_TOKEN_KEY: str = "#reset_token_{token}"
-    USER_VECTOR_KEY: str = "#user_vector_{user_id}"
+    USER_EMAIL_KEY = "user:{email}"
+    CODE_VERIFY_KEY = "code:verify:{email}"
+    ATTEMPTS_ENTER_KEY = "attempts:enter:{email}"
+    ATTEMPTS_SEND_KEY = "attempts:send:{email}"
+    RESET_TOKEN_KEY = "reset:token:{token}"
+
+    SESSION_USERS_KEY = "session:{session_id}:users"
+    SESSION_PAIR_REC_KEY = "session:{session_id}:pair"
+    USER_VECTOR_KEY = "vector:user:{user_id}"
+    USER_SESSION_LIKES_KEY = "session:{session_id}:user:{user_id}:likes"
+    USER_SESSION_SWIPES_KEY = "session:{session_id}:user:{user_id}:swipes"
+    SESSION_KEY = "session:{session_id}:*"
 
 
 class General:
