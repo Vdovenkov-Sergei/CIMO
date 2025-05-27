@@ -180,6 +180,7 @@ $primary-font: 'Inter', sans-serif;
       font-size: 16px;
       margin: 15px;
       text-align: center;
+      height: 40px;
     }
 
     &__buttons {
@@ -191,6 +192,21 @@ $primary-font: 'Inter', sans-serif;
 
       img {
         width: 24px;
+      }
+    }
+
+    .movie-rating {
+      margin-bottom: 10px;
+      text-align: center;
+      font-size: 14px;
+      
+      .rating-stars {
+        color: #ffc107;
+        font-size: 16px;
+      }
+      
+      .rating-value {
+        color: $link-color;
       }
     }
   }

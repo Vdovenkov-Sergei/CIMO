@@ -1,14 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './RateMovieModal.scss';
 
 const RateMovieModal = ({ isOpen, onClose, onSubmit, movie, isLoading }) => {
   const [rating, setRating] = useState(5);
 
+  useEffect(() => {
+    if (movie?.review) {
+      setRating(Number(movie.review));
+    } else {
+      setRating(5);
+    }
+  }, [movie]);
+
   if (!isOpen || !movie) return null;
 
   const handleSubmit = () => {
     onSubmit(rating);
-    setRating(5);
   };
 
   return (

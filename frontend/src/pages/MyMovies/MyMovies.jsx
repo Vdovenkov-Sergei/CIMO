@@ -19,11 +19,13 @@ const MyMovies = () => {
   const [reviewSort, setReviewSort] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isPatchMode, setIsPatchMode] = useState(false);
+
 
   const fetchWatchlist = async (offset = 0, limit = 10) => {
     setIsLoading(true);
     setError('');
-    
+
     try {
       const response = await fetch(`/api/movies/later/?offset=${offset}&limit=${limit}`, {
         credentials: 'include',
@@ -34,7 +36,7 @@ const MyMovies = () => {
       }
 
       const data = await response.json();
-      
+
       if (offset === 0) {
         setWatchlistMovies(data);
       } else {
@@ -52,10 +54,10 @@ const MyMovies = () => {
   const fetchWatched = async (offset = 0, limit = 10) => {
     setIsLoading(true);
     setError('');
-    
+
     try {
       const response = await fetch(
-        `/api/movies/viewed/?offset=${offset}&limit=${limit}&order_review=${reviewSort}`, 
+        `/api/movies/viewed/?offset=${offset}&limit=${limit}&order_review=${reviewSort}`,
         { credentials: 'include' }
       );
 
@@ -64,7 +66,7 @@ const MyMovies = () => {
       }
 
       const data = await response.json();
-      
+
       if (offset === 0) {
         setWatchedMovies(data);
       } else {
@@ -89,10 +91,15 @@ const MyMovies = () => {
     setRatingModalOpen(true);
   };
 
+  const handleEditRatingClick = (movieObj) => {
+    setMovieToRate(movieObj);
+    setRatingModalOpen(true);
+  };
+
   const handleRatingSubmit = async (rating) => {
     setIsLoading(true);
     setError('');
-    
+
     try {
       const addResponse = await fetch('/api/movies/viewed/', {
         method: 'POST',
@@ -105,24 +112,56 @@ const MyMovies = () => {
           review: rating.toString()
         }),
       });
-  
+
       if (!addResponse.ok) {
         throw new Error('Ошибка добавления рецензии');
       }
-  
+
       const deleteResponse = await fetch(`/api/movies/later/${movieToRate.id}`, {
         method: 'DELETE',
         credentials: 'include',
       });
-  
+
       if (!deleteResponse.ok) {
         throw new Error('Ошибка удаления из отложенных');
       }
 
       await Promise.all([fetchWatchlist(0), fetchWatched(0)]);
-      
+
     } catch (err) {
       console.error('Error submitting rating:', err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+      setRatingModalOpen(false);
+      setMovieToRate(null);
+    }
+  };
+
+  const handleEditRatingSubmit = async (rating) => {
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch(`/api/movies/viewed/${movieToRate.movie.id}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          movie_id: movieToRate.movie.id,
+          review: rating.toString()
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Ошибка при обновлении рецензии');
+      }
+
+      await fetchWatched(0);
+    } catch (err) {
+      console.error('Error updating review:', err);
       setError(err.message);
     } finally {
       setIsLoading(false);
@@ -134,7 +173,7 @@ const MyMovies = () => {
   const markAsUnwatched = async (movie) => {
     setIsLoading(true);
     setError('');
-    
+
     try {
       const addResponse = await fetch('/api/movies/later/', {
         method: 'POST',
@@ -173,22 +212,22 @@ const MyMovies = () => {
   const removeMovie = async (movieId) => {
     setIsLoading(true);
     setError('');
-    
+
     try {
       const response = await fetch(`/api/movies/later/${movieId}`, {
         method: 'DELETE',
         credentials: 'include',
       });
-  
+
       if (!response.ok) {
         throw new Error('Ошибка удаления фильма');
       }
-  
+
       await Promise.all([
         fetchWatchlist(0),
         fetchWatched(0)
       ]);
-      
+
     } catch (err) {
       console.error('Error removing movie:', err);
       setError(err.message);
@@ -245,15 +284,23 @@ const MyMovies = () => {
             onUnwatch={markAsUnwatched}
             loadMore={loadMoreWatched}
             hasMore={hasMoreWatched}
+            onCardClick={(watchedMovie) => {
+              setMovieToRate({ ...watchedMovie.movie, review: watchedMovie.review });
+              setIsPatchMode(true); // добавь setIsPatchMode в стейт
+              setRatingModalOpen(true);
+            }}
           />
+
         </section>
       </main>
 
       <RateMovieModal
         isOpen={ratingModalOpen}
         onClose={() => setRatingModalOpen(false)}
-        onSubmit={handleRatingSubmit}
-        movie={movieToRate}
+        onSubmit={
+          movieToRate?.movie ? handleEditRatingSubmit : handleRatingSubmit
+        }
+        movie={movieToRate?.movie || movieToRate}
         isLoading={isLoading}
       />
 

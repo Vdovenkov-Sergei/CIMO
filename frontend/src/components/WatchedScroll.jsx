@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import WatchedCard from './WatchedCard';
 
-const WatchedScroll = ({ movies, onUnwatch, loadMore, hasMore }) => {
+const WatchedScroll = ({ movies, onUnwatch, loadMore, hasMore, onCardClick }) => {
   const scrollRef = useRef();
 
   useEffect(() => {
@@ -27,9 +27,11 @@ const WatchedScroll = ({ movies, onUnwatch, loadMore, hasMore }) => {
     <div className="movies-scroll" ref={scrollRef}>
       {movies.map(obj => (
         <WatchedCard 
+          review={obj.review}
           key={`watched-${obj.movie.id}`}
           movie={obj.movie} 
           onUnwatch={() => onUnwatch(obj.movie)}
+          onClick={() => onCardClick(obj)}
         />
       ))}
     </div>
