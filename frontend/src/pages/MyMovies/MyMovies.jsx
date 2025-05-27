@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './MyMovies.scss';
 import Footer from '../../components/Footer';
 import Header from '../../components/Header';
@@ -9,6 +9,7 @@ import RateMovieModal from '../../components/RateMovieModal/RateMovieModal';
 import MovieDetailsModal from '../../components/MovieDetailsModal';
 
 const MyMovies = () => {
+  const navigate = useNavigate();
   const [watchlistMovies, setWatchlistMovies] = useState([]);
   const [watchedMovies, setWatchedMovies] = useState([]);
   const [watchlistOffset, setWatchlistOffset] = useState(0);
@@ -24,19 +25,65 @@ const MyMovies = () => {
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
+  const refreshToken = async () => {
+    try {
+      const response = await fetch('/api/auth/refresh', {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        navigate('/');
+        throw new Error('Token refresh failed');
+      }
+      return response;
+    } catch (error) {
+      console.error('Token refresh error:', error);
+      navigate('/');
+      throw error;
+    }
+  };
+
+  const fetchWithTokenRefresh = async (url, options = {}) => {
+    try {
+      const response = await fetch(url, {
+        ...options,
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        if (errorData.detail === "Token expired") {
+          await refreshToken();
+          const retryResponse = await fetch(url, {
+            ...options,
+            credentials: 'include',
+          });
+          if (!retryResponse.ok) {
+            navigate('/');
+            throw new Error('Request failed after token refresh');
+          }
+          return retryResponse;
+        }
+        throw new Error(errorData.detail || 'Request failed');
+      }
+      return response;
+    } catch (error) {
+      if (error.message === 'Token refresh failed') {
+        navigate('/');
+      }
+      throw error;
+    }
+  };
 
   const fetchWatchlist = async (offset = 0, limit = 10) => {
     setIsLoading(true);
     setError('');
 
     try {
-      const response = await fetch(`/api/movies/later/?offset=${offset}&limit=${limit}`, {
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        throw new Error('Ошибка загрузки отложенных фильмов');
-      }
+      const response = await fetchWithTokenRefresh(
+        `/api/movies/later/?offset=${offset}&limit=${limit}`
+      );
 
       const data = await response.json();
 
@@ -59,14 +106,9 @@ const MyMovies = () => {
     setError('');
 
     try {
-      const response = await fetch(
-        `/api/movies/viewed/?offset=${offset}&limit=${limit}&order_review=${reviewSort}`,
-        { credentials: 'include' }
+      const response = await fetchWithTokenRefresh(
+        `/api/movies/viewed/?offset=${offset}&limit=${limit}&order_review=${reviewSort}`
       );
-
-      if (!response.ok) {
-        throw new Error('Ошибка загрузки просмотренных фильмов');
-      }
 
       const data = await response.json();
 
@@ -94,19 +136,13 @@ const MyMovies = () => {
     setRatingModalOpen(true);
   };
 
-  const handleEditRatingClick = (movieObj) => {
-    setMovieToRate(movieObj);
-    setRatingModalOpen(true);
-  };
-
   const handleRatingSubmit = async (rating) => {
     setIsLoading(true);
     setError('');
 
     try {
-      const addResponse = await fetch('/api/movies/viewed/', {
+      const addResponse = await fetchWithTokenRefresh('/api/movies/viewed/', {
         method: 'POST',
-        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -116,18 +152,9 @@ const MyMovies = () => {
         }),
       });
 
-      if (!addResponse.ok) {
-        throw new Error('Ошибка добавления рецензии');
-      }
-
-      const deleteResponse = await fetch(`/api/movies/later/${movieToRate.id}`, {
+      const deleteResponse = await fetchWithTokenRefresh(`/api/movies/later/${movieToRate.id}`, {
         method: 'DELETE',
-        credentials: 'include',
       });
-
-      if (!deleteResponse.ok) {
-        throw new Error('Ошибка удаления из отложенных');
-      }
 
       await Promise.all([fetchWatchlist(0), fetchWatched(0)]);
 
@@ -146,9 +173,8 @@ const MyMovies = () => {
     setError('');
 
     try {
-      const response = await fetch(`/api/movies/viewed/${movieToRate.movie.id}`, {
+      const response = await fetchWithTokenRefresh(`/api/movies/viewed/${movieToRate.movie.id}`, {
         method: 'PATCH',
-        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -157,10 +183,6 @@ const MyMovies = () => {
           review: rating.toString()
         }),
       });
-
-      if (!response.ok) {
-        throw new Error('Ошибка при обновлении рецензии');
-      }
 
       await fetchWatched(0);
     } catch (err) {
@@ -178,9 +200,8 @@ const MyMovies = () => {
     setError('');
 
     try {
-      const addResponse = await fetch('/api/movies/later/', {
+      const addResponse = await fetchWithTokenRefresh('/api/movies/later/', {
         method: 'POST',
-        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -189,18 +210,9 @@ const MyMovies = () => {
         }),
       });
 
-      if (!addResponse.ok) {
-        throw new Error('Ошибка добавления в отложенные');
-      }
-
-      const deleteResponse = await fetch(`/api/movies/viewed/${movie.id}`, {
+      const deleteResponse = await fetchWithTokenRefresh(`/api/movies/viewed/${movie.id}`, {
         method: 'DELETE',
-        credentials: 'include',
       });
-
-      if (!deleteResponse.ok) {
-        throw new Error('Ошибка удаления из просмотренных');
-      }
 
       await fetchWatchlist(0);
       await fetchWatched(0);
@@ -217,14 +229,9 @@ const MyMovies = () => {
     setError('');
 
     try {
-      const response = await fetch(`/api/movies/later/${movieId}`, {
+      const response = await fetchWithTokenRefresh(`/api/movies/later/${movieId}`, {
         method: 'DELETE',
-        credentials: 'include',
       });
-
-      if (!response.ok) {
-        throw new Error('Ошибка удаления фильма');
-      }
 
       await Promise.all([
         fetchWatchlist(0),
@@ -253,12 +260,7 @@ const MyMovies = () => {
 
   const handleMovieCardClick = async (movieId) => {
     try {
-      const response = await fetch(`/api/movies/${movieId}/detailed`, {
-        credentials: 'include',
-      });
-      if (!response.ok) {
-        throw new Error('Ошибка загрузки деталей фильма');
-      }
+      const response = await fetchWithTokenRefresh(`/api/movies/${movieId}/detailed`);
       const data = await response.json();
       setSelectedMovie(data);
       setIsDetailsModalOpen(true);
@@ -316,7 +318,6 @@ const MyMovies = () => {
             }}
             onCardClick={handleMovieCardClick}
           />
-
         </section>
       </main>
 
