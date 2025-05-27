@@ -1,0 +1,82 @@
+[
+  {
+    "id": 1,
+    "email": "user1@example.com",
+    "hashed_password": "hashed_pw_1",
+    "user_name": "userone",
+    "created_at": "2024-01-10T12:00:00Z",
+    "is_superuser": false
+  },
+  {
+    "id": 2,
+    "email": "admin@example.com",
+    "hashed_password": "hashed_pw_2",
+    "user_name": "adminuser",
+    "created_at": "2024-02-15T08:30:00Z",
+    "is_superuser": true
+  },
+  {
+    "id": 3,
+    "email": "user2@example.com",
+    "hashed_password": "hashed_pw_3",
+    "user_name": null,
+    "created_at": "2024-03-05T16:45:00Z",
+    "is_superuser": false
+  },
+  {
+    "id": 4,
+    "email": "user3@example.com",
+    "hashed_password": "hashed_pw_4",
+    "user_name": "username4",
+    "created_at": "2024-04-20T09:00:00Z",
+    "is_superuser": false
+  },
+  {
+    "id": 5,
+    "email": "user4@example.com",
+    "hashed_password": "hashed_pw_5",
+    "user_name": "username5",
+    "created_at": "2024-05-01T14:30:00Z",
+    "is_superuser": false
+  },
+  {
+    "id": 6,
+    "email": "user5@example.com",
+    "hashed_password": "hashed_pw_6",
+    "user_name": "username6",
+    "created_at": "2024-06-12T10:15:00Z",
+    "is_superuser": false
+  },
+  {
+    "id": 7,
+    "email": "user6@example.com",
+    "hashed_password": "hashed_pw_7",
+    "user_name": "username7",
+    "created_at": "2024-07-01T12:45:00Z",
+    "is_superuser": false
+  },
+  {
+    "id": 8,
+    "email": "user7@example.com",
+    "hashed_password": "hashed_pw_8",
+    "user_name": "username8",
+    "created_at": "2024-08-20T11:00:00Z",
+    "is_superuser": false
+  },
+  {
+    "id": 9,
+    "email": "user8@example.com",
+    "hashed_password": "hashed_pw_9",
+    "user_name": "username9",
+    "created_at": "2024-09-05T08:30:00Z",
+    "is_superuser": false
+  },
+  {
+    "id": 10,
+    "email": "user9@example.com",
+    "hashed_password": "hashed_pw_10",
+    "user_name": "username10",
+    "created_at": "2024-10-12T13:00:00Z",
+    "is_superuser": false
+  }
+]

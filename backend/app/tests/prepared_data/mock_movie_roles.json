@@ -1,0 +1,62 @@
+[
+  {
+    "movie_id": 1,
+    "person_id": 1,
+    "priority": 1,
+    "role": "ACTOR"
+  },
+  {
+    "movie_id": 1,
+    "person_id": 2,
+    "priority": 2,
+    "role": "ACTOR"
+  },
+  {
+    "movie_id": 1,
+    "person_id": 3,
+    "priority": 3,
+    "role": "ACTOR"
+  },
+  {
+    "movie_id": 2,
+    "person_id": 4,
+    "priority": 1,
+    "role": "ACTOR"
+  },
+  {
+    "movie_id": 2,
+    "person_id": 5,
+    "priority": 2,
+    "role": "ACTOR"
+  },
+  {
+    "movie_id": 3,
+    "person_id": 6,
+    "priority": 1,
+    "role": "ACTOR"
+  },
+  {
+    "movie_id": 3,
+    "person_id": 7,
+    "priority": 2,
+    "role": "ACTOR"
+  },
+  {
+    "movie_id": 4,
+    "person_id": 8,
+    "priority": 1,
+    "role": "ACTOR"
+  },
+  {
+    "movie_id": 5,
+    "person_id": 9,
+    "priority": 1,
+    "role": "ACTOR"
+  },
+  {
+    "movie_id": 6,
+    "person_id": 10,
+    "priority": 1,
+    "role": "ACTOR"
+  }
+]
