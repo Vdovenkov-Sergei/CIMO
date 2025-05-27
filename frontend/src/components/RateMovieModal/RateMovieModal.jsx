@@ -20,7 +20,7 @@ const RateMovieModal = ({ isOpen, onClose, onSubmit, movie, isLoading }) => {
 
   return (
     <div className="modal-backdrop">
-      <div className="modal">
+      <div className="modal-content">
         <h2>Оцените фильм: {movie.name}</h2>
         <input
           type="range"

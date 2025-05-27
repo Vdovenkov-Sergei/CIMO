@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import WatchedCard from './WatchedCard';
 
-const WatchedScroll = ({ movies, onUnwatch, loadMore, hasMore, onCardClick }) => {
+const WatchedScroll = ({ movies, onUnwatch, loadMore, hasMore, onCardClick, onRatingClick }) => {
   const scrollRef = useRef();
 
   useEffect(() => {
@@ -31,7 +31,8 @@ const WatchedScroll = ({ movies, onUnwatch, loadMore, hasMore, onCardClick }) =>
           key={`watched-${obj.movie.id}`}
           movie={obj.movie} 
           onUnwatch={() => onUnwatch(obj.movie)}
-          onClick={() => onCardClick(obj)}
+          onClick={() => onRatingClick(obj)}
+          onCardClick={() => onCardClick(obj.movie.id)}
         />
       ))}
     </div>

@@ -309,11 +309,12 @@ const MyMovies = () => {
             onUnwatch={markAsUnwatched}
             loadMore={loadMoreWatched}
             hasMore={hasMoreWatched}
-            onCardClick={(watchedMovie) => {
+            onRatingClick={(watchedMovie) => {
               setMovieToRate({ ...watchedMovie.movie, review: watchedMovie.review });
-              setIsPatchMode(true); // добавь setIsPatchMode в стейт
+              setIsPatchMode(true);
               setRatingModalOpen(true);
             }}
+            onCardClick={handleMovieCardClick}
           />
 
         </section>

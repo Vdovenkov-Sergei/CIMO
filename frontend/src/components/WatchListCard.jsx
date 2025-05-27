@@ -9,7 +9,7 @@ const WatchlistCard = ({ movie, onWatch, onDelete, onCardClick }) => {
         src={movie.poster_url}
         alt={movie.name}
         className="movie-card__poster"
-        onClick={() => onCardClick(movie.id)} // обработка клика
+        onClick={() => onCardClick(movie.id)}
         style={{ cursor: 'pointer' }}
       />
       <h3 className="movie-card__title">{movie.name}</h3>
