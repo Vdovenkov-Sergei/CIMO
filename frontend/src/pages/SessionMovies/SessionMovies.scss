@@ -17,6 +17,7 @@ $primary-font: 'Inter', sans-serif;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  background-attachment: fixed;
 
     // Стили хедера (оставляем как было)
   .header {
@@ -163,6 +164,7 @@ $primary-font: 'Inter', sans-serif;
       font-size: 20px;
       margin: 15px;
       text-align: center;
+      height: 72px;
     }
 
     &__buttons {

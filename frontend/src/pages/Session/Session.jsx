@@ -24,6 +24,7 @@ const Session = () => {
   const [hasMore, setHasMore] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const limit = 10;
+  const [showLikedMovies, setShowLikedMovies] = useState(true);
 
   const refreshToken = async () => {
     try {
@@ -256,13 +257,20 @@ const Session = () => {
             </div>
 
             <div className="liked-movies">
-              <h3>Понравившиеся фильмы</h3>
-              <LikedMoviesScroll 
-                movies={likedMovies} 
-                hasMore={hasMore}
-                onMovieClick={(movie) => setShowDetails(movie)}
-                onLoadMore={() => fetchLikedMovies()}
-              />
+              <h3 
+                onClick={() => setShowLikedMovies(!showLikedMovies)}
+                style={{ cursor: 'pointer' }}
+              >
+                Понравившиеся фильмы
+              </h3>
+              {showLikedMovies && (
+                <LikedMoviesScroll 
+                  movies={likedMovies} 
+                  hasMore={hasMore}
+                  onMovieClick={(movie) => setShowDetails(movie)}
+                  onLoadMore={() => fetchLikedMovies()}
+                />
+              )}
             </div>
           </>
         )}
