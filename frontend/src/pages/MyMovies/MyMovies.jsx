@@ -1,54 +1,304 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import './MyMovies.scss';
 import Footer from '../../components/Footer';
 import Header from '../../components/Header';
 import WatchListScroll from '../../components/WatchListScroll';
 import WatchedScroll from '../../components/WatchedScroll';
+import RateMovieModal from '../../components/RateMovieModal/RateMovieModal';
 import MovieDetailsModal from '../../components/MovieDetailsModal';
 
 const MyMovies = () => {
-  const [showDetails, setShowDetails] = useState(null);
+  const navigate = useNavigate();
+  const [watchlistMovies, setWatchlistMovies] = useState([]);
+  const [watchedMovies, setWatchedMovies] = useState([]);
+  const [watchlistOffset, setWatchlistOffset] = useState(0);
+  const [watchedOffset, setWatchedOffset] = useState(0);
+  const [hasMoreWatchlist, setHasMoreWatchlist] = useState(true);
+  const [hasMoreWatched, setHasMoreWatched] = useState(true);
+  const [ratingModalOpen, setRatingModalOpen] = useState(false);
+  const [movieToRate, setMovieToRate] = useState(null);
+  const [reviewSort, setReviewSort] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [isPatchMode, setIsPatchMode] = useState(false);
+  const [selectedMovie, setSelectedMovie] = useState(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const limit = 10;
 
-  const [movies, setMovies] = useState({
-    watchlist: [
-      { id: 1, title: 'Фильм1', poster: '/movies/poster1.jpg', watched: false },
-      { id: 2, title: 'Фильм2', poster: '/movies/poster2.jpg', watched: false },
-      { id: 3, title: 'Фильм3', poster: '/movies/poster3.jpg', watched: false },
-      { id: 4, title: 'Фильм4', poster: '/movies/poster4.jpg', watched: false },
-    ],
-    watched: [
-      { id: 5, title: 'Фильм5', poster: '/movies/poster5.jpg', watched: true },
-      { id: 6, title: 'Фильм6', poster: '/movies/poster6.jpg', watched: true },
-    ]
-  });
+  const refreshToken = async () => {
+    try {
+      const response = await fetch('/api/auth/refresh', {
+        method: 'POST',
+        credentials: 'include',
+      });
 
-  const markAsWatched = (id) => {
-    setMovies(prev => {
-      const film = prev.watchlist.find(m => m.id === id);
-      return {
-        watchlist: prev.watchlist.filter(m => m.id !== id),
-        watched: [...prev.watched, { ...film, watched: true }]
-      };
-    });
+      if (!response.ok) {
+        navigate('/');
+        throw new Error('Token refresh failed');
+      }
+      return response;
+    } catch (error) {
+      console.error('Token refresh error:', error);
+      navigate('/');
+      throw error;
+    }
   };
 
-  const markAsUnwatched = (id) => {
-    setMovies(prev => {
-      const film = prev.watched.find(m => m.id === id);
-      return {
-        watched: prev.watched.filter(m => m.id !== id),
-        watchlist: [...prev.watchlist, { ...film, watched: false }]
-      };
-    });
+  const fetchWithTokenRefresh = async (url, options = {}) => {
+    try {
+      const response = await fetch(url, {
+        ...options,
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        if (errorData.detail === "Token expired") {
+          await refreshToken();
+          const retryResponse = await fetch(url, {
+            ...options,
+            credentials: 'include',
+          });
+          if (!retryResponse.ok) {
+            navigate('/');
+            throw new Error('Request failed after token refresh');
+          }
+          return retryResponse;
+        }
+        throw new Error(errorData.detail || 'Request failed');
+      }
+      return response;
+    } catch (error) {
+      if (error.message === 'Token refresh failed') {
+        navigate('/');
+      }
+      throw error;
+    }
   };
 
-  const removeMovie = (id, isWatched) => {
-    setMovies(prev => ({
-      ...prev,
-      [isWatched ? 'watched' : 'watchlist']: 
-        prev[isWatched ? 'watched' : 'watchlist'].filter(m => m.id !== id)
-    }));
+  const fetchWatchlist = async (offset = 0, shouldReset = false) => {
+    if (isLoading && !shouldReset) return;
+    
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const response = await fetchWithTokenRefresh(
+        `/api/movies/later/?offset=${offset}&limit=${limit}`
+      );
+
+      const data = await response.json();
+
+      if (!Array.isArray(data)) {
+        throw new Error('Invalid data format for watchlist');
+      }
+
+      if (shouldReset || offset === 0) {
+        setWatchlistMovies(data);
+        setWatchlistOffset(data.length);
+      } else {
+        const newMovies = data.filter(newMovie => 
+          !watchlistMovies.some(existingMovie => 
+            existingMovie.movie.id === newMovie.movie.id
+          )
+        );
+        setWatchlistMovies(prev => [...prev, ...newMovies]);
+        setWatchlistOffset(prev => prev + newMovies.length);
+      }
+      setHasMoreWatchlist(data.length === limit);
+    } catch (err) {
+      console.error('Error fetching watchlist:', err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchWatched = async (offset = 0, shouldReset = false) => {
+    if (isLoading && !shouldReset) return;
+    
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const response = await fetchWithTokenRefresh(
+        `/api/movies/viewed/?offset=${offset}&limit=${limit}&order_review=${reviewSort}`
+      );
+
+      const data = await response.json();
+
+      if (!Array.isArray(data)) {
+        throw new Error('Invalid data format for watched movies');
+      }
+
+      if (shouldReset || offset === 0) {
+        setWatchedMovies(data);
+        setWatchedOffset(data.length);
+      } else {
+        const newMovies = data.filter(newMovie => 
+          !watchedMovies.some(existingMovie => 
+            existingMovie.movie.id === newMovie.movie.id
+          )
+        );
+        setWatchedMovies(prev => [...prev, ...newMovies]);
+        setWatchedOffset(prev => prev + newMovies.length);
+      }
+      setHasMoreWatched(data.length === limit);
+    } catch (err) {
+      console.error('Error fetching watched movies:', err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const loadData = async () => {
+      setWatchlistMovies([]);
+      setWatchedMovies([]);
+      setWatchlistOffset(0);
+      setWatchedOffset(0);
+      await fetchWatchlist(0, true);
+      await fetchWatched(0, true);
+    };
+    
+    loadData();
+  }, [reviewSort]);
+
+  const handleWatchClick = (movie) => {
+    setMovieToRate(movie);
+    setRatingModalOpen(true);
+  };
+
+  const handleRatingSubmit = async (rating) => {
+    setIsLoading(true);
+    setError('');
+
+    try {
+      await fetchWithTokenRefresh('/api/movies/viewed/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          movie_id: movieToRate.id,
+          review: rating.toString()
+        }),
+      });
+
+      await fetchWithTokenRefresh(`/api/movies/later/${movieToRate.id}`, {
+        method: 'DELETE',
+      });
+
+      await Promise.all([fetchWatchlist(0, true), fetchWatched(0, true)]);
+    } catch (err) {
+      console.error('Error submitting rating:', err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+      setRatingModalOpen(false);
+      setMovieToRate(null);
+    }
+  };
+
+  const handleEditRatingSubmit = async (rating) => {
+    setIsLoading(true);
+    setError('');
+
+    try {
+      await fetchWithTokenRefresh(`/api/movies/viewed/${movieToRate.movie.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          movie_id: movieToRate.movie.id,
+          review: rating.toString()
+        }),
+      });
+
+      await fetchWatched(0, true);
+    } catch (err) {
+      console.error('Error updating review:', err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+      setRatingModalOpen(false);
+      setMovieToRate(null);
+    }
+  };
+
+  const markAsUnwatched = async (movie) => {
+    setIsLoading(true);
+    setError('');
+
+    try {
+      await fetchWithTokenRefresh('/api/movies/later/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          movie_id: movie.id
+        }),
+      });
+
+      await fetchWithTokenRefresh(`/api/movies/viewed/${movie.id}`, {
+        method: 'DELETE',
+      });
+
+      await Promise.all([fetchWatchlist(0, true), fetchWatched(0, true)]);
+    } catch (err) {
+      console.error('Error marking as unwatched:', err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const removeMovie = async (movieId) => {
+    setIsLoading(true);
+    setError('');
+
+    try {
+      await fetchWithTokenRefresh(`/api/movies/later/${movieId}`, {
+        method: 'DELETE',
+      });
+
+      await Promise.all([fetchWatchlist(0, true), fetchWatched(0, true)]);
+    } catch (err) {
+      console.error('Error removing movie:', err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadMoreWatchlist = () => {
+    if (!hasMoreWatchlist || isLoading) return;
+    fetchWatchlist(watchlistOffset);
+  };
+
+  const loadMoreWatched = () => {
+    if (!hasMoreWatched || isLoading) return;
+    fetchWatched(watchedOffset);
+  };
+
+  const handleMovieCardClick = async (movieId) => {
+    try {
+      const response = await fetchWithTokenRefresh(`/api/movies/${movieId}/detailed`);
+      const data = await response.json();
+      setSelectedMovie(data);
+      setIsDetailsModalOpen(true);
+    } catch (err) {
+      console.error('Error fetching movie details:', err);
+      setError(err.message);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setSelectedMovie(null);
   };
 
   return (
@@ -64,23 +314,54 @@ const MyMovies = () => {
           <Link to='/myMovies' className="navigation__link">Мои фильмы</Link>
         </div>
 
+        {error && <div className="error-message">{error}</div>}
+        {isLoading && <div className="loading-indicator">Загрузка...</div>}
+
         <section className="movies-section">
           <h2 className="movies-section__title">Отложенные фильмы</h2>
-          <WatchListScroll 
-            movies={movies.watchlist} 
-            onWatch={markAsWatched}
-            onDelete={(id) => removeMovie(id, false)}
+          <WatchListScroll
+            movies={watchlistMovies}
+            onWatch={handleWatchClick}
+            onDelete={removeMovie}
+            loadMore={loadMoreWatchlist}
+            hasMore={hasMoreWatchlist}
+            onCardClick={handleMovieCardClick}
           />
         </section>
 
         <section className="movies-section">
-          <h2 className="movies-section__title">Просмотренные фильмы</h2>
-          <WatchedScroll 
-            movies={movies.watched} 
+          <div className="movies-section__header">
+            <h2 className="movies-section__title">Просмотренные фильмы</h2>
+          </div>
+          <WatchedScroll
+            movies={watchedMovies}
             onUnwatch={markAsUnwatched}
+            loadMore={loadMoreWatched}
+            hasMore={hasMoreWatched}
+            onRatingClick={(watchedMovie) => {
+              setMovieToRate({ ...watchedMovie.movie, review: watchedMovie.review });
+              setIsPatchMode(true);
+              setRatingModalOpen(true);
+            }}
+            onCardClick={handleMovieCardClick}
           />
         </section>
       </main>
+
+      <RateMovieModal
+        isOpen={ratingModalOpen}
+        onClose={() => setRatingModalOpen(false)}
+        onSubmit={
+          movieToRate?.movie ? handleEditRatingSubmit : handleRatingSubmit
+        }
+        movie={movieToRate?.movie || movieToRate}
+        isLoading={isLoading}
+      />
+
+      <MovieDetailsModal
+        movie={selectedMovie}
+        onClose={handleCloseModal}
+      />
 
       <Footer />
     </div>

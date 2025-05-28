@@ -1,9 +1,10 @@
+// WatchButton.jsx
 import React from 'react';
 import eyeIconUrl from '../assets/images/eye.svg';
 
 const WatchButton = ({ onClick, alt = "Просмотрено", className = "" }) => {
   return (
-    <button 
+    <button
       onClick={onClick}
       className={`movie-button movie-button--primary ${className}`}
       aria-label={alt}

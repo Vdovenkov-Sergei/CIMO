@@ -109,21 +109,6 @@ app.include_router(router_session_movies)
 app.include_router(router_viewed_movies)
 app.include_router(router_watch_later_movies)
 
-origins = [settings.FRONTEND_URL]
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS", "DELETE", "PATCH", "PUT"],
-    allow_headers=[
-        "Content-Type",
-        "Set-Cookie",
-        "Access-Control-Allow-Headers",
-        "Access-Control-Allow-Origin",
-        "Authorization",
-    ],
-)
-
 
 @app.middleware("http")
 async def add_process_time_header(request: Request, call_next):
@@ -158,6 +143,22 @@ async def add_security_headers(request: Request, call_next):
     response.headers["X-Content-Type-Options"] = "nosniff"
 
     return response"""
+
+
+origins = [settings.FRONTEND_URL]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "OPTIONS", "DELETE", "PATCH", "PUT"],
+    allow_headers=[
+        "Content-Type",
+        "Set-Cookie",
+        "Access-Control-Allow-Headers",
+        "Access-Control-Allow-Origin",
+        "Authorization",
+    ],
+)
 
 
 BASE_DIR = Path(__file__).resolve().parent

@@ -37,6 +37,7 @@ $primary-font: 'Inter', sans-serif;
   padding: 40px;
   gap: 60px;
   align-items: center;
+  justify-content: center;
   }
 
   .onboarding {
@@ -85,6 +86,14 @@ $primary-font: 'Inter', sans-serif;
     color: #A1ACFF;
     margin: 0 0 32px 0;
     font-size: 14px;
+
+    &--error {
+      color: $error-color;
+    }
+
+    &--success {
+      color: $success-color;
+    }
   }
 
   .form {

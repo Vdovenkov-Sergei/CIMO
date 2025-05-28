@@ -1,3 +1,4 @@
+import random
 import uuid
 from datetime import UTC, datetime
 from typing import Any, Optional
@@ -87,10 +88,10 @@ async def check_ready_participants(session_id: uuid.UUID) -> bool:
     return ready_flag
 
 
-@router.patch("/status", response_model=dict[str, str])
+@router.patch("/status", response_model=dict[str, str | int])
 async def change_session_status(
     data: SSessionUpdate, session: Session = Depends(get_current_session)
-) -> dict[str, str]:
+) -> dict[str, str | int]:
     new_status = data.status
     update_fields: dict[str, Any] = {"status": new_status}
 
@@ -102,7 +103,13 @@ async def change_session_status(
         logger.info("User ended session.", extra={"time": update_fields["ended_at"], "user_id": session.user_id})
 
     await SessionDAO.update_session(session_id=session.id, user_id=session.user_id, update_data=update_fields)
-    return {"message": "Session status updated successfully."}
+
+    response_data: dict[str, str | int] = {"message": "Session status updated successfully."}
+    if new_status == SessionStatus.ACTIVE:
+        # TODO Здесь будет логика получения first_movie_id
+        first_movie_id = random.randint(1, 10000)
+        response_data["movie_id"] = first_movie_id
+    return response_data
 
 
 @router.delete("/leave", response_model=dict[str, str])

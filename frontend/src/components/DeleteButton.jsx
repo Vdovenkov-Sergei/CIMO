@@ -1,3 +1,4 @@
+// DeleteButton.jsx
 import React from 'react';
 import trashIconUrl from '../assets/images/trash.svg';
 

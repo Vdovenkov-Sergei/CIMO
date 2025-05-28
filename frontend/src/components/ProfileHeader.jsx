@@ -30,8 +30,8 @@ const ProfileHeader = ({ user }) => {
 
 ProfileHeader.propTypes = {
   user: PropTypes.shape({
-  login: PropTypes.string.isRequired,
-  email: PropTypes.string.isRequired
+    login: PropTypes.string.isRequired,
+    email: PropTypes.string.isRequired
   }).isRequired
 };
 

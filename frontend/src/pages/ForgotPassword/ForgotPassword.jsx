@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination } from 'swiper/modules';
 import './ForgotPassword.scss';
@@ -8,24 +7,53 @@ import HeaderReg from '../../components/HeaderReg';
 import PasswordRecoveryForm from '../../components/PasswordRecoveryForm';
 
 const ForgotPassword = () => {
-
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [backendError, setBackendError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
     
-    // Здесь будет логика отправки письма
-    console.log('Отправка письма на:', email);
-    
-    // Имитация запроса
-    setTimeout(() => {
-      setIsLoading(false);
-      alert('Письмо отправлено! Проверьте вашу почту');
-    }, 1500);
-  };
+    if (!email.trim()) {
+      setError('Введите email');
+      setBackendError('');
+      return;
+    }
 
+    setIsLoading(true);
+    setError('');
+    setBackendError('');
+    setSuccessMessage('');
+
+    try {
+      const response = await fetch('/api/auth/password/forgot', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email.trim()
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        const errorMessage = data.detail || data.message || 'Ошибка отправки письма';
+        setBackendError(errorMessage);
+        throw new Error(errorMessage);
+      }
+
+      setSuccessMessage('Письмо отправлено! Проверьте вашу почту');
+      
+    } catch (err) {
+      console.error('Ошибка восстановления пароля:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="forgot-password-page">
@@ -34,9 +62,16 @@ const ForgotPassword = () => {
       <main className="main-content container">
         <PasswordRecoveryForm
           email={email}
-          onEmailChange={(e) => setEmail(e.target.value)}
+          onEmailChange={(e) => {
+            setEmail(e.target.value);
+            if (error) setError('');
+            if (backendError) setBackendError('');
+          }}
           onSubmit={handleSubmit}
           isLoading={isLoading}
+          error={error}
+          backendError={backendError}
+          successMessage={successMessage}
         />
       </main>
 

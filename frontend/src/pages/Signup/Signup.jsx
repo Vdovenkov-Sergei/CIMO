@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination } from 'swiper/modules';
 import './Signup.scss';
@@ -13,6 +13,7 @@ import Footer from '../../components/Footer';
 import RegisterForm from '../../components/RegisterForm';
 
 const Signup = () => {
+  const navigate = useNavigate();
   const onboardingImages = [
     { id: 1, src: onboarding1, alt: 'Демонстрация функционала 1' },
     { id: 2, src: onboarding2, alt: 'Демонстрация функционала 2' },
@@ -20,11 +21,14 @@ const Signup = () => {
   ];
 
   const [formData, setFormData] = useState({
-    login: '',
+    email: '',
     password: '',
     confirmPassword: ''
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [backendError, setBackendError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -32,19 +36,66 @@ const Signup = () => {
       ...prev,
       [name]: value
     }));
+    if (error) setError('');
+    if (backendError) setBackendError('');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Валидация формы
+    if (!formData.email || !formData.password || !formData.confirmPassword) {
+      setError('Все поля обязательны для заполнения');
+      setBackendError('');
+      return;
+    }
+    
+    if (formData.password !== formData.confirmPassword) {
+      setError('Пароли не совпадают');
+      setBackendError('');
+      return;
+    }
+
     setIsLoading(true);
+    setError('');
+    setBackendError('');
+    setSuccessMessage('');
     
-    // Здесь будет логика регистрации
-    console.log('Отправка данных:', formData);
-    
-    // Имитация запроса
-    setTimeout(() => {
+    try {
+      const response = await fetch('/api/auth/register/email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Используем detail или message из ответа сервера
+        const errorMessage = data.detail || data.message || 'Ошибка регистрации';
+        setBackendError(errorMessage);
+        throw new Error(errorMessage);
+      }
+
+      setSuccessMessage('Регистрация прошла успешно! Перенаправляем на верификацию...');
+      
+      setTimeout(() => {
+        navigate('/verification', { 
+          state: { email: formData.email }
+        });
+      }, 2000);
+      
+    } catch (err) {
+      console.error('Ошибка регистрации:', err);
+      // Не устанавливаем error, так как используем backendError
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   };
 
   return (
@@ -52,21 +103,20 @@ const Signup = () => {
       <HeaderReg className="header" />
 
       <main className="main-content container">
-        <Onboarding 
-          images={onboardingImages}
-          autoplayDelay={4000}
-          className="custom-onboarding"
-        />
 
         <RegisterForm
-          login={formData.login}
+          email={formData.email}
           password={formData.password}
           confirmPassword={formData.confirmPassword}
-          onLoginChange={(e) => handleChange({ ...e, target: { ...e.target, name: 'login' }})}
+          onEmailChange={(e) => handleChange({ ...e, target: { ...e.target, name: 'email' }})}
           onPasswordChange={(e) => handleChange({ ...e, target: { ...e.target, name: 'password' }})}
           onConfirmPasswordChange={(e) => handleChange({ ...e, target: { ...e.target, name: 'confirmPassword' }})}
           onSubmit={handleSubmit}
           isLoading={isLoading}
+          error={error}
+          backendError={backendError}
+          successMessage={successMessage}
+          buttonText={isLoading ? 'Регистрация...' : 'Далее'}
         />
       </main>
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination } from 'swiper/modules';
 import './Nickname.scss';
@@ -13,32 +13,67 @@ import Onboarding from '../../components/Onboarding';
 import NicknameForm from '../../components/NicknameForm';
 
 const Nickname = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const onboardingImages = [
     { id: 1, src: onboarding1, alt: 'Демонстрация функционала 1' },
     { id: 2, src: onboarding2, alt: 'Демонстрация функционала 2' },
     { id: 3, src: onboarding3, alt: 'Демонстрация функционала 3' },
   ];
 
+  const user_id = location.state?.user_id || '';
   const [nickname, setNickname] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [backendError, setBackendError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!nickname.trim()) {
+      setError('Введите никнейм');
+      setBackendError('');
+      return;
+    }
+
     setIsLoading(true);
-    
-    // Здесь будет логика сохранения никнейма
-    console.log('Сохранение никнейма:', nickname);
-    
-    // Имитация запроса
-    setTimeout(() => {
+    setError('');
+    setBackendError('');
+    setSuccessMessage('');
+
+    try {
+      const response = await fetch('/api/auth/register/username', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: user_id,
+          user_name: nickname.trim()
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        const errorMessage = data.detail || data.message || 'Ошибка сохранения никнейма';
+        setBackendError(errorMessage);
+        throw new Error(errorMessage);
+      }
+
+      setSuccessMessage('Никнейм успешно сохранен!');
+      setTimeout(() => navigate('/'), 2000);
+      
+    } catch (err) {
+      console.error('Ошибка сохранения никнейма:', err);
+    } finally {
       setIsLoading(false);
-      alert('Никнейм сохранен!');
-    }, 1500);
+    }
   };
 
   const handleSkip = () => {
-    console.log('Пользователь пропустил создание никнейма');
-    // Логика пропуска шага
+    navigate('/');
   };
 
   return (
@@ -46,19 +81,21 @@ const Nickname = () => {
       <HeaderReg className="header" />
 
       <main className="main-content container">
-        <Onboarding 
-          images={onboardingImages}
-          autoplayDelay={4000}
-          className="custom-onboarding"
-        />
 
         <NicknameForm
           nickname={nickname}
-          onNicknameChange={(e) => setNickname(e.target.value)}
+          onNicknameChange={(e) => {
+            setNickname(e.target.value);
+            if (error) setError('');
+            if (backendError) setBackendError('');
+          }}
           onSubmit={handleSubmit}
           onSkip={handleSkip}
           isLoading={isLoading}
           isSkippable={true}
+          error={error}
+          backendError={backendError}
+          successMessage={successMessage}
         />
       </main>
 
