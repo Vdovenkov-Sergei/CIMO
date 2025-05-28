@@ -15,7 +15,7 @@ const PasswordRecoveryForm = ({
     if (backendError) return backendError;
     if (error) return error;
     if (successMessage) return successMessage;
-    return 'На Ваш электронный адрес будет отправлена ссылка для восстановления пароля';
+    return 'Введите Вашy почту';
   };
 
   const getSubtitleClass = () => {
@@ -36,7 +36,7 @@ const PasswordRecoveryForm = ({
         <div className="form__group">
           <Input
             type="email"
-            placeholder="Введите ваш email"
+            placeholder="Почта"
             value={email}
             onChange={onEmailChange}
             className="form__input"

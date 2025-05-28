@@ -86,7 +86,7 @@ const Header = () => {
 
   return (
     <header className="header">
-      <img src={CimoLogo} className="logo" alt="CIMO Logo" />
+      <Link to="/modeSelection"><img src={CimoLogo} className="logo" alt="CIMO Logo" /></Link>
       
       <div className="header__profile">
         <div className="profile-menu-container">

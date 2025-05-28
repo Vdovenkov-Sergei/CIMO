@@ -81,11 +81,6 @@ const Nickname = () => {
       <HeaderReg className="header" />
 
       <main className="main-content container">
-        <Onboarding 
-          images={onboardingImages}
-          autoplayDelay={4000}
-          className="custom-onboarding"
-        />
 
         <NicknameForm
           nickname={nickname}

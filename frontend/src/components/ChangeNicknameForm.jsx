@@ -40,7 +40,6 @@ const ChangeNicknameForm = ({
             type="text"
             id="nickname"
             placeholder="Никнейм"
-            value={nickname}
             onChange={(e) => setNickname(e.target.value)}
             required
             minLength={3}
