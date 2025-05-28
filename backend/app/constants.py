@@ -32,18 +32,22 @@ class Tokens:
 
 
 class RedisKeys:
-    USER_EMAIL_KEY = "user:{email}"
-    CODE_VERIFY_KEY = "code:verify:{email}"
-    ATTEMPTS_ENTER_KEY = "attempts:enter:{email}"
-    ATTEMPTS_SEND_KEY = "attempts:send:{email}"
-    RESET_TOKEN_KEY = "reset:token:{token}"
+    USER_EMAIL_KEY: str = "user:{email}"
+    CODE_VERIFY_KEY: str = "code:verify:{email}"
+    ATTEMPTS_ENTER_KEY: str = "attempts:enter:{email}"
+    ATTEMPTS_SEND_KEY: str = "attempts:send:{email}"
+    RESET_TOKEN_KEY: str = "reset:token:{token}"
 
-    SESSION_USERS_KEY = "session:{session_id}:users"
-    SESSION_PAIR_REC_KEY = "session:{session_id}:pair"
-    USER_VECTOR_KEY = "vector:user:{user_id}"
-    USER_SESSION_LIKES_KEY = "session:{session_id}:user:{user_id}:likes"
-    USER_SESSION_SWIPES_KEY = "session:{session_id}:user:{user_id}:swipes"
-    SESSION_KEY = "session:{session_id}:*"
+    USER_VECTOR_KEY: str = "vector:user:{user_id}"
+    USER_VECTOR_NORM_KEY: str = "vector:user:{user_id}:norm"
+
+    SESSION_USERS_KEY: str = "session:{session_id}:users"
+    SESSION_PAIR_REC_KEY: str = "session:{session_id}:pair"
+    USER_SESSION_LIKES_KEY: str = "session:{session_id}:user:{user_id}:likes"
+    USER_SESSION_SWIPES_KEY: str = "session:{session_id}:user:{user_id}:swipes"
+    SESSION_KEY: str = "session:{session_id}:*"
+
+    USER_ONBOARDING_LIST: str = "session:{session_id}:user:{user_id}:onboarding_lst"
 
 
 class General:

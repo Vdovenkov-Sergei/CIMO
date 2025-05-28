@@ -127,8 +127,8 @@ async def change_session_status(
 
     response_data: dict[str, str | int] = {"message": "Session status updated successfully."}
     if new_status == SessionStatus.ACTIVE:
-        first_movie_id = await recommender.get_new_movie(
-            user_id=session.user_id, is_pair=session.is_pair, is_onboarding=session.is_onboarding
+        first_movie_id = await recommender.get_recommendation(
+            session_id=session.id, user_id=session.user_id, is_pair=session.is_pair, is_onboarding=session.is_onboarding
         )
         response_data["movie_id"] = first_movie_id
     return response_data

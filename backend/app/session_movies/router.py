@@ -75,10 +75,10 @@ async def swipe_session_movie(
                 },
             )
 
-    await recommender.update_user_vector(
-        session.user_id, data.movie_id, data.is_liked, data.is_open_full_info, data.time_swiped
+    await recommender.update_user_vector(session.user_id, data.movie_id, data.time_swiped, data.is_liked)
+    new_movie_id = await recommender.get_recommendation(
+        session.id, session.user_id, session.is_pair, session.is_onboarding
     )
-    new_movie_id = await recommender.get_new_movie(session.user_id, session.is_pair, session.is_onboarding)
     logger.info("Swipe completed.", extra={"user_id": session.user_id, "new_movie_id": new_movie_id})
     return {"message": "The movie was successfully swiped.", "movie_id": new_movie_id}
 

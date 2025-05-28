@@ -12,7 +12,7 @@ router = APIRouter(prefix="/chats/message", tags=["Chats"])
 
 
 async def bot_generate_response(_: str) -> str:
-    # TODO Здесь будет логика работы бота
+    # TODO Добавить логику генерации ответа бота
     msg = "Я не знаю, что ответить =("
     logger.debug("Bot generated response", extra={"msg_content": msg})
     return msg
