@@ -10,6 +10,8 @@ from app.recommendation.index import FaissIndex, faiss_index
 from app.constants import RedisKeys
 from app.database import redis_client
 
+from app.logger import logger
+
 
 BASE_DIR = Path(__file__).parent.parent
 ONBOARDING_FILE_PATH = BASE_DIR / "data" / "onboarding.json"
@@ -43,10 +45,7 @@ class RecommendationService:
         user_likes = await redis_client.get(user_likes_key)
 
         await redis_client.set(user_swipes_key, (int(user_swipes) + 1) % self.SWIPES_ITER)
-        if user_vector_bytes:
-            u_old = np.frombuffer(user_vector_bytes, dtype=np.float32)
-        else:
-            u_old = np.zeros(self.faiss_index.index.d, dtype=np.float32)
+        u_old = self.load_or_default(user_vector_bytes, self.faiss_index.index.d)
         Z_old = float(norm_bytes) if norm_bytes else 0.0
         v = self.faiss_index.index.reconstruct(movie_id)
         w = math.log(1 + time_swiped)
@@ -98,11 +97,7 @@ class RecommendationService:
             return random_movie
         user_vector_key = RedisKeys.USER_VECTOR_KEY.format(user_id=user_id)
         user_vector_bytes = await redis_client.get(user_vector_key)
-
-        if user_vector_bytes:
-            user_vector = np.frombuffer(user_vector_bytes, dtype=np.float32)
-        else:
-            user_vector = np.zeros(self.faiss_index.index.d, dtype=np.float32)
+        user_vector = self.load_or_default(user_vector_bytes, self.faiss_index.index.d)
         return int(np.random.choice(self.faiss_index.search(user_vector)))
 
     async def get_pair_recommendation(self, session_id: uuid.UUID, user_id: int) -> int:
@@ -125,14 +120,8 @@ class RecommendationService:
 
         u1_bytes = await redis_client.get(RedisKeys.USER_VECTOR_KEY.format(user_id=user1))
         u2_bytes = await redis_client.get(RedisKeys.USER_VECTOR_KEY.format(user_id=user2))
-        if u1_bytes:
-            u1 = np.frombuffer(u1_bytes, dtype=np.float32)
-        else:
-            u1 = np.zeros(self.faiss_index.index.d, dtype=np.float32)
-        if u2_bytes:
-            u2 = np.frombuffer(u2_bytes, dtype=np.float32)
-        else:
-            u2 = np.zeros(self.faiss_index.index.d, dtype=np.float32)
+        u1 = self.load_or_default(u1_bytes, self.faiss_index.index.d)
+        u2 = self.load_or_default(u2_bytes, self.faiss_index.index.d)
 
         likes1 = await redis_client.get(RedisKeys.USER_SESSION_LIKES_KEY.format(session_id=session_id, user_id=user1))
         likes2 = await redis_client.get(RedisKeys.USER_SESSION_LIKES_KEY.format(session_id=session_id, user_id=user2))
@@ -157,6 +146,11 @@ class RecommendationService:
         if random.random() < self.PROBABILITY and self.popular_movies:
             return random.choice(self.popular_movies)
         return None
+
+    def load_or_default(self, vector_bytes: Optional[bytes], dim: int) -> np.ndarray:
+        if vector_bytes:
+            return np.frombuffer(vector_bytes, dtype=np.float32).reshape(1, -1)
+        return np.zeros((1, dim), dtype=np.float32)
 
 
 recommender = RecommendationService(faiss_index=faiss_index)

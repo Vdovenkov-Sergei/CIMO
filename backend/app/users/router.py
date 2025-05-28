@@ -109,7 +109,7 @@ async def verify_email(user_data: SUserVerification) -> dict[str, str | int]:
     await UserDAO.update_user(user_id=user.id, update_data={"user_name": f"user_{user.id}"})
     logger.debug("Default username set for user.", extra={"user_id": user.id, "user_name": f"user_{user.id}"})
 
-    empty_user_vector = np.zeros(faiss_index.index.d, dtype=np.float32)
+    empty_user_vector = np.zeros((1, faiss_index.index.d), dtype=np.float32)
     user_vector_key = RedisKeys.USER_VECTOR_KEY.format(user_id=user.id)
     await redis_client.set(user_vector_key, empty_user_vector.tobytes())
     logger.info("Initialized empty user embedding vector in Redis.", extra={"user_id": user.id})

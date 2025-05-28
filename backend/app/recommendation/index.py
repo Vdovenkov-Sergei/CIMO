@@ -27,7 +27,7 @@ class FaissIndex:
             self.load()
         _, indices = self.index.search(vector, k)
         logger.debug("Search completed in FAISS index.", extra={"result_count": len(indices), "k": k})
-        return indices
+        return indices[0]
 
 
 faiss_index = FaissIndex()
