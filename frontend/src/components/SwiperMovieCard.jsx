@@ -46,6 +46,7 @@ const SwipeableMovieCard = ({ movie, onClick, onSwipe, className }) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 0 }}
         whileDrag={{ opacity: 1 }}
+        hidden
       >
         👍
       </motion.div>
@@ -55,6 +56,7 @@ const SwipeableMovieCard = ({ movie, onClick, onSwipe, className }) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 0 }}
         whileDrag={{ opacity: 1 }}
+        hidden
       >
         👎
       </motion.div>

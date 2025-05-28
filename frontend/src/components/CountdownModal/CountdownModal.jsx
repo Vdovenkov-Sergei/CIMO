@@ -6,6 +6,7 @@ const CountdownModal = ({ isOpen, onClose, onActivate, is_pair, session_id }) =>
     const navigate = useNavigate();
     const [countdown, setCountdown] = useState(5);
     const [isReady, setIsReady] = useState(false);
+    const [checkingReady, setCheckingReady] = useState(false);
     
     const refreshToken = async () => {
         try {
@@ -26,7 +27,7 @@ const CountdownModal = ({ isOpen, onClose, onActivate, is_pair, session_id }) =>
         }
       };
     
-      const fetchWithTokenRefresh = async (url, options = {}) => {
+    const fetchWithTokenRefresh = async (url, options = {}) => {
         try {
           const response = await fetch(url, {
             ...options,
@@ -58,108 +59,128 @@ const CountdownModal = ({ isOpen, onClose, onActivate, is_pair, session_id }) =>
         }
       };
 
-  const handleLeave = async () => {
-    try {
-      await fetchWithTokenRefresh('/api/sessions/leave', {
-        method: 'DELETE',
-      });
-      navigate('/modeSelection');
-      onClose();
-    } catch (err) {
-      console.error('Error leaving session:', err);
-    }
-  };
-
-  // Проверка готовности сессии (для парных сессий)
-  const checkSessionReady = async () => {
-    try {
-      const response = await fetchWithTokenRefresh(`/api/sessions/ready/${session_id}`);
-      const data = await response.json();
-      return data;
-    } catch (err) {
-      console.error('Error checking session ready status:', err);
-      return false;
-    }
-  };
-
-  // Эффект для проверки готовности парной сессии
-  useEffect(() => {
-    if (!isOpen || !is_pair || isReady) return;
-
-    const interval = setInterval(async () => {
-      const ready = await checkSessionReady();
-      if (ready) {
-        setIsReady(true);
-        clearInterval(interval);
-      }
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [isOpen, is_pair, isReady, session_id]);
-
-  // Эффект для обратного отсчёта
-  useEffect(() => {
-    if (!isOpen || (is_pair && !isReady)) return;
-
-    const timer = setInterval(() => {
-      setCountdown(prev => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [isOpen, is_pair, isReady]);
-
-  useEffect(() => {
-    if (countdown === 0 && isOpen && (!is_pair || isReady)) {
-      const activate = async () => {
+    const handleLeave = async () => {
         try {
-          const response = await fetchWithTokenRefresh('/api/sessions/status', {
-            method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ status: 'ACTIVE' }),
+          await fetchWithTokenRefresh('/api/sessions/leave', {
+            method: 'DELETE',
           });
-          
-          const data = await response.json();
-          if (onActivate) {
-            onActivate(data.movie_id);
-          }
+          navigate('/modeSelection');
           onClose();
         } catch (err) {
-          console.error('Error activating session:', err);
+          console.error('Error leaving session:', err);
         }
-      };
-      activate();
-    }
-  }, [countdown, isOpen, onClose, onActivate, is_pair, isReady]);
+    };
 
-  if (!isOpen) return null;
+    const checkSessionReady = async () => {
+        try {
+          console.log('Checking if session is ready...');
+          const response = await fetchWithTokenRefresh(`/api/sessions/ready/${session_id}`);
+          const data = await response.json();
+          console.log('Ready check response:', data);
+          
+          // Гибкая проверка ответа
+          return data === true;
+        } catch (err) {
+          console.error('Error checking session ready status:', err);
+          return false;
+        }
+    };
 
-  return (
-    <div className="countdown-modal">
-      <div className="countdown-modal__content">
-        <h3>
-          {is_pair && !isReady ? (
-            "Ожидаем других участников"
-          ) : (
-            `Сессия начнётся через: ${countdown}`
-          )}
-        </h3>
-        <button 
-          className="countdown-modal__leave-button"
-          onClick={handleLeave}
-        >
-          Выйти
-        </button>
-      </div>
-    </div>
-  );
+    
+    // Эффект для проверки готовности парной сессии
+    useEffect(() => {
+        if (!isOpen || !is_pair || isReady) return;
+
+        setCheckingReady(true);
+        const interval = setInterval(async () => {
+            const ready = await checkSessionReady();
+            if (ready) {
+                console.log('Both participants are ready! Starting countdown...');
+                setIsReady(true);
+                setCheckingReady(false);
+                clearInterval(interval);
+            }
+        }, 5000);
+
+        return () => {
+            clearInterval(interval);
+            setCheckingReady(false);
+        };
+    }, [isOpen, is_pair, session_id]);
+  
+    useEffect(() => {
+      if (isOpen && !is_pair && !isReady) {
+          console.log('Single session detected — skipping wait and starting countdown immediately.');
+          setIsReady(true);
+      }
+  }, [isOpen, is_pair, isReady]);
+
+    // Эффект для обратного отсчёта (запускается только когда isReady = true)
+    useEffect(() => {
+        if (!isOpen || !isReady) return;
+
+        console.log('Starting countdown...');
+        const timer = setInterval(() => {
+            setCountdown(prev => {
+                if (prev <= 1) {
+                    clearInterval(timer);
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [isOpen, isReady]);
+
+    // Эффект для активации сессии после отсчёта
+    useEffect(() => {
+        if (countdown === 0 && isOpen) {
+            console.log('Countdown finished, activating session...');
+            const activate = async () => {
+                try {
+                    const response = await fetchWithTokenRefresh('/api/sessions/status', {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ status: 'ACTIVE' }),
+                    });
+                    
+                    const data = await response.json();
+                    if (onActivate) {
+                        onActivate(data.movie_id);
+                    }
+                    onClose();
+                } catch (err) {
+                    console.error('Error activating session:', err);
+                }
+            };
+            activate();
+        }
+    }, [countdown, isOpen]);
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="countdown-modal">
+            <div className="countdown-modal__content">
+                <h3>
+                    {is_pair && !isReady ? (
+                        checkingReady ? "Проверяем готовность участников..." : "Ожидаем других участников"
+                    ) : (
+                        `Сессия начнётся через: ${countdown}`
+                    )}
+                </h3>
+                <button 
+                    className="countdown-modal__leave-button"
+                    onClick={handleLeave}
+                >
+                    Выйти
+                </button>
+            </div>
+        </div>
+    );
 };
 
 export default CountdownModal;

@@ -217,7 +217,13 @@ const Session = () => {
           onClose={() => {
             setShowCountdown(false);
             activateSession();
-          }} 
+          }}
+          onActivate={(movieId) => {
+            setCurrentMovieId(movieId);
+            fetchCurrentMovie(movieId);
+          }}
+          is_pair={location.state?.is_pair}
+          session_id={location.state?.session_id}
         />
 
         <div className="movie-card-container">

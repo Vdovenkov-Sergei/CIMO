@@ -9,7 +9,8 @@ import PairModeCard from '../../components/PairModeCard';
 
 const ModeSelection = () => {
   const navigate = useNavigate();
-  const [inviteLink] = useState('https://cinemood.app/invite/xyz123');
+  const [inviteLink, setInviteLink] = useState('http://localhost:5173/invite?id=');
+  const [sessionId, setSessionId] = useState('');
 
   const refreshToken = async () => {
     try {
@@ -98,14 +99,55 @@ const ModeSelection = () => {
       });
       
       const data = await response.json();
-      navigate('/session', { state: { movie_id: data.movie_id } });
+      navigate('/session', { state: { session_id: sessionId, is_pair: false, movie_id: data.movie_id } });
     } catch (err) {
       console.error('Error preparing session:', err);
     }
   };
 
-  const handleStartPairSession = () => {
-    console.log('Парная сессия начата');
+  const handleStartPairSession = async (showModalCallback) => {
+    try {
+      const response = await fetchWithTokenRefresh('/api/sessions/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ is_pair: true }),
+      });
+      const data = await response.json();
+      setSessionId(data.id);
+      setInviteLink(`http://localhost:5173/invite?id=${sessionId}`);
+      showModalCallback();
+    } catch (err) {
+      console.error('Error starting pair session:', err);
+    }
+  };
+
+  const handleCancelPairSession = async () => {
+    try {
+      await fetchWithTokenRefresh('/api/sessions/leave', {
+        method: 'DELETE',
+      });
+    } catch (err) {
+      console.error('Error canceling pair session:', err);
+    }
+  };
+
+  const handleConfirmPairSession = async () => {
+    try {
+      const response = await fetchWithTokenRefresh('/api/sessions/status', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: 'PREPARED' }),
+      });
+      
+      const data = await response.json();
+      navigate(`/session?id=${sessionId}`, { state: { session_id: sessionId, is_pair: true, movie_id: data.movie_id } });
+    } catch (err) {
+      console.error('Error preparing pair session:', err);
+    }
   };
 
   return (
@@ -124,6 +166,8 @@ const ModeSelection = () => {
 
           <PairModeCard 
             onStartSession={handleStartPairSession}
+            onCancelSession={handleCancelPairSession}
+            onConfirmSession={handleConfirmPairSession}
             inviteLink={inviteLink}
             copyIconUrl={copyIconUrl}
           />
