@@ -9,7 +9,7 @@ import PairModeCard from '../../components/PairModeCard';
 
 const ModeSelection = () => {
   const navigate = useNavigate();
-  const [inviteLink, setInviteLink] = useState('http://localhost:5173/invite?id=');
+  const [inviteLink, setInviteLink] = useState('');
   const [sessionId, setSessionId] = useState('');
 
   const refreshToken = async () => {
@@ -115,8 +115,9 @@ const ModeSelection = () => {
         body: JSON.stringify({ is_pair: true }),
       });
       const data = await response.json();
-      setSessionId(data.id);
-      setInviteLink(`http://localhost:5173/invite?id=${sessionId}`);
+      const newSessionId = data.id;
+      setSessionId(newSessionId);
+      setInviteLink(`http://localhost:5173/invite?id=${newSessionId}`);
       showModalCallback();
     } catch (err) {
       console.error('Error starting pair session:', err);
