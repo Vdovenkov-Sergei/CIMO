@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './CountdownModal.scss';
 
-const CountdownModal = ({ isOpen, onClose, onActivate }) => {
+const CountdownModal = ({ isOpen, onClose, onActivate, is_pair, session_id }) => {
     const navigate = useNavigate();
     const [countdown, setCountdown] = useState(5);
+    const [isReady, setIsReady] = useState(false);
     
     const refreshToken = async () => {
         try {
@@ -69,8 +70,36 @@ const CountdownModal = ({ isOpen, onClose, onActivate }) => {
     }
   };
 
+  // Проверка готовности сессии (для парных сессий)
+  const checkSessionReady = async () => {
+    try {
+      const response = await fetchWithTokenRefresh(`/api/sessions/ready/${session_id}`);
+      const data = await response.json();
+      return data;
+    } catch (err) {
+      console.error('Error checking session ready status:', err);
+      return false;
+    }
+  };
+
+  // Эффект для проверки готовности парной сессии
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || !is_pair || isReady) return;
+
+    const interval = setInterval(async () => {
+      const ready = await checkSessionReady();
+      if (ready) {
+        setIsReady(true);
+        clearInterval(interval);
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [isOpen, is_pair, isReady, session_id]);
+
+  // Эффект для обратного отсчёта
+  useEffect(() => {
+    if (!isOpen || (is_pair && !isReady)) return;
 
     const timer = setInterval(() => {
       setCountdown(prev => {
@@ -83,10 +112,10 @@ const CountdownModal = ({ isOpen, onClose, onActivate }) => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [isOpen]);
+  }, [isOpen, is_pair, isReady]);
 
   useEffect(() => {
-    if (countdown === 0 && isOpen) {
+    if (countdown === 0 && isOpen && (!is_pair || isReady)) {
       const activate = async () => {
         try {
           const response = await fetchWithTokenRefresh('/api/sessions/status', {
@@ -108,14 +137,20 @@ const CountdownModal = ({ isOpen, onClose, onActivate }) => {
       };
       activate();
     }
-  }, [countdown, isOpen, onClose, onActivate]);
+  }, [countdown, isOpen, onClose, onActivate, is_pair, isReady]);
 
   if (!isOpen) return null;
 
   return (
     <div className="countdown-modal">
       <div className="countdown-modal__content">
-        <h3>Сессия начнётся через: {countdown}</h3>
+        <h3>
+          {is_pair && !isReady ? (
+            "Ожидаем других участников"
+          ) : (
+            `Сессия начнётся через: ${countdown}`
+          )}
+        </h3>
         <button 
           className="countdown-modal__leave-button"
           onClick={handleLeave}

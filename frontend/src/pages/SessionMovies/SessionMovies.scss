@@ -155,10 +155,12 @@ $primary-font: 'Inter', sans-serif;
       width: 100%;
       height: 300px;
       object-fit: cover;
+      cursor: pointer;
+      border-radius: 8px;
     }
 
     &__title {
-      font-size: 16px;
+      font-size: 20px;
       margin: 15px;
       text-align: center;
     }
@@ -168,11 +170,55 @@ $primary-font: 'Inter', sans-serif;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      padding: 0 15px 15px;
+      padding: 12px 12px;
+      border: none;
+      border-radius: 4px;
+      font-family: $primary-font;
+      font-size: 14px;
+      cursor: pointer;
+      transition: opacity 0.2s;
 
-      img {
-        width: 24px;
+      .movie-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 12px;
+        border: none;
+        border-radius: 4px;
+        font-family: $primary-font;
+        font-size: 14px;
+        cursor: pointer;
+
+        background-color: #615CF8;
+        color: #FFFFFF;
+
+        &:hover {
+          background-color: #4631D1;
+        }
+
+        &--primary {
+          background-color: #615CF8;
+          color: #FFFFFF;
+    
+          &:hover {
+            background-color: #4631D1;
+          }
+        }
+    
+        &--danger {
+          background-color: #EF4444;
+          color: #FFFFFF;
+    
+          &:hover {
+            background-color: #B91C1C;
+          }
+        }
+  
+        img {
+          width: 24px;
+        }
       }
+
     }
   }
 
@@ -224,7 +270,7 @@ $primary-font: 'Inter', sans-serif;
     }
   }
 
-  .movie-button, .buttons .add-all-button, .buttons .end-session {
+  .buttons .add-all-button, .buttons .end-session {
     display: flex;
     align-items: center;
     justify-content: center;
