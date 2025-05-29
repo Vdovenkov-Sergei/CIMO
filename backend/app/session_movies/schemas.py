@@ -12,6 +12,7 @@ class SSessionMovieRead(BaseSchema):
 class SSessionMovieCreate(BaseSchema):
     movie_id: int
     is_liked: bool
+    time_swiped: int
 
 
 class MatchNotification(BaseSchema):

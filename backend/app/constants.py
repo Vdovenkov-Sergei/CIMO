@@ -32,11 +32,22 @@ class Tokens:
 
 
 class RedisKeys:
-    USER_EMAIL_KEY: str = "user_{email}"
-    CODE_VERIFY_KEY: str = "code_verify_{email}"
-    ATTEMPTS_ENTER_KEY: str = "attempts_enter_{email}"
-    ATTEMPTS_SEND_KEY: str = "attempts_send_{email}"
-    RESET_TOKEN_KEY: str = "reset_token_{token}"
+    USER_EMAIL_KEY: str = "user:{email}"
+    CODE_VERIFY_KEY: str = "code:verify:{email}"
+    ATTEMPTS_ENTER_KEY: str = "attempts:enter:{email}"
+    ATTEMPTS_SEND_KEY: str = "attempts:send:{email}"
+    RESET_TOKEN_KEY: str = "reset:token:{token}"
+
+    USER_VECTOR_KEY: str = "vector:user:{user_id}"
+    USER_VECTOR_NORM_KEY: str = "vector:user:{user_id}:norm"
+
+    SESSION_USERS_KEY: str = "session:{session_id}:users"
+    SESSION_PAIR_REC_KEY: str = "session:{session_id}:pair"
+    USER_SESSION_LIKES_KEY: str = "session:{session_id}:user:{user_id}:likes"
+    USER_SESSION_SWIPES_KEY: str = "session:{session_id}:user:{user_id}:swipes"
+    SESSION_KEY: str = "session:{session_id}:*"
+
+    USER_ONBOARDING_LIST: str = "session:{session_id}:user:{user_id}:onboarding_lst"
 
 
 class General:
@@ -46,3 +57,4 @@ class General:
     ROUND: int = 4
     VOWELS: str = "aeiou"
     CVC_MASK: list[bool] = [False, True, False]
+    K_NEAREST: int = 10
