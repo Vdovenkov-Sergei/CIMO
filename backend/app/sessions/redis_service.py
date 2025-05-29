@@ -1,4 +1,5 @@
 import uuid
+
 from app.constants import RedisKeys
 from app.database import redis_client
 from app.logger import logger

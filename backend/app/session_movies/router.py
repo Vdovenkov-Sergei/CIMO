@@ -8,11 +8,11 @@ from app.exceptions import InvalidSessionStatusException
 from app.logger import logger
 from app.movies.dao import MovieDAO
 from app.movies.schemas import SMovieRead
+from app.recommendation.service import recommender
 from app.session_movies.dao import SessionMovieDAO
 from app.session_movies.schemas import MatchNotification, SSessionMovieCreate, SSessionMovieRead
 from app.sessions.dependencies import get_current_session
 from app.sessions.models import Session, SessionStatus
-from app.recommendation.service import recommender
 
 router = APIRouter(prefix="/movies/session", tags=["Session Movies"])
 active_sessions: dict[uuid.UUID, list[WebSocket]] = {}

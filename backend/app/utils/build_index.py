@@ -1,10 +1,11 @@
-import numpy as np
-import faiss
 from pathlib import Path
 
+import faiss
+import numpy as np
+
 BASE_DIR = Path(__file__).parent.parent
-MOVIE_EMBEDDINGS_FILE = BASE_DIR / "data" / "movie_embeddings.csv"
-FAISS_INDEX_FILE = BASE_DIR / "data" / "index.faiss"
+MOVIE_EMBEDDINGS_FILE = BASE_DIR / "data" / "recommender" / "movie_embeddings.csv"
+FAISS_INDEX_FILE = BASE_DIR / "data" / "recommender" / "index.faiss"
 
 try:
     movie_vectors = np.loadtxt(MOVIE_EMBEDDINGS_FILE, delimiter=",", dtype=np.float32)
@@ -17,7 +18,7 @@ try:
     base_index = faiss.IndexFlatIP(dim)
     index = faiss.IndexIDMap2(base_index)
     index.add_with_ids(movie_vectors, ids)
-    print(f"Successfully created FAISS index with external IDs.")
+    print("Successfully created FAISS index with external IDs.")
 
     faiss.write_index(index, str(FAISS_INDEX_FILE))
     print(f"Successfully saved FAISS index to {FAISS_INDEX_FILE}.")

@@ -1,13 +1,13 @@
 import secrets
 from datetime import timedelta
 
+import numpy as np
 from fastapi import APIRouter, Cookie, Depends, Response
 from pydantic import EmailStr
-import numpy as np
 
 from app.config import settings
 from app.constants import RedisKeys, Tokens, Verification
-from app.database import redis_client, redis_bin_client
+from app.database import redis_bin_client, redis_client
 from app.exceptions import (
     EmailAlreadyExistsException,
     MaxAttemptsSendCodeException,
@@ -17,6 +17,7 @@ from app.exceptions import (
     UserNotFoundException,
 )
 from app.logger import logger
+from app.recommendation.index import faiss_index
 from app.tasks.tasks import send_email_with_reset_link
 from app.users.auth import authenticate_user, check_jwt_token, check_verification_code, create_jwt_token
 from app.users.dao import UserDAO
@@ -33,7 +34,6 @@ from app.users.schemas import (
     SUserVerifyPassword,
 )
 from app.users.utils import Hashing, send_verification_code
-from app.recommendation.index import faiss_index
 
 router_auth = APIRouter(prefix="/auth", tags=["Authentication"])
 router_user = APIRouter(prefix="/users", tags=["User"])

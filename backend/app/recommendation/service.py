@@ -1,19 +1,21 @@
-import random
-from typing import Optional
-import uuid
-import numpy as np
 import json
-from pathlib import Path
 import math
+import random
+import uuid
+from pathlib import Path
+from typing import Optional
 
-from app.recommendation.index import FaissIndex, faiss_index
+import numpy as np
+import numpy.typing as npt
+
 from app.constants import RedisKeys
-from app.database import redis_client, redis_bin_client
-
+from app.database import redis_bin_client, redis_client
+from app.logger import logger
+from app.recommendation.index import FaissIndex, faiss_index
 
 BASE_DIR = Path(__file__).parent.parent
-ONBOARDING_FILE_PATH = BASE_DIR / "data" / "onboarding.json"
-POPULAR_MOVIES_FILE_PATH = BASE_DIR / "data" / "popular.json"
+ONBOARDING_FILE_PATH = BASE_DIR / "data" / "recommender" / "onboarding.json"
+POPULAR_MOVIES_FILE_PATH = BASE_DIR / "data" / "recommender" / "popular.json"
 
 
 class RecommendationService:
@@ -32,6 +34,11 @@ class RecommendationService:
     async def update_user_vector(
         self, session_id: uuid.UUID, user_id: int, movie_id: int, time_swiped: int, is_liked: bool = False
     ) -> None:
+
+        logger.info(
+            "Updating user vector.",
+            extra={"user_id": user_id, "session_id": str(session_id), "movie_id": movie_id, "is_liked": is_liked},
+        )
         user_likes_key = RedisKeys.USER_SESSION_LIKES_KEY.format(session_id=session_id, user_id=user_id)
         user_swipes_key = RedisKeys.USER_SESSION_SWIPES_KEY.format(session_id=session_id, user_id=user_id)
         user_vector_key = RedisKeys.USER_VECTOR_KEY.format(user_id=user_id)
@@ -58,51 +65,86 @@ class RecommendationService:
 
         await redis_bin_client.set(user_vector_key, u_new.tobytes())
         await redis_client.set(norm_key, str(Z_new))
+        logger.debug("Successfully updated user vector.", extra={"user_id": user_id})
 
     async def get_recommendation(
         self, session_id: uuid.UUID, user_id: int, is_pair: bool = False, is_onboarding: bool = False
     ) -> int:
+        logger.info(
+            "Generating recommendation.",
+            extra={
+                "session_id": str(session_id),
+                "user_id": user_id,
+                "is_pair": is_pair,
+                "is_onboarding": is_onboarding,
+            },
+        )
         if is_onboarding:
+            logger.debug("Onboarding recommendation selected.", extra={"user_id": user_id})
             return await self.get_onboarding_recommendation(session_id, user_id)
         else:
             if is_pair:
+                logger.debug("Pair recommendation selected.", extra={"user_id": user_id})
                 movie_id = await self.get_pair_recommendation(session_id, user_id)
                 if movie_id == -1:
+                    logger.debug("Pair recommendation fallback to user recommendation.", extra={"user_id": user_id})
                     return await self.get_user_recommendation(user_id)
                 return movie_id
             else:
+                logger.debug("Single user recommendation selected.", extra={"user_id": user_id})
                 return await self.get_user_recommendation(user_id)
 
     async def get_onboarding_recommendation(self, session_id: uuid.UUID, user_id: int) -> int:
         onboard_list_key = RedisKeys.USER_ONBOARDING_LIST.format(session_id=session_id, user_id=user_id)
         onboard_list = None
+        logger.debug("Fetching onboarding list.", extra={"session_id": str(session_id), "user_id": user_id})
+
         raw_onboard_list = await redis_client.get(onboard_list_key)
         if raw_onboard_list is None:
             onboard_list = recommender.generate_onboarding_list()
+            logger.debug(
+                "Generated new onboarding list.",
+                extra={"session_id": str(session_id), "user_id": user_id, "length": len(onboard_list)},
+            )
         else:
             onboard_list = json.loads(raw_onboard_list)
+            logger.debug(
+                "Loaded existing onboarding list.",
+                extra={"session_id": str(session_id), "user_id": user_id, "length": len(onboard_list)},  # type: ignore
+            )
 
         if not onboard_list:
             await redis_client.delete(onboard_list_key)
-            # No more movies in the onboarding list
+            logger.warning("Onboarding list exhausted.", extra={"session_id": str(session_id), "user_id": user_id})
             return -1
         movie_id = onboard_list.pop()
         await redis_client.set(onboard_list_key, json.dumps(onboard_list))
+        logger.info(
+            "Successfully fetched onboarding recommendation.",
+            extra={"session_id": str(session_id), "user_id": user_id, "movie_id": movie_id},
+        )
         return movie_id
 
     async def get_user_recommendation(self, user_id: int) -> int:
         random_movie = self.get_popular_movie_with_prob()
         if random_movie is not None:
+            logger.info("Returned popular movie by probability.", extra={"user_id": user_id, "movie_id": random_movie})
             return random_movie
         user_vector_key = RedisKeys.USER_VECTOR_KEY.format(user_id=user_id)
         user_vector_bytes = await redis_bin_client.get(user_vector_key)
         user_vector = self.load_or_default(user_vector_bytes, self.faiss_index.index.d)
-        return int(np.random.choice(self.faiss_index.search(user_vector)))
+        movie_id = int(np.random.choice(self.faiss_index.search(user_vector)))
+        logger.info("Successfully fetched user recommendation.", extra={"user_id": user_id, "movie_id": movie_id})
+        return movie_id
 
     async def get_pair_recommendation(self, session_id: uuid.UUID, user_id: int) -> int:
         user_swipes_key = RedisKeys.USER_SESSION_SWIPES_KEY.format(session_id=session_id, user_id=user_id)
         swipes = await redis_client.get(user_swipes_key)
         if not swipes or int(swipes) != self.SWIPES_ITER - 1:
+            logger.debug(
+                "Not enough swipes yet for pair recommendation.",
+                extra={"session_id": str(session_id), "user_id": user_id, "swipes": swipes},
+            )
             return -1
 
         pair_key = RedisKeys.SESSION_PAIR_REC_KEY.format(session_id=session_id)
@@ -111,6 +153,10 @@ class RecommendationService:
             movie_str, recommender_id_str = existing.split(":")
             recommender_id = int(recommender_id_str)
             if recommender_id != user_id:
+                logger.info(
+                    "Returning cached pair recommendation.",
+                    extra={"session_id": str(session_id), "user_id": user_id, "movie_id": int(movie_str)},
+                )
                 return int(movie_str)
 
         users_key = RedisKeys.SESSION_USERS_KEY.format(session_id=session_id)
@@ -128,9 +174,13 @@ class RecommendationService:
         C2 = int(likes2) if likes2 else 1
 
         alpha = C1 / (C1 + C2)
-        u_pair = alpha * u1 + (1 - alpha) * u2
+        u_pair = (alpha * u1 + (1 - alpha) * u2).astype(np.float32)
         movie_id = int(np.random.choice(self.faiss_index.search(u_pair)))
         await redis_client.set(pair_key, f"{movie_id}:{user_id}")
+        logger.info(
+            "Successfully fetched pair recommendation.",
+            extra={"session_id": str(session_id), "user_id": user_id, "movie_id": movie_id, "alpha": alpha},
+        )
         return movie_id
 
     def generate_onboarding_list(self) -> list[int]:
@@ -143,10 +193,10 @@ class RecommendationService:
 
     def get_popular_movie_with_prob(self) -> Optional[int]:
         if random.random() < self.PROBABILITY and self.popular_movies:
-            return random.choice(self.popular_movies)
+            return int(random.choice(self.popular_movies))
         return None
 
-    def load_or_default(self, vector_bytes: Optional[bytes], dim: int) -> np.ndarray:
+    def load_or_default(self, vector_bytes: Optional[bytes], dim: int) -> npt.NDArray[np.float32]:
         if vector_bytes:
             return np.frombuffer(vector_bytes, dtype=np.float32).reshape(1, -1)
         return np.zeros((1, dim), dtype=np.float32)

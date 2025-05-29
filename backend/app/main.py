@@ -1,3 +1,5 @@
+# type: ignore
+
 import logging
 import time
 from contextlib import asynccontextmanager
@@ -32,18 +34,19 @@ from app.admin.views import (
 )
 from app.chats.router import router as router_chat
 from app.config import settings
-from app.database import async_engine, async_session_maker, redis_client, redis_bin_client
+from app.database import async_engine, async_session_maker, redis_bin_client, redis_client
 from app.logger import logger
 from app.messages.router import router as router_message
 from app.movie_roles.router import router as router_movie_roles
 from app.movies.router import router as router_movies
 from app.people.router import router as router_people
+from app.recommendation.index import faiss_index
 from app.session_movies.router import router as router_session_movies
 from app.sessions.router import router as router_sessions
 from app.users.router import router_auth, router_user
 from app.viewed_movies.router import router as router_viewed_movies
 from app.watch_later_movies.router import router as router_watch_later_movies
-from app.recommendation.index import faiss_index
+
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
@@ -74,11 +77,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
         )
         raise
 
-    if faiss_index.index is None:
-        faiss_index.load()
-    else:
-        logger.warning("FAISS index already loaded, skipping load operation.")
-        
+    faiss_index.load()
     yield
 
     logger.info("Shutting down application...")

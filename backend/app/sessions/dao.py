@@ -66,7 +66,9 @@ class SessionDAO(BaseDAO[Session]):
     async def _find_session_ids_by_filters(
         cls, *, filters: Optional[list[Any]] = None, limit: Optional[int] = None
     ) -> Sequence[uuid.UUID]:
-        query = select(cls.model.id).where(*filters)
+        query = select(cls.model.id)
+        if filters is not None:
+            query = query.where(*filters)
         if limit is not None:
             query = query.limit(limit)
         async with async_session_maker() as session:

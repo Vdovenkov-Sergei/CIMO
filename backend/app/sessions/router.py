@@ -4,7 +4,8 @@ from typing import Any, Optional
 
 from fastapi import APIRouter, Depends
 
-from app.constants import General
+from app.constants import General, RedisKeys
+from app.database import redis_client
 from app.exceptions import (
     MaxParticipantsInSessionException,
     ParticipantsNotEnoughException,
@@ -13,15 +14,13 @@ from app.exceptions import (
     UserAlreadyInSessionException,
 )
 from app.logger import logger
+from app.recommendation.service import recommender
 from app.sessions.dao import SessionDAO
 from app.sessions.dependencies import get_current_session
 from app.sessions.models import Session, SessionStatus
 from app.sessions.schemas import SSessionCreate, SSessionRead, SSessionUpdate
 from app.users.dependencies import get_current_user
 from app.users.models import User
-from app.recommendation.service import recommender
-from app.database import redis_client
-from app.constants import RedisKeys
 
 router = APIRouter(prefix="/sessions", tags=["Sessions"])
 
@@ -52,7 +51,7 @@ async def create_session(data: SSessionCreate, user: User = Depends(get_current_
     await redis_client.set(user_session_swipes, 0)
     await redis_client.set(user_session_likes, 0)
     logger.debug("Session keys set in Redis.", extra={"user_id": user.id, "session_id": session.id})
-    
+
     return SSessionRead.model_validate(session)
 
 
