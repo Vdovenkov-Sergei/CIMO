@@ -75,7 +75,7 @@ async def swipe_session_movie(
                 },
             )
 
-    await recommender.update_user_vector(session.user_id, data.movie_id, data.time_swiped, data.is_liked)
+    await recommender.update_user_vector(session.id, session.user_id, data.movie_id, data.time_swiped, data.is_liked)
     new_movie_id = await recommender.get_recommendation(
         session.id, session.user_id, session.is_pair, session.is_onboarding
     )

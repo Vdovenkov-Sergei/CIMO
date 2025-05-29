@@ -8,9 +8,7 @@ import math
 
 from app.recommendation.index import FaissIndex, faiss_index
 from app.constants import RedisKeys
-from app.database import redis_client
-
-from app.logger import logger
+from app.database import redis_client, redis_bin_client
 
 
 BASE_DIR = Path(__file__).parent.parent
@@ -39,15 +37,15 @@ class RecommendationService:
         user_vector_key = RedisKeys.USER_VECTOR_KEY.format(user_id=user_id)
         norm_key = RedisKeys.USER_VECTOR_NORM_KEY.format(user_id=user_id)
 
-        user_vector_bytes = await redis_client.get(user_vector_key)
-        norm_bytes = await redis_client.get(norm_key)
+        user_vector_bytes = await redis_bin_client.get(user_vector_key)
+        norm_koef = await redis_client.get(norm_key)
         user_swipes = await redis_client.get(user_swipes_key)
         user_likes = await redis_client.get(user_likes_key)
 
         await redis_client.set(user_swipes_key, (int(user_swipes) + 1) % self.SWIPES_ITER)
         u_old = self.load_or_default(user_vector_bytes, self.faiss_index.index.d)
-        Z_old = float(norm_bytes) if norm_bytes else 0.0
-        v = self.faiss_index.index.reconstruct(movie_id)
+        Z_old = float(norm_koef) if norm_koef else 0.0
+        v = self.faiss_index.index.reconstruct(movie_id).reshape(1, -1)
         w = math.log(1 + time_swiped)
         if is_liked:
             u_new = (Z_old * u_old + w * v) / (Z_old + w)
@@ -57,7 +55,8 @@ class RecommendationService:
             penalized = self.BETA * w
             u_new = (Z_old * u_old - penalized * v) / (Z_old + penalized)
             Z_new = Z_old + penalized
-        await redis_client.set(user_vector_key, u_new.astype(np.float32).tobytes())
+
+        await redis_bin_client.set(user_vector_key, u_new.tobytes())
         await redis_client.set(norm_key, str(Z_new))
 
     async def get_recommendation(
@@ -96,7 +95,7 @@ class RecommendationService:
         if random_movie is not None:
             return random_movie
         user_vector_key = RedisKeys.USER_VECTOR_KEY.format(user_id=user_id)
-        user_vector_bytes = await redis_client.get(user_vector_key)
+        user_vector_bytes = await redis_bin_client.get(user_vector_key)
         user_vector = self.load_or_default(user_vector_bytes, self.faiss_index.index.d)
         return int(np.random.choice(self.faiss_index.search(user_vector)))
 
@@ -118,8 +117,8 @@ class RecommendationService:
         users = await redis_client.smembers(users_key)
         user1, user2 = [int(user_id) for user_id in users]
 
-        u1_bytes = await redis_client.get(RedisKeys.USER_VECTOR_KEY.format(user_id=user1))
-        u2_bytes = await redis_client.get(RedisKeys.USER_VECTOR_KEY.format(user_id=user2))
+        u1_bytes = await redis_bin_client.get(RedisKeys.USER_VECTOR_KEY.format(user_id=user1))
+        u2_bytes = await redis_bin_client.get(RedisKeys.USER_VECTOR_KEY.format(user_id=user2))
         u1 = self.load_or_default(u1_bytes, self.faiss_index.index.d)
         u2 = self.load_or_default(u2_bytes, self.faiss_index.index.d)
 

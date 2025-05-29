@@ -7,7 +7,7 @@ import numpy as np
 
 from app.config import settings
 from app.constants import RedisKeys, Tokens, Verification
-from app.database import redis_client
+from app.database import redis_client, redis_bin_client
 from app.exceptions import (
     EmailAlreadyExistsException,
     MaxAttemptsSendCodeException,
@@ -111,7 +111,7 @@ async def verify_email(user_data: SUserVerification) -> dict[str, str | int]:
 
     empty_user_vector = np.zeros((1, faiss_index.index.d), dtype=np.float32)
     user_vector_key = RedisKeys.USER_VECTOR_KEY.format(user_id=user.id)
-    await redis_client.set(user_vector_key, empty_user_vector.tobytes())
+    await redis_bin_client.set(user_vector_key, empty_user_vector.tobytes())
     logger.info("Initialized empty user embedding vector in Redis.", extra={"user_id": user.id})
 
     logger.info("User registered successfully.", extra={"user_id": user.id, "email": email})
