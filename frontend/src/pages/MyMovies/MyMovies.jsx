@@ -305,7 +305,7 @@ const MyMovies = () => {
     <div className="my-movies-page">
       <Header />
 
-      <main className="movies-main container">
+      <main className="movies-main">
         <div className="navigation">
           <Link to='/modeSelection' className="navigation__link">Главная страница</Link>
           <span className="delimeter">-</span>

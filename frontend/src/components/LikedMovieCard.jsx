@@ -11,7 +11,6 @@ const LikedMovieCard = ({ movie, onClick }) => {
           e.target.src = 'path-to-default-poster.jpg';
         }}
       />
-      <h3 className="liked-movie__title">{movie.name}</h3>
     </div>
   );
 };

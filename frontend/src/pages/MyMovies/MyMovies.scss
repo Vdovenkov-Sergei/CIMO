@@ -138,24 +138,6 @@ $primary-font: 'Inter', sans-serif;
     }
   }
 
-  .movies-scroll {
-    display: flex;
-    gap: 20px;
-    overflow-x: auto;
-    padding: 20px;
-    margin-top: 50px;
-    scrollbar-width: 10px;
-    scrollbar-color: $link-color transparent;
-
-    &::-webkit-scrollbar {
-      height: 8px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background-color: $link-color;
-      border-radius: 4px;
-    }
-  }
 
   .movie-card {
     flex: 0 0 200px;
@@ -503,7 +485,7 @@ $primary-font: 'Inter', sans-serif;
 }
 
 .movie-detail-scroll {
-  max-height: 600px; // фиксированная высота
+  max-height: 600px;
   overflow-y: auto;
   padding: 20px;
   margin-top: 50px;
@@ -521,5 +503,63 @@ $primary-font: 'Inter', sans-serif;
   &::-webkit-scrollbar-thumb {
     background-color: $link-color;
     border-radius: 4px;
+  }
+}
+
+.movies-scroll-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0 60px;
+}
+
+.movies-scroll {
+  display: flex;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  gap: 20px;
+  padding: 10px 0;
+  width: 100%;
+}
+
+.scroll-button {
+  position: absolute;
+  z-index: 1;
+  background: rgba(97, 92, 248, 0.5);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  top: 50%;
+  transform: translateY(-50%);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  
+  &:hover {
+    background: rgba(97, 92, 248);
+    transform: translateY(-50%) scale(1.05);
+  }
+
+  &:active {
+    transform: translateY(-50%) scale(0.95);
+  }
+
+  &.left {
+    left: 0;
+  }
+
+  &.right {
+    right: 0;
+  }
+
+  @media (max-width: 480px) {
+    width: 30px;
+    height: 30px;
   }
 }
