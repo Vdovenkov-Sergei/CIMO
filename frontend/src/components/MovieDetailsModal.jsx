@@ -1,6 +1,61 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
+import PeopleScroll from './PeopleScroll/PeopleScroll';
 
 const MovieDetailsModal = ({ movie, onClose, onSwipeLeft, onSwipeRight }) => {
+  const [people, setPeople] = useState([]);
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const limit = 10;
+
+  const controllerRef = useRef(null);
+
+  const loadMorePeople = useCallback(async () => {
+    if (!movie?.id || isLoading || !hasMore) return;
+
+    setIsLoading(true);
+
+    const controller = new AbortController();
+    controllerRef.current = controller;
+
+    try {
+      const res = await fetch(`/api/movie/roles/${movie.id}?limit=${limit}&offset=${offset}`, {
+        credentials: 'include',
+        signal: controller.signal
+      });
+      if (!res.ok) throw new Error('Failed to fetch roles');
+      const data = await res.json();
+
+      setPeople((prev) => [...prev, ...data]);
+      setOffset((prev) => prev + data.length);
+      if (data.length < limit) setHasMore(false);
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        console.error(err);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, [movie?.id, offset, isLoading, hasMore]);
+
+  // при смене фильма
+  useEffect(() => {
+    if (!movie?.id) return;
+  
+    // Сбросим всё как прежде
+    setPeople([]);
+    setOffset(0);
+    setHasMore(true);
+  }, [movie?.id]);
+  
+  useEffect(() => {
+    if (!movie?.id || offset !== 0 || people.length > 0) return;
+  
+    // Загружаем людей только после сброса
+    loadMorePeople();
+  }, [movie?.id, offset, people.length, loadMorePeople]);
+  
+
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'ArrowLeft') {
@@ -31,14 +86,7 @@ const MovieDetailsModal = ({ movie, onClose, onSwipeLeft, onSwipeRight }) => {
   };
 
   const formatValue = (value) => {
-    if (
-      value === null ||
-      value === undefined ||
-      value === '' ||
-      (Array.isArray(value) && value.length === 0)
-    ) {
-      return '–';
-    }
+    if (!value || (Array.isArray(value) && value.length === 0)) return '–';
     return value;
   };
 
@@ -78,9 +126,21 @@ const MovieDetailsModal = ({ movie, onClose, onSwipeLeft, onSwipeRight }) => {
               <img src={movie.poster_url || ''} alt={movie.name || 'poster'} />
             </div>
           </div>
+
           <div className="detail-description">
             <p>{formatValue(movie.description)}</p>
           </div>
+
+          {people.length > 0 && (
+            <div className="detail-people-block">
+              <PeopleScroll
+                people={people}
+                hasMore={hasMore}
+                isLoading={isLoading}
+                onLoadMore={loadMorePeople}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>
