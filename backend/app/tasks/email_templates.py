@@ -38,7 +38,7 @@ def create_reset_password_template(email_to: EmailStr, reset_link: str) -> Email
         <div>
             <h2>Сброс пароля</h2>
             <p>Здравствуйте! Чтобы сбросить пароль, пожалуйста, перейдите по следующей ссылке:</p>
-            <a href="{reset_link}">Сбросить пароль</a>
+            <a href="{reset_link}">{reset_link}</a>
             <p>Если вы не запрашивали сброс пароля, просто проигнорируйте это сообщение.</p>
             <p>С уважением,<br>Команда поддержки CIMO</p>
         </div>

@@ -2,7 +2,7 @@ from typing import Optional, Self
 
 from pydantic import model_validator
 
-from app.config import settings
+from app.constants import URLs
 from app.schemas.base import BaseSchema
 
 
@@ -14,5 +14,5 @@ class SPersonRead(BaseSchema):
     @model_validator(mode="after")
     def postprocess_photo_url(self) -> Self:
         if self.photo_url and not self.photo_url.startswith("http"):
-            self.photo_url = f"{settings.BASE_PHOTO_URL}{self.photo_url}"
+            self.photo_url = f"{URLs.BASE_PHOTO_URL}{self.photo_url}"
         return self

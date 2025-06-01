@@ -11,17 +11,7 @@ sys.path.insert(0, abspath(dirname(dirname(dirname(__file__)))))
 
 from app.config import settings
 from app.database import Base
-from app.chats.models import Chat
-from app.messages.models import Message
-from app.movies.models import Movie
-from app.session_movies.models import SessionMovie
-from app.sessions.models import Session
-from app.users.models import User
-from app.viewed_movies.models import ViewedMovie
-from app.watch_later_movies.models import WatchLaterMovie
-from app.movie_roles.models import MovieRole
-from app.people.models import Person
-
+from app.models import *
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -42,7 +32,7 @@ target_metadata = Base.metadata
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
-config.set_main_option("sqlalchemy.url", f"{settings.database_url}?async_fallback=True")
+config.set_main_option("sqlalchemy.url", f"{settings.async_database_url}?async_fallback=True")
 
 
 def run_migrations_offline() -> None:

@@ -1,9 +1,12 @@
+import random
 import uuid
 from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 
+from app.constants import Pagination
 from app.exceptions import InvalidSessionStatusException
+from app.logger import logger
 from app.movies.dao import MovieDAO
 from app.movies.schemas import SMovieRead
 from app.session_movies.dao import SessionMovieDAO
@@ -18,15 +21,18 @@ active_sessions: dict[uuid.UUID, list[WebSocket]] = {}
 @router.websocket("/ws/{session_id}")
 async def websocket_endpoint(websocket: WebSocket, session_id: uuid.UUID) -> None:
     await websocket.accept()
+    logger.info("WebSocket connected.", extra={"session_id": session_id})
     if session_id not in active_sessions:
         active_sessions[session_id] = []
-
     active_sessions[session_id].append(websocket)
+
     try:
         while True:
             await websocket.receive_text()
+            logger.debug("WebSocket message received.", extra={"session_id": session_id})
     except WebSocketDisconnect:
         active_sessions[session_id].remove(websocket)
+        logger.info("WebSocket disconnected.", extra={"session_id": session_id})
         if not active_sessions[session_id]:
             del active_sessions[session_id]
 
@@ -36,33 +42,57 @@ async def swipe_session_movie(
     data: SSessionMovieCreate, session: Session = Depends(get_current_session)
 ) -> dict[str, str | int]:
     if session.status != SessionStatus.ACTIVE:
+        logger.warning(
+            "Invalid session status for swipe operation.",
+            extra={"session_id": session.id, "status": session.status.value},
+        )
         raise InvalidSessionStatusException(status=session.status.value)
 
+    logger.info(
+        "Swipe started.", extra={"user_id": session.user_id, "movie_id": data.movie_id, "is_liked": data.is_liked}
+    )
     existing_movie = await SessionMovieDAO.find_by_session_user_movie_id(
         session_id=session.id, user_id=session.user_id, movie_id=data.movie_id
     )
     if data.is_liked and not existing_movie:
-        await SessionMovieDAO.add_record(session_id=session.id, user_id=session.user_id, movie_id=data.movie_id)
+        await SessionMovieDAO.add_movie(session_id=session.id, user_id=session.user_id, movie_id=data.movie_id)
 
         if session.is_pair and await SessionMovieDAO.check_movie_match(session_id=session.id, movie_id=data.movie_id):
             await SessionMovieDAO.update_movie_match(session_id=session.id, movie_id=data.movie_id)
-            movie = await MovieDAO.find_by_id(data.movie_id)
+            movie = await MovieDAO.find_movie_by_id(movie_id=data.movie_id)
             notification = MatchNotification(
                 movie=SMovieRead.model_validate(movie), match_time=datetime.now(UTC)
             ).model_dump_json()
             for websocket in active_sessions.get(session.id, []):
                 await websocket.send_text(notification)
 
-    # TODO Здесь будет логика обновления рекомендаций и отдачи нового movie_id
+            logger.info(
+                "Match sent to all clients.",
+                extra={
+                    "session_id": session.id,
+                    "movie_id": data.movie_id,
+                    "clients": len(active_sessions.get(session.id, [])),
+                },
+            )
 
-    return {"message": "The movie was successfully swipped.", "movie_id": data.movie_id}
+    # TODO Здесь будет логика обновления рекомендаций и отдачи new_movie_id
+    new_movie_id = random.randint(1, 10000)
+
+    logger.info("Swipe completed.", extra={"user_id": session.user_id, "new_movie_id": new_movie_id})
+    return {"message": "The movie was successfully swiped.", "movie_id": new_movie_id}
 
 
 @router.get("/", response_model=list[SSessionMovieRead])
 async def get_session_list(
-    limit: int = 20, offset: int = 0, session: Session = Depends(get_current_session)
+    limit: int = Pagination.PAG_LIMIT,
+    offset: int = Pagination.PAG_OFFSET,
+    session: Session = Depends(get_current_session),
 ) -> list[SSessionMovieRead]:
     if session.status not in (SessionStatus.REVIEW, SessionStatus.ACTIVE):
+        logger.warning(
+            "Invalid session status for get operation.",
+            extra={"session_id": session.id, "status": session.status.value},
+        )
         raise InvalidSessionStatusException(status=session.status.value)
 
     movies = await SessionMovieDAO.find_movies(
@@ -74,6 +104,10 @@ async def get_session_list(
 @router.delete("/{movie_id}", response_model=dict[str, str])
 async def delete_from_session_list(movie_id: int, session: Session = Depends(get_current_session)) -> dict[str, str]:
     if session.status != SessionStatus.REVIEW:
+        logger.warning(
+            "Invalid session status for delete operation.",
+            extra={"session_id": session.id, "status": session.status.value},
+        )
         raise InvalidSessionStatusException(status=session.status.value)
 
     await SessionMovieDAO.delete_movie(session_id=session.id, user_id=session.user_id, movie_id=movie_id)

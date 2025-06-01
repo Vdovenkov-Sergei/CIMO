@@ -1,4 +1,4 @@
-###VS code###
+### VS code ###
 .vscode
 
 ### Python ###
@@ -124,9 +124,10 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
+.env*
 .venv
 env/
+data
 venv/
 ENV/
 env.bak/
@@ -175,27 +176,32 @@ pyrightconfig.json
 
 ### Frontend (React, Vite) ###
 
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
 # Node modules
 node_modules/
 
 # Build output
 dist/
 build/
+dist-ssr
+*.local
 
 # Vite cache
 .vite/
 
-# Logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
 # Environment variables
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env
+.env.development
+.env.test
+.env.production
 
 # TypeScript type declarations
 *.d.ts
@@ -210,13 +216,13 @@ yarn-error.log*
 # Storybook
 storybook-static/
 
-# Vite specific
-vite.config.js
-vite.config.ts
-
 # IDEs and editors (optional, depending on your team)
 .idea/
 
 # Misc
 .DS_Store
-Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
