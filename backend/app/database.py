@@ -22,6 +22,7 @@ async_engine = create_async_engine(ASYNC_DATABASE_URL, **DATABASE_PARAMS, echo=F
 async_session_maker = async_sessionmaker(async_engine, expire_on_commit=False)
 
 redis_client = aioredis.from_url(settings.redis_url, encoding="utf-8", decode_responses=True)
+redis_bin_client = aioredis.from_url(settings.redis_url, encoding="utf-8", decode_responses=False)
 
 
 class Base(DeclarativeBase):

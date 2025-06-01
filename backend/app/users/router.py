@@ -1,12 +1,13 @@
 import secrets
 from datetime import timedelta
 
+import numpy as np
 from fastapi import APIRouter, Cookie, Depends, Response
 from pydantic import EmailStr
 
 from app.config import settings
 from app.constants import RedisKeys, Tokens, Verification
-from app.database import redis_client
+from app.database import redis_bin_client, redis_client
 from app.exceptions import (
     EmailAlreadyExistsException,
     MaxAttemptsSendCodeException,
@@ -16,6 +17,7 @@ from app.exceptions import (
     UserNotFoundException,
 )
 from app.logger import logger
+from app.recommendation.index import faiss_index
 from app.tasks.tasks import send_email_with_reset_link
 from app.users.auth import authenticate_user, check_jwt_token, check_verification_code, create_jwt_token
 from app.users.dao import UserDAO
@@ -106,6 +108,11 @@ async def verify_email(user_data: SUserVerification) -> dict[str, str | int]:
     user = await UserDAO.add_user(email=email, hashed_password=hashed_password)
     await UserDAO.update_user(user_id=user.id, update_data={"user_name": f"user_{user.id}"})
     logger.debug("Default username set for user.", extra={"user_id": user.id, "user_name": f"user_{user.id}"})
+
+    empty_user_vector = np.zeros((1, faiss_index.index.d), dtype=np.float32)
+    user_vector_key = RedisKeys.USER_VECTOR_KEY.format(user_id=user.id)
+    await redis_bin_client.set(user_vector_key, empty_user_vector.tobytes())
+    logger.info("Initialized empty user embedding vector in Redis.", extra={"user_id": user.id})
 
     logger.info("User registered successfully.", extra={"user_id": user.id, "email": email})
     return {"message": "Email successfully verified and user registered.", "id": user.id}

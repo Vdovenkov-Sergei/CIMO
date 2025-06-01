@@ -34,12 +34,13 @@ from app.admin.views import (
 )
 from app.chats.router import router as router_chat
 from app.config import settings
-from app.database import async_engine, async_session_maker, redis_client
+from app.database import async_engine, async_session_maker, redis_bin_client, redis_client
 from app.logger import logger
 from app.messages.router import router as router_message
 from app.movie_roles.router import router as router_movie_roles
 from app.movies.router import router as router_movies
 from app.people.router import router as router_people
+from app.recommendation.index import faiss_index
 from app.session_movies.router import router as router_session_movies
 from app.sessions.router import router as router_sessions
 from app.users.router import router_auth, router_user
@@ -65,6 +66,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 
     try:
         await redis_client.ping()
+        await redis_bin_client.ping()
         FastAPICache.init(RedisBackend(redis_client), prefix="cache", expire=settings.CACHE_TTL)
         logger.info("Successfully connected to Redis and initialized cache.")
     except Exception as err:
@@ -75,6 +77,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
         )
         raise
 
+    faiss_index.load()
     yield
 
     logger.info("Shutting down application...")
