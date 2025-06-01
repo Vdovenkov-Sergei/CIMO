@@ -1,0 +1,52 @@
+[
+  {
+    "id": 1,
+    "name": "Robert Downey Jr.",
+    "photo_url": "https://example.com/photos/robert_downey_jr.jpg"
+  },
+  {
+    "id": 2,
+    "name": "Scarlett Johansson",
+    "photo_url": "https://example.com/photos/scarlett_johansson.jpg"
+  },
+  {
+    "id": 3,
+    "name": "Chris Hemsworth",
+    "photo_url": "https://example.com/photos/chris_hemsworth.jpg"
+  },
+  {
+    "id": 4,
+    "name": "Mark Ruffalo",
+    "photo_url": "https://example.com/photos/mark_ruffalo.jpg"
+  },
+  {
+    "id": 5,
+    "name": "Chris Evans",
+    "photo_url": "https://example.com/photos/chris_evans.jpg"
+  },
+  {
+    "id": 6,
+    "name": "Tom Hiddleston",
+    "photo_url": "https://example.com/photos/tom_hiddleston.jpg"
+  },
+  {
+    "id": 7,
+    "name": "Tom Holland",
+    "photo_url": "https://example.com/photos/tom_holland.jpg"
+  },
+  {
+    "id": 8,
+    "name": "Natalie Portman",
+    "photo_url": "https://example.com/photos/natalie_portman.jpg"
+  },
+  {
+    "id": 9,
+    "name": "Benedict Cumberbatch",
+    "photo_url": "https://example.com/photos/benedict_cumberbatch.jpg"
+  },
+  {
+    "id": 10,
+    "name": "Samuel L. Jackson",
+    "photo_url": "https://example.com/photos/samuel_l_jackson.jpg"
+  }
+]

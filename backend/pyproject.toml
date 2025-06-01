@@ -30,6 +30,7 @@ dependencies = [
     "celery (>=5.4.0,<6.0.0)",
     "flower (>=2.0.1,<3.0.0)",
     "faker (>=37.1.0,<38.0.0)",
+    "httpx (>=0.28.1,<0.29.0)",
     "python-json-logger (>=3.3.0,<4.0.0)",
     "sentry-sdk[fastapi] (>=2.27.0,<3.0.0)",
     "gunicorn (>=23.0.0,<24.0.0)",
