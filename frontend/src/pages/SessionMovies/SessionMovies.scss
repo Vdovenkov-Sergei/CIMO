@@ -661,3 +661,36 @@ $primary-font: 'Inter', sans-serif;
     height: 30px;
   }
 }
+
+.push-notification {
+  position: absolute;
+  left: -350px;
+  top: 20px;
+  width: 400px;
+  padding: 15px;
+  background: $modal-color;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 1000;
+  animation: slideIn 0.5s forwards, slideOut 0.5s forwards 3s;
+}
+
+.notification-poster {
+  width: 50px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+@keyframes slideIn {
+  from { left: -350px; }
+  to { left: 20px; }
+}
+
+@keyframes slideOut {
+  from { left: 20px; }
+  to { left: -350px; }
+}

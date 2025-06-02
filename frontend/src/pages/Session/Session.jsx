@@ -11,6 +11,22 @@ import CheckControlButton from '../../components/CheckControlButton';
 import LikedMoviesScroll from '../../components/LikedMoviesScroll';
 import MovieDetailsModal from '../../components/MovieDetailsModal';
 import CountdownModal from '../../components/CountdownModal/CountdownModal';
+import { useWebSocket } from '@/context/WebSocketContext';
+
+const Notification = ({ movie }) => {
+  return (
+    <div className="push-notification">
+      <img 
+        src={movie.poster_url} 
+        alt={movie.name} 
+        className="notification-poster" 
+      />
+      <div className="notification-text">
+        🎉 Совпадение найдено! Фильм: {movie.name}
+      </div>
+    </div>
+  );
+};
 
 const Session = () => {
   const location = useLocation();
@@ -25,6 +41,26 @@ const Session = () => {
   const [isLoading, setIsLoading] = useState(false);
   const limit = 10;
   const [showLikedMovies, setShowLikedMovies] = useState(true);
+  const { sessionId, latestMessage, sendMessage } = useWebSocket();
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationMovie, setNotificationMovie] = useState(null);
+
+  useEffect(() => {
+    if (latestMessage) {
+      console.log('🔔 New message from WebSocket in /session:', latestMessage);
+
+      if (latestMessage.movie) {
+        setNotificationMovie(latestMessage.movie);
+        setShowNotification(true);
+        
+        const timer = setTimeout(() => {
+          setShowNotification(false);
+        }, 3000);
+        
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [latestMessage]);
 
   const refreshToken = async () => {
     try {
@@ -281,6 +317,13 @@ const Session = () => {
           onSwipeLeft={() => handleMovieAction(showDetails.id, false)}
           onSwipeRight={() => handleMovieAction(showDetails.id, true)}
         />
+
+        {showNotification && (
+          <div className="notification-container">
+            <Notification movie={notificationMovie} />
+          </div>
+        )}
+
       </main>
 
       <Footer />

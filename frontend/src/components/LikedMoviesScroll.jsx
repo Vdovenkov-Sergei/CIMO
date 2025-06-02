@@ -1,5 +1,5 @@
 import React, { useRef, useState, useCallback } from 'react';
-import LikedMovieCard from './LikedMovieCard';
+import LikedMovieCard from './LikedMovieCard/LikedMovieCard';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 const LikedMoviesScroll = ({ movies, hasMore, onMovieClick, onLoadMore }) => {
@@ -61,6 +61,7 @@ const LikedMoviesScroll = ({ movies, hasMore, onMovieClick, onLoadMore }) => {
             key={obj.movie.id} 
             movie={obj.movie} 
             onClick={() => onMovieClick(obj.movie)}
+            is_matched={obj.is_matched}
           />
         ))}
         {isLoading && <div className="loading-more">Загрузка...</div>}

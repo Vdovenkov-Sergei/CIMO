@@ -8,6 +8,22 @@ import Footer from '../../components/Footer';
 import Header from '../../components/Header';
 import MovieDetailsModal from '../../components/MovieDetailsModal';
 import RateMovieModal from '../../components/RateMovieModal/RateMovieModal';
+import { useWebSocket } from '@/context/WebSocketContext';
+
+const Notification = ({ movie }) => {
+  return (
+    <div className="push-notification">
+      <img 
+        src={movie.poster_url} 
+        alt={movie.name} 
+        className="notification-poster" 
+      />
+      <div className="notification-text">
+        🎉 Совпадение найдено! Фильм: {movie.name}
+      </div>
+    </div>
+  );
+};
 
 const SessionMovies = () => {
   const navigate = useNavigate();
@@ -21,6 +37,26 @@ const SessionMovies = () => {
   const [movieToRate, setMovieToRate] = useState(null);
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
   const limit = 10;
+  const { latestMessage, sessionId } = useWebSocket();
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationMovie, setNotificationMovie] = useState(null);
+  
+  useEffect(() => {
+    if (latestMessage) {
+      console.log('🔔 New message from WebSocket in /session:', latestMessage);
+  
+      if (latestMessage.movie) {
+        setNotificationMovie(latestMessage.movie);
+        setShowNotification(true);
+          
+        const timer = setTimeout(() => {
+          setShowNotification(false);
+        }, 3000);
+          
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [latestMessage]);
 
   const refreshToken = async () => {
     try {
@@ -247,6 +283,12 @@ const SessionMovies = () => {
           <FinishSessionButton onClick={finishSession} />
           <a href="#" className='feedback-btn' target='_blank'>Оставить обратную связь</a>
         </div>
+
+        {showNotification && (
+          <div className="notification-container">
+            <Notification movie={notificationMovie} />
+          </div>
+        )}
       </main>
 
       <MovieDetailsModal
