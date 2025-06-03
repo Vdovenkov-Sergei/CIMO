@@ -6,7 +6,7 @@ import Header from '../../components/Header';
 import WatchListScroll from '../../components/WatchListScroll';
 import WatchedScroll from '../../components/WatchedScroll';
 import RateMovieModal from '../../components/RateMovieModal/RateMovieModal';
-import MovieDetailsModal from '../../components/MovieDetailsModal';
+import MovieDetailsModal from '../../components/MovieDetailsModal/MovieDetailsModal';
 
 const MyMovies = () => {
   const navigate = useNavigate();

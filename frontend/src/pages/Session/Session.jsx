@@ -9,7 +9,7 @@ import FinishSelectionButton from '../../components/FinishSelectionButton';
 import XControlButton from '../../components/XControlButton';
 import CheckControlButton from '../../components/CheckControlButton';
 import LikedMoviesScroll from '../../components/LikedMoviesScroll';
-import MovieDetailsModal from '../../components/MovieDetailsModal';
+import MovieDetailsModal from '../../components/MovieDetailsModal/MovieDetailsModal';
 import CountdownModal from '../../components/CountdownModal/CountdownModal';
 import { useWebSocket } from '@/context/WebSocketContext';
 

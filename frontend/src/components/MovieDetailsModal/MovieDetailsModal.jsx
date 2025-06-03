@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import PeopleScroll from './PeopleScroll/PeopleScroll';
+import PeopleScroll from '../PeopleScroll/PeopleScroll';
+import './MovieDetailsModal.scss'
 
 const MovieDetailsModal = ({ movie, onClose, onSwipeLeft, onSwipeRight }) => {
   const [people, setPeople] = useState([]);
@@ -94,9 +95,13 @@ const MovieDetailsModal = ({ movie, onClose, onSwipeLeft, onSwipeRight }) => {
     <div className="movie-detail-overlay" onClick={onClose}>
       <div className="movie-detail-scroll">
         <div className="movie-detail" onClick={(e) => e.stopPropagation()}>
+          <h2>{formatValue(movie.name)}</h2>
           <div className="detail-content">
+            <div className="detail-poster">
+              <img src={movie.poster_url || ''} alt={movie.name || 'poster'} />
+            </div>
             <div className="detail-info">
-              <h2>{formatValue(movie.name)}</h2>
+              
               <div className="detail-meta">
                 <div className="meta-item">
                   <div className="meta-label">КиноПоиск:</div>
@@ -122,9 +127,7 @@ const MovieDetailsModal = ({ movie, onClose, onSwipeLeft, onSwipeRight }) => {
                 </div>
               </div>
             </div>
-            <div className="detail-poster">
-              <img src={movie.poster_url || ''} alt={movie.name || 'poster'} />
-            </div>
+            
           </div>
 
           <div className="detail-description">
