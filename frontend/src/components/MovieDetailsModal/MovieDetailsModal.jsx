@@ -98,7 +98,7 @@ const MovieDetailsModal = ({ movie, onClose, onSwipeLeft, onSwipeRight }) => {
           <h2>{formatValue(movie.name)}</h2>
           <div className="detail-content">
             <div className="detail-poster">
-              <img src={movie.poster_url || ''} alt={movie.name || 'poster'} />
+              <img src={movie.poster_url || '/no-poster.png'} alt={movie.name || 'poster'} />
             </div>
             <div className="detail-info">
               

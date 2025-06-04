@@ -35,7 +35,6 @@ const SessionMovies = () => {
   const [movieToRate, setMovieToRate] = useState(null);
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
   const limit = 10;
-  const { latestMessage, sessionId } = useWebSocket();
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMovie, setNotificationMovie] = useState(null);
   

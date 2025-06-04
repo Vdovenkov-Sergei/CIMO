@@ -5,12 +5,12 @@ const WatchedCard = ({ review, movie, onUnwatch, onClick, onCardClick }) => {
   return (
     <div className="movie-card">
       <img
-        src={movie.poster_url}
+        src={movie.poster_url || '/no-poster.png'}
         alt={movie.name}
         className="movie-card__poster"
         onClick={() => onCardClick(movie.id)}
         onError={(e) => {
-          e.target.src = '/path-to-default-poster.jpg';
+          e.target.src = '/no-poster.png';
           e.target.onerror = null;
         }}
       />

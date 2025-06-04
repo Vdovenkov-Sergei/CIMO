@@ -16,11 +16,11 @@ const PersonCard = ({ personObj }) => {
   return (
     <div className="person-card">
       <img 
-        src={personObj.person.photo_url} 
+        src={personObj.person.photo_url || '/no-photo.png'} 
         alt={personObj.person.name} 
         className="person-card__photo"
         onError={(e) => {
-          e.target.src = '/default-person.jpg';
+          e.target.src = '/no-photo.png';
         }}
       />
       <div className="person-card__info">
