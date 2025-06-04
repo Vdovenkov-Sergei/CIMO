@@ -34,7 +34,7 @@ from app.admin.views import (
 )
 from app.chats.router import router as router_chat
 from app.config import settings
-from app.database import async_engine, async_session_maker, redis_client
+from app.database import async_engine, async_session_maker, redis_client, redis_bin_client
 from app.logger import logger
 from app.messages.router import router as router_message
 from app.movie_roles.router import router as router_movie_roles
@@ -65,7 +65,8 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 
     try:
         await redis_client.ping()
-        FastAPICache.init(RedisBackend(redis_client), prefix="cache", expire=settings.CACHE_TTL)
+        await redis_bin_client.ping()
+        FastAPICache.init(RedisBackend(redis_bin_client), prefix="cache", expire=settings.CACHE_TTL)
         logger.info("Successfully connected to Redis and initialized cache.")
     except Exception as err:
         logger.critical(
