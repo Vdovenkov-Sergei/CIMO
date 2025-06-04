@@ -63,7 +63,6 @@ const SwipeableMovieCard = ({ movie, onClick, onSwipe, className }) => {
           className="movie-card__poster"
           onError={(e) => {
             e.target.src = '/no-poster.png';
-            e.target.onerror = null;
           }}
         />
         <div className="movie-info">

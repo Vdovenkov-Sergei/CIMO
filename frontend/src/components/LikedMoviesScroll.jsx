@@ -40,7 +40,7 @@ const LikedMoviesScroll = ({ movies, hasMore, onMovieClick, onLoadMore }) => {
   };
 
   return (
-    <div className="movies-scroll-container">
+    <div className="movies-scroll-container filled-scroll">
       {showLeftArrow && (
         <button 
           className="scroll-button left" 
@@ -52,7 +52,7 @@ const LikedMoviesScroll = ({ movies, hasMore, onMovieClick, onLoadMore }) => {
       )}
       
       <div 
-        className="movies-scroll" 
+        className="movies-scroll-liked" 
         ref={scrollRef}
         onScroll={handleScroll}
       >

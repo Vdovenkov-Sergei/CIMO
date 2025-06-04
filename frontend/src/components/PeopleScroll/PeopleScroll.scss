@@ -29,7 +29,7 @@
     transform: translateY(-50%);
     background: rgba(97, 92, 248, 0.5);
     border: none;
-    border-radius: 50%;
+    border-radius: 4px;
     padding: 0.5rem;
     cursor: pointer;
     z-index: 2;
@@ -43,11 +43,11 @@
     }
   
     &.left {
-      left: 0.5rem;
+      left: 0;
     }
   
     &.right {
-      right: 0.5rem;
+      right: 0;
     }
   }
   

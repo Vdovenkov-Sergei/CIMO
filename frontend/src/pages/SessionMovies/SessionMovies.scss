@@ -118,6 +118,23 @@ $primary-font: 'Inter', sans-serif;
       margin: 0 0 20px 0;
       color: $link-color;
     }
+
+    .filled-scroll {
+      background-color: rgb(255, 255, 255, 0.02);
+      border-radius: 8px;
+    }
+
+    .empty-watch-later {
+      height: 504px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: $additional-text-color;
+      background-color: rgb(255, 255, 255, 0.02);
+      font-size: 1.2rem;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
   }
 
 
@@ -129,6 +146,7 @@ $primary-font: 'Inter', sans-serif;
     overflow: hidden;
     transition: transform 0.2s;
     min-width: 250px;
+    margin-top: 10px;
 
     &:hover {
       transform: translateY(-5px);
@@ -213,6 +231,7 @@ $primary-font: 'Inter', sans-serif;
     justify-content: center;
     gap: 8px;
     padding: 0 15px 15px;
+    
 
     .add-all-button, .end-session {
       width: 200px;
@@ -223,9 +242,9 @@ $primary-font: 'Inter', sans-serif;
       border: none;
       border-radius: 4px;
       font-family: $primary-font;
-      font-size: 14px;
+      font-size: 16px;
       cursor: pointer;
-
+      font-weight: 500;
       background-color: #615CF8;
       color: #FFFFFF;
 
@@ -245,8 +264,9 @@ $primary-font: 'Inter', sans-serif;
       text-decoration: none;
       border-radius: 4px;
       font-family: $primary-font;
-      font-size: 14px;
       text-align: center;
+      font-weight: 500;
+      font-size: 16px;
 
       &:hover {
         background-color: #4631D1;
@@ -262,7 +282,7 @@ $primary-font: 'Inter', sans-serif;
     border: none;
     border-radius: 4px;
     font-family: $primary-font;
-    font-size: 14px;
+    font-size: 16px;
     cursor: pointer;
 
     background-color: #615CF8;
@@ -527,8 +547,8 @@ $primary-font: 'Inter', sans-serif;
   color: white;
   border: none;
   border-radius: 4px;
-  width: 36px;
-  height: 36px;
+  width: 50px;
+  height: 50px;
   display: flex;
   align-items: center;
   justify-content: center;

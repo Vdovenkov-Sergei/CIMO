@@ -41,7 +41,7 @@ const WatchedScroll = ({ movies, onUnwatch, loadMore, hasMore, onCardClick, onRa
   };
 
   return (
-    <div className="movies-scroll-container">
+    <div className="movies-scroll-container filled-scroll watched">
       {showLeftArrow && (
         <button 
           className="scroll-button left" 

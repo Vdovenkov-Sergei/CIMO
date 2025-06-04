@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SubmitButton from './SubmitButton';
 import Input from './Input';
 
@@ -6,21 +6,28 @@ const ChangeNicknameForm = ({
   currentNickname, 
   onSubmit, 
   isLoading = false, 
-  error = '', 
+  backendError = '', 
   successMessage = '' 
 }) => {
   const [nickname, setNickname] = useState(currentNickname);
 
+  useEffect(() => {
+    setNickname(currentNickname);
+  }, [currentNickname]);
+
   const getSubtitleText = () => {
-    if (error) return error;
+    if (backendError) return backendError;
     if (successMessage) return successMessage;
     return 'Никнейм должен быть уникальным';
   };
 
   const getSubtitleClass = () => {
     let className = "change-nickname__subtitle";
-    if (error) className += " change-nickname__subtitle--error";
-    if (successMessage) className += " change-nickname__subtitle--success";
+    if (backendError) {
+      className += " change-nickname__subtitle--error";
+    } else if (successMessage) {
+      className += " change-nickname__subtitle--success";
+    }
     return className;
   };
 
@@ -42,13 +49,11 @@ const ChangeNicknameForm = ({
             placeholder="Никнейм"
             onChange={(e) => setNickname(e.target.value)}
             required
-            minLength={3}
-            maxLength={20}
           />
         </div>
         <SubmitButton 
           type="submit" 
-          disabled={isLoading || nickname === currentNickname}
+          disabled={isLoading}
           className="form__button"
         >
           {isLoading ? 'Сохранение...' : 'Сохранить'}

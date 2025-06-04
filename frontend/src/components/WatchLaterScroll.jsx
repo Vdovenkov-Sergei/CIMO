@@ -31,7 +31,7 @@ const WatchLaterScroll = ({ movies, onToggleWatchLater, onWatch, onDelete, onCar
   };
 
   return (
-    <div className="movies-scroll-container">
+    <div className="movies-scroll-container filled-scroll watchlist">
       {showLeftArrow && (
         <button 
           className="scroll-button left" 

@@ -39,11 +39,9 @@ const MovieDetailsModal = ({ movie, onClose, onSwipeLeft, onSwipeRight }) => {
     }
   }, [movie?.id, offset, isLoading, hasMore]);
 
-  // при смене фильма
   useEffect(() => {
     if (!movie?.id) return;
   
-    // Сбросим всё как прежде
     setPeople([]);
     setOffset(0);
     setHasMore(true);
@@ -52,7 +50,6 @@ const MovieDetailsModal = ({ movie, onClose, onSwipeLeft, onSwipeRight }) => {
   useEffect(() => {
     if (!movie?.id || offset !== 0 || people.length > 0) return;
   
-    // Загружаем людей только после сброса
     loadMorePeople();
   }, [movie?.id, offset, people.length, loadMorePeople]);
   
@@ -120,7 +117,7 @@ const MovieDetailsModal = ({ movie, onClose, onSwipeLeft, onSwipeRight }) => {
                   <div className="meta-value">{formatValue(movie.release_year)}</div>
 
                   <div className="meta-label">Продолжительность:</div>
-                  <div className="meta-value">{formatValue(movie.runtime)} мин</div>
+                  <div className="meta-value">{formatValue(movie.runtime) === "–" ? "–" : `${movie.runtime} мин`}</div>
 
                   <div className="meta-label">Возрастные ограничения:</div>
                   <div className="meta-value">{formatValue(movie.age_rating)}</div>

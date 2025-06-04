@@ -13,7 +13,6 @@ const ChangeNickname = () => {
     email: ''
   });
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
   const [backendError, setBackendError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
@@ -57,7 +56,7 @@ const ChangeNickname = () => {
           }
           return retryResponse;
         }
-        throw new Error(errorData.detail || 'Request failed');
+        throw new Error(errorData.detail || JSON.stringify(errorData) || 'Request failed');
       }
       return response;
     } catch (error) {
@@ -96,13 +95,18 @@ const ChangeNickname = () => {
 
   const handleNicknameSubmit = async (newNickname) => {
     if (!newNickname.trim()) {
-      setError('Введите новый никнейм');
-      setBackendError('');
+      setBackendError('Введите новый никнейм');
+      setSuccessMessage('');
+      return;
+    }
+
+    if (user.login === newNickname.trim()) {
+      setBackendError('Никнейм совпадает с текущим');
+      setSuccessMessage('');
       return;
     }
 
     setIsLoading(true);
-    setError('');
     setBackendError('');
     setSuccessMessage('');
 
@@ -120,15 +124,16 @@ const ChangeNickname = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        const errorMessage = data.detail || data.message || 'Ошибка обновления никнейма';
+        const errorMessage = data.detail || data.message || JSON.stringify(data) || 'Ошибка обновления никнейма';
         setBackendError(errorMessage);
-        throw new Error(errorMessage);
+        return;
       }
 
       setUser(prev => ({ ...prev, login: newNickname.trim() }));
       setSuccessMessage('Никнейм успешно изменен!');
     } catch (err) {
       console.error('Ошибка:', err);
+      setBackendError("Никнейм уже занят");
     } finally {
       setIsLoading(false);
     }
@@ -157,7 +162,7 @@ const ChangeNickname = () => {
           currentNickname={user.login}
           onSubmit={handleNicknameSubmit}
           isLoading={isLoading}
-          error={error || backendError}
+          backendError={backendError}
           successMessage={successMessage}
         />
       </main>

@@ -266,13 +266,19 @@ const SessionMovies = () => {
       <main className="movies-main container">
         <section className="movies-section">
           <h2 className="movies-section__title">Отложенные фильмы</h2>
-          <WatchLaterScroll 
-            movies={movies} 
-            onToggleWatchLater={handleToggleWatchLater}
-            onWatch={handleWatchClick}
-            onDelete={handleDelete}
-            onCardClick={handleCardClick}
-          />
+          {movies.length > 0 ? (
+            <WatchLaterScroll 
+              movies={movies} 
+              onToggleWatchLater={handleToggleWatchLater}
+              onWatch={handleWatchClick}
+              onDelete={handleDelete}
+              onCardClick={handleCardClick}
+            />
+          ) : (
+            <div className="empty-watch-later">
+              Список пуст
+            </div>
+          )}
         </section>
 
         <div className="buttons">

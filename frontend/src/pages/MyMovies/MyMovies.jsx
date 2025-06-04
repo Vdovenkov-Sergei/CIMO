@@ -315,36 +315,49 @@ const MyMovies = () => {
         </div>
 
         {error && <div className="error-message">{error}</div>}
-        {isLoading && <div className="loading-indicator">Загрузка...</div>}
 
         <section className="movies-section">
           <h2 className="movies-section__title">Отложенные фильмы</h2>
-          <WatchListScroll
-            movies={watchlistMovies}
-            onWatch={handleWatchClick}
-            onDelete={removeMovie}
-            loadMore={loadMoreWatchlist}
-            hasMore={hasMoreWatchlist}
-            onCardClick={handleMovieCardClick}
-          />
+          {watchlistMovies.length > 0 ? (
+            <WatchListScroll
+              movies={watchlistMovies}
+              onWatch={handleWatchClick}
+              onDelete={removeMovie}
+              loadMore={loadMoreWatchlist}
+              hasMore={hasMoreWatchlist}
+              onCardClick={handleMovieCardClick}
+            />
+          ) : (
+            <div className="empty-scroll watchlist">
+              Список пуст
+            </div>
+          )}
+          
         </section>
 
         <section className="movies-section">
           <div className="movies-section__header">
             <h2 className="movies-section__title">Просмотренные фильмы</h2>
           </div>
-          <WatchedScroll
-            movies={watchedMovies}
-            onUnwatch={markAsUnwatched}
-            loadMore={loadMoreWatched}
-            hasMore={hasMoreWatched}
-            onRatingClick={(watchedMovie) => {
-              setMovieToRate({ ...watchedMovie.movie, review: watchedMovie.review });
-              setIsPatchMode(true);
-              setRatingModalOpen(true);
-            }}
-            onCardClick={handleMovieCardClick}
-          />
+          {watchedMovies.length > 0 ? (
+            <WatchedScroll
+              movies={watchedMovies}
+              onUnwatch={markAsUnwatched}
+              loadMore={loadMoreWatched}
+              hasMore={hasMoreWatched}
+              onRatingClick={(watchedMovie) => {
+                setMovieToRate({ ...watchedMovie.movie, review: watchedMovie.review });
+                setIsPatchMode(true);
+                setRatingModalOpen(true);
+              }}
+              onCardClick={handleMovieCardClick}
+            />
+          ) : (
+            <div className="empty-scroll watched">
+              Список пуст
+            </div>
+          )}
+          
         </section>
       </main>
 
