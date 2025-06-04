@@ -4,7 +4,7 @@ import './CountdownModal.scss';
 
 const CountdownModal = ({ isOpen, onClose, onActivate, is_pair, session_id }) => {
     const navigate = useNavigate();
-    const [countdown, setCountdown] = useState(3);
+    const [countdown, setCountdown] = useState(5);
     const [isReady, setIsReady] = useState(false);
     const [checkingReady, setCheckingReady] = useState(false);
     
@@ -100,7 +100,7 @@ const CountdownModal = ({ isOpen, onClose, onActivate, is_pair, session_id }) =>
                 setCheckingReady(false);
                 clearInterval(interval);
             }
-        }, 5000);
+        }, 4000);
 
         return () => {
             clearInterval(interval);

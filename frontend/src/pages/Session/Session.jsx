@@ -28,26 +28,116 @@ const Notification = ({ movie }) => {
   );
 };
 
+const STORAGE_KEYS = {
+  CURRENT_MOVIE: 'session_current_movie',
+  LIKED_MOVIES: 'session_liked_movies',
+  SHOW_COUNTDOWN: 'session_show_countdown',
+  CURRENT_MOVIE_ID: 'session_current_movie_id',
+  SHOW_LIKED_MOVIES: 'session_show_liked_movies',
+  OFFSET: 'session_offset',
+  HAS_MORE: 'session_has_more',
+  SESSION_ID: 'session_id'
+};
+
 const Session = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [currentMovie, setCurrentMovie] = useState(null);
   const [likedMovies, setLikedMovies] = useState([]);
   const [showDetails, setShowDetails] = useState(null);
-  const [showCountdown, setShowCountdown] = useState(true);
+  const [showCountdown, setShowCountdown] = useState(false);
   const [currentMovieId, setCurrentMovieId] = useState(null);
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const limit = 10;
   const [showLikedMovies, setShowLikedMovies] = useState(true);
-  const { sessionId, latestMessage, sendMessage } = useWebSocket();
+  const { sessionId, latestMessage, connect } = useWebSocket();
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMovie, setNotificationMovie] = useState(null);
 
+  // Сохранение состояния
+  const saveState = () => {
+    try {
+      const stateToSave = {
+        [STORAGE_KEYS.CURRENT_MOVIE]: currentMovie,
+        [STORAGE_KEYS.LIKED_MOVIES]: likedMovies,
+        [STORAGE_KEYS.SHOW_COUNTDOWN]: showCountdown,
+        [STORAGE_KEYS.CURRENT_MOVIE_ID]: currentMovieId,
+        [STORAGE_KEYS.SHOW_LIKED_MOVIES]: showLikedMovies,
+        [STORAGE_KEYS.OFFSET]: offset,
+        [STORAGE_KEYS.HAS_MORE]: hasMore,
+        [STORAGE_KEYS.SESSION_ID]: sessionId
+      };
+
+      Object.entries(stateToSave).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          localStorage.setItem(key, JSON.stringify(value));
+        }
+      });
+    } catch (error) {
+      console.error('Error saving state:', error);
+    }
+  };
+
+  // Восстановление состояния
+  const loadState = () => {
+    try {
+      const storedCurrentMovie = localStorage.getItem(STORAGE_KEYS.CURRENT_MOVIE);
+      const storedLikedMovies = localStorage.getItem(STORAGE_KEYS.LIKED_MOVIES);
+      const storedShowCountdown = localStorage.getItem(STORAGE_KEYS.SHOW_COUNTDOWN);
+      const storedCurrentMovieId = localStorage.getItem(STORAGE_KEYS.CURRENT_MOVIE_ID);
+      const storedShowLikedMovies = localStorage.getItem(STORAGE_KEYS.SHOW_LIKED_MOVIES);
+      const storedOffset = localStorage.getItem(STORAGE_KEYS.OFFSET);
+      const storedHasMore = localStorage.getItem(STORAGE_KEYS.HAS_MORE);
+      const storedSessionId = localStorage.getItem(STORAGE_KEYS.SESSION_ID);
+
+      if (storedCurrentMovie) setCurrentMovie(JSON.parse(storedCurrentMovie));
+      if (storedLikedMovies) setLikedMovies(JSON.parse(storedLikedMovies));
+      if (storedShowCountdown) setShowCountdown(JSON.parse(storedShowCountdown));
+      if (storedCurrentMovieId) setCurrentMovieId(JSON.parse(storedCurrentMovieId));
+      if (storedShowLikedMovies) setShowLikedMovies(JSON.parse(storedShowLikedMovies));
+      if (storedOffset) setOffset(JSON.parse(storedOffset));
+      if (storedHasMore) setHasMore(JSON.parse(storedHasMore));
+      
+      // Восстанавливаем WebSocket соединение
+      if (storedSessionId) {
+        connect(JSON.parse(storedSessionId));
+      }
+    } catch (error) {
+      console.error('Error loading state:', error);
+    }
+  };
+
+  // Очистка сохраненного состояния
+  const clearSavedState = () => {
+    Object.values(STORAGE_KEYS).forEach(key => {
+      localStorage.removeItem(key);
+    });
+  };
+
+  useEffect(() => {
+    loadState();
+    checkSessionStatus();
+
+    if (location.state?.movie_id) {
+      setCurrentMovieId(location.state.movie_id);
+      fetchCurrentMovie(location.state.movie_id);
+    }
+    fetchLikedMovies(true);
+
+    return () => {
+      clearSavedState();
+    };
+  }, []);
+
+  useEffect(() => {
+    saveState();
+  }, [currentMovie, likedMovies, showCountdown, currentMovieId, showLikedMovies, offset, hasMore, sessionId]);
+
   useEffect(() => {
     if (latestMessage) {
-      console.log('🔔 New message from WebSocket in /session:', latestMessage);
+      console.log('🔔 New WebSocket message:', latestMessage);
 
       if (latestMessage.movie) {
         setNotificationMovie(latestMessage.movie);
@@ -113,10 +203,21 @@ const Session = () => {
     }
   };
 
+  const checkSessionStatus = async () => {
+    try {
+      const response = await fetchWithTokenRefresh('/api/sessions/me');
+      const data = await response.json();
+      if (data.status === 'PREPARED') {
+        setShowCountdown(true);
+      }
+    } catch (err) {
+      console.error('Error checking session status:', err);
+    }
+  };
+
   const finishSession = async () => {
     setIsLoading(true);
     try {
-      // Сначала отправляем PATCH запрос для изменения статуса сессии
       await fetchWithTokenRefresh('/api/sessions/status', {
         method: 'PATCH',
         headers: {
@@ -124,8 +225,6 @@ const Session = () => {
         },
         body: JSON.stringify({ status: 'REVIEW' }),
       });
-
-      // После успешного изменения статуса перенаправляем
       navigate('/sessionMovies');
     } catch (err) {
       console.error('Error finishing session:', err);
@@ -225,14 +324,6 @@ const Session = () => {
   };
 
   useEffect(() => {
-    if (location.state?.movie_id) {
-      setCurrentMovieId(location.state.movie_id);
-      fetchCurrentMovie(location.state.movie_id);
-    }
-    fetchLikedMovies(true);
-  }, [location.state]);
-
-  useEffect(() => {
     if (currentMovieId) {
       fetchCurrentMovie(currentMovieId);
     }
@@ -323,7 +414,6 @@ const Session = () => {
             <Notification movie={notificationMovie} />
           </div>
         )}
-
       </main>
 
       <Footer />

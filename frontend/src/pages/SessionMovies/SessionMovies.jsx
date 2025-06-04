@@ -1,4 +1,3 @@
-// SessionMovies.jsx
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './SessionMovies.scss';
@@ -8,7 +7,6 @@ import Footer from '../../components/Footer';
 import Header from '../../components/Header';
 import MovieDetailsModal from '../../components/MovieDetailsModal/MovieDetailsModal';
 import RateMovieModal from '../../components/RateMovieModal/RateMovieModal';
-import { useWebSocket } from '@/context/WebSocketContext';
 
 const Notification = ({ movie }) => {
   return (
@@ -41,7 +39,7 @@ const SessionMovies = () => {
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMovie, setNotificationMovie] = useState(null);
   
-  useEffect(() => {
+  /*useEffect(() => {
     if (latestMessage) {
       console.log('🔔 New message from WebSocket in /session:', latestMessage);
   
@@ -56,7 +54,7 @@ const SessionMovies = () => {
         return () => clearTimeout(timer);
       }
     }
-  }, [latestMessage]);
+  }, [latestMessage]);*/
 
   const refreshToken = async () => {
     try {
@@ -253,7 +251,6 @@ const SessionMovies = () => {
           status: 'COMPLETED'
         }),
       });
-
       navigate('/modeSelection');
     } catch (err) {
       console.error('Error finishing session:', err);

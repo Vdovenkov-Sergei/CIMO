@@ -1,13 +1,11 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import './Invite.scss';
-import { useWebSocket } from '../../context/WebSocketContext';
 
 const Invite = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get('id');
-  const { connect } = useWebSocket();
 
   const refreshToken = async () => {
     try {
@@ -77,7 +75,6 @@ const Invite = () => {
         body: JSON.stringify({ status: 'PREPARED' }),
       });
       console.log('Status update response:', statusResponse.status);
-      connect(sessionId);
       navigate(`/session?id=${sessionId}`, { 
         state: { session_id: sessionId, is_pair: true } 
       });

@@ -6,13 +6,11 @@ import Footer from '../../components/Footer';
 import Header from '../../components/Header';
 import SingleModeCard from '../../components/SingleModeCard';
 import PairModeCard from '../../components/PairModeCard';
-import { useWebSocket } from '../../context/WebSocketContext';
 
 const ModeSelection = () => {
   const navigate = useNavigate();
   const [inviteLink, setInviteLink] = useState('');
   const [sessionId, setSessionId] = useState('');
-  const { connect } = useWebSocket();
 
   const refreshToken = async () => {
     try {
@@ -118,7 +116,6 @@ const ModeSelection = () => {
       const newSessionId = data.id;
       setSessionId(newSessionId);
       setInviteLink(`http://localhost:5173/invite?id=${newSessionId}`);
-      connect(newSessionId);
       showModalCallback();
     } catch (err) {
       console.error('Error starting pair session:', err);
