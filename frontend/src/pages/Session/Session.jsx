@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import './Session.scss';
@@ -11,7 +11,6 @@ import CheckControlButton from '../../components/CheckControlButton';
 import LikedMoviesScroll from '../../components/LikedMoviesScroll';
 import MovieDetailsModal from '../../components/MovieDetailsModal/MovieDetailsModal';
 import CountdownModal from '../../components/CountdownModal/CountdownModal';
-import { useWebSocket } from '@/context/WebSocketContext';
 
 const Notification = ({ movie }) => {
   return (
@@ -55,6 +54,7 @@ const Session = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [currentMovie, setCurrentMovie] = useState(null);
+  const [sessionId, setSessionId] = useState('');
   const [likedMovies, setLikedMovies] = useState([]);
   const [showDetails, setShowDetails] = useState(null);
   const [showCountdown, setShowCountdown] = useState(false);
@@ -64,9 +64,10 @@ const Session = () => {
   const [isLoading, setIsLoading] = useState(false);
   const limit = 10;
   const [showLikedMovies, setShowLikedMovies] = useState(false);
-  const { sessionId, latestMessage, connect } = useWebSocket();
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMovie, setNotificationMovie] = useState(null);
+  const [latestMessage, setLatestMessage] = useState(null);
+  const ws = useRef(null);
 
   // Сохранение состояния
   const saveState = () => {
@@ -102,7 +103,6 @@ const Session = () => {
       const storedShowLikedMovies = localStorage.getItem(STORAGE_KEYS.SHOW_LIKED_MOVIES);
       const storedOffset = localStorage.getItem(STORAGE_KEYS.OFFSET);
       const storedHasMore = localStorage.getItem(STORAGE_KEYS.HAS_MORE);
-      const storedSessionId = localStorage.getItem(STORAGE_KEYS.SESSION_ID);
 
       if (storedCurrentMovie) setCurrentMovie(JSON.parse(storedCurrentMovie));
       if (storedLikedMovies) setLikedMovies(JSON.parse(storedLikedMovies));
@@ -111,11 +111,6 @@ const Session = () => {
       if (storedShowLikedMovies) setShowLikedMovies(JSON.parse(storedShowLikedMovies));
       if (storedOffset) setOffset(JSON.parse(storedOffset));
       if (storedHasMore) setHasMore(JSON.parse(storedHasMore));
-      
-      // Восстанавливаем WebSocket соединение
-      if (storedSessionId) {
-        connect(JSON.parse(storedSessionId));
-      }
     } catch (error) {
       console.error('Error loading state:', error);
     }
@@ -148,6 +143,50 @@ const Session = () => {
   }, [currentMovie, likedMovies, showCountdown, currentMovieId, showLikedMovies, offset, hasMore, sessionId]);
 
   useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const sessionId = searchParams.get('id');
+    setSessionId(sessionId);
+      
+    if (!sessionId) {
+      console.error('Session ID not found');
+      return;
+    }
+  
+    const protocol = import.meta.env.VITE_WS_PROTOCOL || 'ws';
+    const host = import.meta.env.VITE_WS_HOST || 'localhost:8000';
+    const wsUrl = `${protocol}://${host}/movies/session/ws/${sessionId}`;
+      
+    ws.current = new WebSocket(wsUrl);
+  
+    ws.current.onopen = () => {
+      console.log('WebSocket connected');
+    };
+  
+    ws.current.onclose = () => {
+      console.log('WebSocket disconnected');
+    };
+  
+    ws.current.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+  
+    ws.current.onmessage = (event) => {
+      try {
+        const message = JSON.parse(event.data);
+        setLatestMessage(message);
+      } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
+      }
+    };
+  
+    return () => {
+      if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+        ws.current.close();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     if (latestMessage) {
       console.log('🔔 New WebSocket message:', latestMessage);
 
@@ -158,7 +197,7 @@ const Session = () => {
         
         const timer = setTimeout(() => {
           setShowNotification(false);
-        }, 3000);
+        }, 5000);
         
         return () => clearTimeout(timer);
       }
@@ -238,7 +277,7 @@ const Session = () => {
         },
         body: JSON.stringify({ status: 'REVIEW' }),
       });
-      navigate('/sessionMovies');
+      navigate('/sessionMovies', { state: { sessionId: sessionId } });
     } catch (err) {
       console.error('Error finishing session:', err);
     } finally {

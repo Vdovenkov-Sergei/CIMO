@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import './SessionMovies.scss';
 import WatchLaterScroll from '../../components/WatchLaterScroll';
 import FinishSessionButton from '../../components/FinishSessionButton';
@@ -25,6 +25,7 @@ const Notification = ({ movie }) => {
 
 const SessionMovies = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [movies, setMovies] = useState([]);
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
@@ -37,14 +38,58 @@ const SessionMovies = () => {
   const limit = 10;
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMovie, setNotificationMovie] = useState(null);
+  const [latestMessage, setLatestMessage] = useState(null);
+  const ws = useRef(null);
+  const sessionId = location.state?.sessionId;
   
-  /*useEffect(() => {
+  useEffect(() => {
+    if (!sessionId) {
+      console.error('Session ID not found');
+      return;
+    }
+
+    const protocol = import.meta.env.VITE_WS_PROTOCOL || 'ws';
+    const host = import.meta.env.VITE_WS_HOST || 'localhost:8000';
+    const wsUrl = `${protocol}://${host}/movies/session/ws/${sessionId}`;
+    
+    ws.current = new WebSocket(wsUrl);
+
+    ws.current.onopen = () => {
+      console.log('WebSocket connected');
+    };
+
+    ws.current.onclose = () => {
+      console.log('WebSocket disconnected');
+    };
+
+    ws.current.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+
+    ws.current.onmessage = (event) => {
+      try {
+        const message = JSON.parse(event.data);
+        setLatestMessage(message);
+      } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
+      }
+    };
+
+    return () => {
+      if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+        ws.current.close();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     if (latestMessage) {
       console.log('🔔 New message from WebSocket in /session:', latestMessage);
   
       if (latestMessage.movie) {
         setNotificationMovie(latestMessage.movie);
         setShowNotification(true);
+        fetchMovies(0);
           
         const timer = setTimeout(() => {
           setShowNotification(false);
@@ -53,7 +98,7 @@ const SessionMovies = () => {
         return () => clearTimeout(timer);
       }
     }
-  }, [latestMessage]);*/
+  }, [latestMessage]);
 
   const refreshToken = async () => {
     try {
