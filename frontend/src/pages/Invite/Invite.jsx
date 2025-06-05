@@ -27,35 +27,21 @@ const Invite = () => {
   };
 
   const fetchWithTokenRefresh = async (url, options = {}) => {
-    try {
-      const response = await fetch(url, {
+    const response = await fetch(url, {
+      ...options,
+      credentials: 'include',
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok && data.detail === "Token expired") {
+      await refreshToken();
+      const retryResponse = await fetch(url, {
         ...options,
         credentials: 'include',
       });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        if (errorData.detail === "Token expired") {
-          await refreshToken();
-          const retryResponse = await fetch(url, {
-            ...options,
-            credentials: 'include',
-          });
-          if (!retryResponse.ok) {
-            navigate('/');
-            throw new Error('Request failed after token refresh');
-          }
-          return retryResponse;
-        }
-        throw new Error(errorData.detail || 'Request failed');
-      }
-      return response;
-    } catch (error) {
-      if (error.message === 'Token refresh failed') {
-        navigate('/');
-      }
-      throw error;
+      return retryResponse;
     }
+    return response;
   };
 
   const joinSession = async () => {
@@ -65,6 +51,10 @@ const Invite = () => {
       const joinResponse = await fetchWithTokenRefresh(`/api/sessions/join/${sessionId}`, {
         method: 'POST',
       });
+
+      if (!joinResponse.ok) {
+        throw new Error(joinResponse.detail);
+      }
       console.log('Join response status:', joinResponse.status);
   
       const statusResponse = await fetchWithTokenRefresh('/api/sessions/status', {
@@ -80,7 +70,7 @@ const Invite = () => {
       });
     } catch (err) {
       console.error('Full error joining session:', err);
-      navigate('/');
+      navigate(`/?redirect=/invite&id=${sessionId}`);
     }
   };
 

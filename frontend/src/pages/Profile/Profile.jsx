@@ -4,7 +4,7 @@ import './Profile.scss';
 import ProfileNavLink from '../../components/ProfileNavLink';
 import ProfileHeader from '../../components/ProfileHeader';
 import Footer from '../../components/Footer';
-import Header from '../../components/Header';
+import Header from '../../components/Header/Header';
 
 const Profile = () => {
   const navigate = useNavigate();

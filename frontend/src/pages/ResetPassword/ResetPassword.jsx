@@ -4,7 +4,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination } from 'swiper/modules';
 import './ResetPassword.scss';
 import Footer from '../../components/Footer';
-import HeaderReg from '../../components/HeaderReg';
+import HeaderReg from '../../components/HeaderReg/HeaderReg';
 import PasswordResetForm from '../../components/PasswordResetForm';
 
 const ResetPassword = () => {

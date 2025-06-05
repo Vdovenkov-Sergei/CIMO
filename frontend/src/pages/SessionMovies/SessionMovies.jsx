@@ -4,7 +4,7 @@ import './SessionMovies.scss';
 import WatchLaterScroll from '../../components/WatchLaterScroll';
 import FinishSessionButton from '../../components/FinishSessionButton';
 import Footer from '../../components/Footer';
-import Header from '../../components/Header';
+import Header from '../../components/Header/Header';
 import MovieDetailsModal from '../../components/MovieDetailsModal/MovieDetailsModal';
 import RateMovieModal from '../../components/RateMovieModal/RateMovieModal';
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination } from 'swiper/modules';
 import './Login.scss';
@@ -8,11 +8,12 @@ import onboarding1 from '@/assets/images/onboarding1.png';
 import onboarding2 from '@/assets/images/onboarding2.png';
 import onboarding3 from '@/assets/images/onboarding3.png';
 import AuthForm from '../../components/AuthForm';
-import HeaderReg from '../../components/HeaderReg';
+import HeaderReg from '../../components/HeaderReg/HeaderReg';
 import Footer from '../../components/Footer';
 import Onboarding from '../../components/Onboarding';
 
 const Login = () => {
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const onboardingImages = [
     { id: 1, src: onboarding1, alt: 'Демонстрация функционала 1' },
@@ -26,6 +27,8 @@ const Login = () => {
   const [error, setError] = useState('');
   const [backendError, setBackendError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const redirectUrl = searchParams.get('redirect');
+  const inviteId = searchParams.get('id');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -63,7 +66,11 @@ const Login = () => {
       }
 
       setSuccessMessage('Вход выполнен успешно!');
-      setTimeout(() => navigate('/modeSelection'), 1500);
+      if (redirectUrl && inviteId) {
+        navigate(`${redirectUrl}?id=${inviteId}`);
+      } else {
+        setTimeout(() => navigate('/modeSelection'), 1500);
+      }
       
     } catch (err) {
       console.error('Ошибка авторизации:', err.message);

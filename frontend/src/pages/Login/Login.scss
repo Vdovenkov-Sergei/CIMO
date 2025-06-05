@@ -16,20 +16,6 @@ $primary-font: 'Inter', sans-serif;
   display: flex;
   flex-direction: column;
 
-  // Стили хедера
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 40px;
-    background-color: #09090B;
-    height: 85px;
-    
-    .logo {
-        width: 150px;
-    }
-  }
-
   // Основной контент
   .main-content {
   display: flex;
@@ -190,13 +176,6 @@ $primary-font: 'Inter', sans-serif;
 // Малые экраны (мобильные устройства)
 @media (max-width: 576px) {
   .login-page {
-    .header {
-      justify-content: center;
-      padding: 16px;
-      .logo {
-        width: 120px;
-      }
-    }
 
     .main-content {
       display: flex;

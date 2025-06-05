@@ -13,20 +13,16 @@ const PeopleScroll = ({ people, hasMore, isLoading, onLoadMore }) => {
     if (!container) return;
 
     const handleScroll = () => {
-      // Показываем левую стрелку если прокрутка не в начале
       setShowLeftArrow(container.scrollLeft > 0);
       
-      // Показываем правую стрелку если не достигли конца
       const isEnd = container.scrollLeft + container.clientWidth >= container.scrollWidth - 50;
       setShowRightArrow(!isEnd);
       
-      // Загружаем больше если достигли конца и есть что загружать
       if (isEnd && hasMore && !isLoading) {
         onLoadMore();
       }
     };
 
-    // Инициализация состояния стрелок
     handleScroll();
     
     container.addEventListener('scroll', handleScroll);
@@ -37,7 +33,7 @@ const PeopleScroll = ({ people, hasMore, isLoading, onLoadMore }) => {
     const container = scrollRef.current;
     if (!container) return;
 
-    const scrollAmount = 400; // Увеличим количество прокрутки
+    const scrollAmount = 400;
     const newScrollLeft = direction === 'left' 
       ? container.scrollLeft - scrollAmount 
       : container.scrollLeft + scrollAmount;

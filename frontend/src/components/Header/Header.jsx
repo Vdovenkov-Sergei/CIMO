@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import CimoLogo from '../assets/images/CIMO_logo.svg';
-import ProfileIcon from '../assets/images/person-square.svg';
+import CimoLogo from '/CIMO_logo.svg';
+import ProfileIcon from '../../assets/images/person-square.svg';
+import './Header.scss';
 
 const Header = () => {
   const navigate = useNavigate();

@@ -30,7 +30,7 @@ const PairModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="modal">
+    <div className="pair-modal">
       <div className="modal__content">
         <h3 className="modal__title">{title}</h3>
         <p className="modal__description">{description}</p>

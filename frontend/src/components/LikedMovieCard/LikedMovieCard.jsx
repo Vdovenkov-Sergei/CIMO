@@ -1,4 +1,3 @@
-// В компоненте (остаётся без изменений)
 import React from 'react';
 import './LikedMovieCard.scss';
 

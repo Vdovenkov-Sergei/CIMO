@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import WatchLaterCard from './WatchLaterCard';
+import WatchLaterCard from './WatchLaterCard/WatchLaterCard';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 const WatchLaterScroll = ({ movies, onToggleWatchLater, onWatch, onDelete, onCardClick }) => {
@@ -55,6 +55,7 @@ const WatchLaterScroll = ({ movies, onToggleWatchLater, onWatch, onDelete, onCar
             onWatch={onWatch}
             onDelete={onDelete}
             onClick={() => onCardClick(obj.movie.id)}
+            is_matched={obj.is_matched}
           />
         ))}
       </div>

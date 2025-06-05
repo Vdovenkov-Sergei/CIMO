@@ -3,7 +3,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination } from 'swiper/modules';
 import './ForgotPassword.scss';
 import Footer from '../../components/Footer';
-import HeaderReg from '../../components/HeaderReg';
+import HeaderReg from '../../components/HeaderReg/HeaderReg';
 import PasswordRecoveryForm from '../../components/PasswordRecoveryForm';
 
 const ForgotPassword = () => {

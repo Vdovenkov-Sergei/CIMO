@@ -7,7 +7,7 @@ import './Verification.scss';
 import onboarding1 from '@/assets/images/onboarding1.png';
 import onboarding2 from '@/assets/images/onboarding2.png';
 import onboarding3 from '@/assets/images/onboarding3.png';
-import HeaderReg from '../../components/HeaderReg';
+import HeaderReg from '../../components/HeaderReg/HeaderReg';
 import Onboarding from '../../components/Onboarding';
 import Footer from '../../components/Footer';
 import VerificationCodeForm from '../../components/VerificationCodeForm';

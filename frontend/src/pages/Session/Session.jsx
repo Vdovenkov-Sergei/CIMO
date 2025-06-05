@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import './Session.scss';
-import Header from '../../components/Header';
+import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer';
 import SwipeableMovieCard from '../../components/SwiperMovieCard';
 import FinishSelectionButton from '../../components/FinishSelectionButton';
@@ -154,6 +154,7 @@ const Session = () => {
       if (latestMessage.movie) {
         setNotificationMovie(latestMessage.movie);
         setShowNotification(true);
+        fetchLikedMovies(true);
         
         const timer = setTimeout(() => {
           setShowNotification(false);

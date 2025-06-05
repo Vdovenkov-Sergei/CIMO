@@ -78,7 +78,6 @@ const CountdownModal = ({ isOpen, onClose, onActivate, is_pair, session_id }) =>
           const data = await response.json();
           console.log('Ready check response:', data);
           
-          // Гибкая проверка ответа
           return data === true;
         } catch (err) {
           console.error('Error checking session ready status:', err);
@@ -87,7 +86,6 @@ const CountdownModal = ({ isOpen, onClose, onActivate, is_pair, session_id }) =>
     };
 
     
-    // Эффект для проверки готовности парной сессии
     useEffect(() => {
         if (!isOpen || !is_pair || isReady) return;
 
@@ -115,7 +113,6 @@ const CountdownModal = ({ isOpen, onClose, onActivate, is_pair, session_id }) =>
       }
   }, [isOpen, is_pair, isReady]);
 
-    // Эффект для обратного отсчёта (запускается только когда isReady = true)
     useEffect(() => {
         if (!isOpen || !isReady) return;
 
@@ -133,7 +130,6 @@ const CountdownModal = ({ isOpen, onClose, onActivate, is_pair, session_id }) =>
         return () => clearInterval(timer);
     }, [isOpen, isReady]);
 
-    // Эффект для активации сессии после отсчёта
     useEffect(() => {
         if (countdown === 0 && isOpen) {
             console.log('Countdown finished, activating session...');
