@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import './Session.scss';
 import Header from '../../components/Header/Header';
-import Footer from '../../components/Footer';
+import Footer from '../../components/Footer/Footer';
 import SwipeableMovieCard from '../../components/SwiperMovieCard';
 import FinishSelectionButton from '../../components/FinishSelectionButton';
 import XControlButton from '../../components/XControlButton';

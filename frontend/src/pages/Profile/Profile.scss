@@ -132,26 +132,6 @@ $primary-font: 'Inter', sans-serif;
 
   }
 
-  // Футер (оставляем как было)
-  .footer {
-    padding: 40px;
-    text-align: center;
-    
-    .footer-title {
-      font-size: 18px;
-      margin-bottom: 12px;
-    }
-    
-    .footer-email {
-      color: $link-color;
-      text-decoration: none;
-      
-      &:hover {
-        text-decoration: underline;
-      }
-    }
-  }
-
 }
 
 
@@ -168,18 +148,6 @@ $primary-font: 'Inter', sans-serif;
   
     .profile-nav__link {
       padding: 15px;
-    }
-
-    .footer {
-      padding: 20px;
-
-      .footer-title {
-        font-size: 16px;
-      }
-
-      .footer-email {
-        font-size: 14px;
-      }
     }
   }
   

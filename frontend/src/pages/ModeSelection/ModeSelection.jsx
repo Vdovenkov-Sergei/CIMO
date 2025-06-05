@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './ModeSelection.scss';
 import copyIconUrl from '../../../src/assets/images/copy.svg';
-import Footer from '../../components/Footer';
+import Footer from '../../components/Footer/Footer';
 import Header from '../../components/Header/Header';
 import SingleModeCard from '../../components/SingleModeCard';
 import PairModeCard from '../../components/PairModeCard';

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import './SessionMovies.scss';
 import WatchLaterScroll from '../../components/WatchLaterScroll';
 import FinishSessionButton from '../../components/FinishSessionButton';
-import Footer from '../../components/Footer';
+import Footer from '../../components/Footer/Footer';
 import Header from '../../components/Header/Header';
 import MovieDetailsModal from '../../components/MovieDetailsModal/MovieDetailsModal';
 import RateMovieModal from '../../components/RateMovieModal/RateMovieModal';

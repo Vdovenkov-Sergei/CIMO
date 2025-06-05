@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './ChangeNickname.scss';
 import Header from '../../components/Header/Header';
-import Footer from '../../components/Footer';
+import Footer from '../../components/Footer/Footer';
 import ProfileAvatar from '../../components/ProfileAvatar';
 import ChangeNicknameForm from '../../components/ChangeNicknameForm';
 

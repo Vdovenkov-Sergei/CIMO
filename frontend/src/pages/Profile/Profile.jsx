@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import './Profile.scss';
 import ProfileNavLink from '../../components/ProfileNavLink';
 import ProfileHeader from '../../components/ProfileHeader';
-import Footer from '../../components/Footer';
+import Footer from '../../components/Footer/Footer';
 import Header from '../../components/Header/Header';
 
 const Profile = () => {

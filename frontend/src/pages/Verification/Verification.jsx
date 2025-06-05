@@ -9,7 +9,7 @@ import onboarding2 from '@/assets/images/onboarding2.png';
 import onboarding3 from '@/assets/images/onboarding3.png';
 import HeaderReg from '../../components/HeaderReg/HeaderReg';
 import Onboarding from '../../components/Onboarding';
-import Footer from '../../components/Footer';
+import Footer from '../../components/Footer/Footer';
 import VerificationCodeForm from '../../components/VerificationCodeForm';
 
 const Verification = () => {

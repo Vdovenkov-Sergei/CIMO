@@ -9,7 +9,7 @@ import onboarding2 from '@/assets/images/onboarding2.png';
 import onboarding3 from '@/assets/images/onboarding3.png';
 import Onboarding from '../../components/Onboarding';
 import HeaderReg from '../../components/HeaderReg/HeaderReg';
-import Footer from '../../components/Footer';
+import Footer from '../../components/Footer/Footer';
 import RegisterForm from '../../components/RegisterForm';
 
 const Signup = () => {

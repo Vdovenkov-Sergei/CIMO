@@ -200,25 +200,6 @@
     }
   }
   
-  .footer {
-    padding: 40px;
-    text-align: center;
-    
-    .footer-title {
-      font-size: 18px;
-      margin-bottom: 12px;
-    }
-    
-    .footer-email {
-      color: $link-color;
-      text-decoration: none;
-      
-      &:hover {
-        text-decoration: underline;
-      }
-    }
-  }
-  
 }
 
 
@@ -358,18 +339,6 @@
       background-color: #18181B;
       padding: 12px;
       transform: translateY(20%) translateX(38%);
-    }
-
-    .footer {
-      padding: 20px;
-
-      .footer-title {
-        font-size: 16px;
-      }
-
-      .footer-email {
-        font-size: 14px;
-      }
     }
   }
   
