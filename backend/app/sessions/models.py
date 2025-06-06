@@ -27,6 +27,7 @@ class Session(Base):
     started_at: Mapped[datetime] = mapped_column(nullable=True)
     ended_at: Mapped[datetime] = mapped_column(nullable=True)
     is_pair: Mapped[bool] = mapped_column(nullable=False, server_default="false")
+    is_onboarding: Mapped[bool] = mapped_column(nullable=False, server_default="false")
     status: Mapped[SessionStatus] = mapped_column(
         Enum(SessionStatus), server_default=SessionStatus.PENDING, nullable=False
     )
