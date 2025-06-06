@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './ModeSelection.scss';
 import copyIconUrl from '../../../src/assets/images/copy.svg';
@@ -6,11 +6,13 @@ import Footer from '../../components/Footer/Footer';
 import Header from '../../components/Header/Header';
 import SingleModeCard from '../../components/SingleModeCard';
 import PairModeCard from '../../components/PairModeCard';
+import ActiveSession from '../../components/ActiveSession/ActiveSession';
 
 const ModeSelection = () => {
   const navigate = useNavigate();
   const [inviteLink, setInviteLink] = useState('');
   const [sessionId, setSessionId] = useState('');
+  let activeSession = false;
 
   const refreshToken = async () => {
     try {
@@ -148,6 +150,30 @@ const ModeSelection = () => {
       console.error('Error preparing pair session:', err);
     }
   };
+
+  const checkUserSession = async () => {
+    try {
+      const response = await fetchWithTokenRefresh('/api/sessions/me', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      const data = await response.json();
+
+      if (data !== null) {
+        activeSession = true;
+      }
+      console.log(activeSession);
+    } catch (err) {
+      console.error('Error checking user\'s session:', err);
+    }
+  }
+
+  useEffect(() => {
+    checkUserSession();
+  }, [])
 
   return (
     <div className="mode-selection-page">

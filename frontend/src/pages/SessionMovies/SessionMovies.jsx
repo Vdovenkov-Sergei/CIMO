@@ -328,7 +328,7 @@ const SessionMovies = () => {
 
         <div className="buttons">
           <FinishSessionButton onClick={finishSession} />
-          <a href="#" className='feedback-btn' target='_blank'>Оставить обратную связь</a>
+          <a href="https://forms.yandex.ru/u/681a215ad046880a127479a7/" className='feedback-btn' target='_blank'>Оставить обратную связь</a>
         </div>
 
         {showNotification && (
