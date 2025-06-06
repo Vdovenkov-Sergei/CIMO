@@ -46,8 +46,7 @@ const STORAGE_KEYS = {
   CURRENT_MOVIE_ID: 'session_current_movie_id',
   SHOW_LIKED_MOVIES: 'session_show_liked_movies',
   OFFSET: 'session_offset',
-  HAS_MORE: 'session_has_more',
-  SESSION_ID: 'session_id'
+  HAS_MORE: 'session_has_more'
 };
 
 const Session = () => {
@@ -80,7 +79,6 @@ const Session = () => {
         [STORAGE_KEYS.SHOW_LIKED_MOVIES]: showLikedMovies,
         [STORAGE_KEYS.OFFSET]: offset,
         [STORAGE_KEYS.HAS_MORE]: hasMore,
-        [STORAGE_KEYS.SESSION_ID]: sessionId
       };
 
       Object.entries(stateToSave).forEach(([key, value]) => {
@@ -148,7 +146,6 @@ const Session = () => {
     setSessionId(sessionId);
       
     if (!sessionId) {
-      console.error('Session ID not found');
       return;
     }
   

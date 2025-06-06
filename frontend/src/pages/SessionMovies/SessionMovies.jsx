@@ -44,7 +44,6 @@ const SessionMovies = () => {
   
   useEffect(() => {
     if (!sessionId) {
-      console.error('Session ID not found');
       return;
     }
 
