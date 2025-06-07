@@ -21,7 +21,7 @@ const Notification = ({ movie }) => {
         className="notification-poster" 
       />
       <div className="notification-text">
-        🎉 Совпадение найдено! Фильм: {movie.name}
+        <span className='notification-match'>Совпадение найдено!</span>🎉 <p>Фильм: <span className='notification-movie-info'>{movie.name} ({movie.release_year})</span></p>
       </div>
     </div>
   );
@@ -46,7 +46,9 @@ const STORAGE_KEYS = {
   CURRENT_MOVIE_ID: 'session_current_movie_id',
   SHOW_LIKED_MOVIES: 'session_show_liked_movies',
   OFFSET: 'session_offset',
-  HAS_MORE: 'session_has_more'
+  HAS_MORE: 'session_has_more',
+  TIMER: 'session_timer',
+  TIME_SWIPED: 'session_time_swiped'
 };
 
 const Session = () => {
@@ -67,6 +69,12 @@ const Session = () => {
   const [notificationMovie, setNotificationMovie] = useState(null);
   const [latestMessage, setLatestMessage] = useState(null);
   const ws = useRef(null);
+  const [timeSwiped, setTimeSwiped] = useState(0);
+  const [timer, setTimer] = useState(0);
+  const timerRef = useRef(null);
+  const startTimeRef = useRef(null);
+  const accumulatedTimeRef = useRef(0);
+  const [queue, setQueue] = useState([]);
 
   // Сохранение состояния
   const saveState = () => {
@@ -79,6 +87,8 @@ const Session = () => {
         [STORAGE_KEYS.SHOW_LIKED_MOVIES]: showLikedMovies,
         [STORAGE_KEYS.OFFSET]: offset,
         [STORAGE_KEYS.HAS_MORE]: hasMore,
+        [STORAGE_KEYS.TIMER]: timer,
+        [STORAGE_KEYS.TIME_SWIPED]: timeSwiped
       };
 
       Object.entries(stateToSave).forEach(([key, value]) => {
@@ -101,6 +111,8 @@ const Session = () => {
       const storedShowLikedMovies = localStorage.getItem(STORAGE_KEYS.SHOW_LIKED_MOVIES);
       const storedOffset = localStorage.getItem(STORAGE_KEYS.OFFSET);
       const storedHasMore = localStorage.getItem(STORAGE_KEYS.HAS_MORE);
+      const storedTimer = localStorage.getItem(STORAGE_KEYS.TIMER);
+      const storedTimeSwiped = localStorage.getItem(STORAGE_KEYS.TIME_SWIPED);
 
       if (storedCurrentMovie) setCurrentMovie(JSON.parse(storedCurrentMovie));
       if (storedLikedMovies) setLikedMovies(JSON.parse(storedLikedMovies));
@@ -109,6 +121,8 @@ const Session = () => {
       if (storedShowLikedMovies) setShowLikedMovies(JSON.parse(storedShowLikedMovies));
       if (storedOffset) setOffset(JSON.parse(storedOffset));
       if (storedHasMore) setHasMore(JSON.parse(storedHasMore));
+      if (storedTimer) setTimer(Number(JSON.parse(storedTimer)));
+      if (storedTimeSwiped) setTimeSwiped(Number(JSON.parse(storedTimeSwiped)));
     } catch (error) {
       console.error('Error loading state:', error);
     }
@@ -119,11 +133,14 @@ const Session = () => {
     Object.values(STORAGE_KEYS).forEach(key => {
       localStorage.removeItem(key);
     });
+    localStorage.removeItem('session_accumulated_time');
+    localStorage.removeItem('session_start_time');
   };
 
   useEffect(() => {
     loadState();
     checkSessionStatus();
+    
 
     if (location.state?.movie_id) {
       setCurrentMovieId(location.state.movie_id);
@@ -138,7 +155,7 @@ const Session = () => {
 
   useEffect(() => {
     saveState();
-  }, [currentMovie, likedMovies, showCountdown, currentMovieId, showLikedMovies, offset, hasMore, sessionId]);
+  }, [currentMovie, likedMovies, showCountdown, currentMovieId, showLikedMovies, offset, hasMore, timer, timeSwiped]);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -183,23 +200,118 @@ const Session = () => {
     };
   }, []);
 
+  const enqueue = (item) => {
+    setQueue(prevQueue => [...prevQueue, item]);
+  }
+
+  const dequeue = () => {
+    if (queue.length > 0) {
+      setQueue(prevQueue => prevQueue.slice(1));
+    }
+  }
+
   useEffect(() => {
     if (latestMessage) {
       console.log('🔔 New WebSocket message:', latestMessage);
 
       if (latestMessage.movie) {
-        setNotificationMovie(latestMessage.movie);
-        setShowNotification(true);
-        fetchLikedMovies(true);
-        
-        const timer = setTimeout(() => {
-          setShowNotification(false);
-        }, 5000);
-        
-        return () => clearTimeout(timer);
+        enqueue(latestMessage.movie);
       }
     }
   }, [latestMessage]);
+
+  useEffect(() => {
+    if (queue.length > 0) {
+      const item = queue[0];
+      setNotificationMovie(item);
+      setShowNotification(true);
+      fetchLikedMovies(true);
+
+      const timer = setTimeout(() => {
+        setShowNotification(false);
+        dequeue();
+      }, 5000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [queue]);
+
+  const startTimer = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+    
+    startTimeRef.current = Date.now() - timer * 1000;
+    
+    timerRef.current = setInterval(() => {
+      const currentTime = Date.now();
+      const elapsedSinceStart = Math.floor((currentTime - startTimeRef.current) / 1000);
+      setTimer(accumulatedTimeRef.current + elapsedSinceStart);
+    }, 1000);
+  };
+
+  useEffect(() => {
+    const savedAccumulatedTime = localStorage.getItem('session_accumulated_time');
+    const savedStartTime = localStorage.getItem('session_start_time');
+    
+    if (savedAccumulatedTime && savedStartTime) {
+      const parsedAccumulated = parseFloat(savedAccumulatedTime);
+      const parsedStartTime = parseInt(savedStartTime, 10);
+      
+      if (Date.now() - parsedStartTime < 86400000) {
+        accumulatedTimeRef.current = parsedAccumulated;
+        startTimeRef.current = parsedStartTime;
+        const elapsedSinceSave = Math.floor((Date.now() - parsedStartTime) / 1000);
+        setTimer(parsedAccumulated + elapsedSinceSave);
+      }
+    }
+    
+    startTimer();
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      const currentAccumulated = Math.floor(accumulatedTimeRef.current + 
+                               (Date.now() - startTimeRef.current) / 1000);
+      
+      localStorage.setItem('session_accumulated_time', currentAccumulated.toString());
+      localStorage.setItem('session_start_time', Date.now().toString());
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      handleBeforeUnload();
+    };
+  }, []);
+
+  useEffect(() => {
+    loadState();
+    checkSessionStatus();
+  
+  
+    if (location.state?.movie_id) {
+      setCurrentMovieId(location.state.movie_id);
+      fetchCurrentMovie(location.state.movie_id);
+    }
+    fetchLikedMovies(true);
+  
+    startTimer(timer);
+  
+    return () => {
+      clearSavedState();
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, []);
 
   const refreshToken = async () => {
     try {
@@ -221,41 +333,27 @@ const Session = () => {
   };
 
   const fetchWithTokenRefresh = async (url, options = {}) => {
-    try {
-      const response = await fetch(url, {
+    const response = await fetch(url, {
+      ...options,
+      credentials: 'include',
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok && data.detail === "Token expired") {
+      await refreshToken();
+      const retryResponse = await fetch(url, {
         ...options,
         credentials: 'include',
       });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        if (errorData.detail === "Token expired") {
-          await refreshToken();
-          const retryResponse = await fetch(url, {
-            ...options,
-            credentials: 'include',
-          });
-          if (!retryResponse.ok) {
-            navigate('/');
-            throw new Error('Request failed after token refresh');
-          }
-          return retryResponse;
-        }
-        throw new Error(errorData.detail || 'Request failed');
-      }
-      return response;
-    } catch (error) {
-      if (error.message === 'Token refresh failed') {
-        navigate('/');
-      }
-      throw error;
+      const retryData = await retryResponse.json().catch(() => ({}));
+      return retryData;
     }
+    return data;
   };
 
   const checkSessionStatus = async () => {
     try {
-      const response = await fetchWithTokenRefresh('/api/sessions/me');
-      const data = await response.json();
+      const data = await fetchWithTokenRefresh('/api/sessions/me');
       if (data.status === 'PREPARED') {
         setShowCountdown(true);
       }
@@ -267,6 +365,8 @@ const Session = () => {
   const finishSession = async () => {
     setIsLoading(true);
     try {
+      localStorage.removeItem('session_accumulated_time');
+      localStorage.removeItem('session_start_time');
       await fetchWithTokenRefresh('/api/sessions/status', {
         method: 'PATCH',
         headers: {
@@ -284,9 +384,13 @@ const Session = () => {
 
   const fetchCurrentMovie = async (movieId) => {
     try {
-      const response = await fetchWithTokenRefresh(`/api/movies/${movieId}`);
-      const data = await response.json();
-      setCurrentMovie(data);
+      const data = await fetchWithTokenRefresh(`/api/movies/${movieId}`);
+      if (data.detail === "Movie with id=-1 not found") {
+        setCurrentMovie({ id: -1 });
+      }
+      else {
+        setCurrentMovie(data);
+      }
     } catch (err) {
       console.error('Error fetching current movie:', err);
     }
@@ -294,8 +398,7 @@ const Session = () => {
 
   const fetchMovieDetails = async (movieId) => {
     try {
-      const response = await fetchWithTokenRefresh(`/api/movies/${movieId}/detailed`);
-      const data = await response.json();
+      const data = await fetchWithTokenRefresh(`/api/movies/${movieId}/detailed`);
       setShowDetails(data);
     } catch (err) {
       console.error('Error fetching movie details:', err);
@@ -305,10 +408,9 @@ const Session = () => {
   const fetchLikedMovies = async (reset = false) => {
     try {
       const newOffset = reset ? 0 : offset;
-      const response = await fetchWithTokenRefresh(
+      const data = await fetchWithTokenRefresh(
         `/api/movies/session/?limit=${limit}&offset=${newOffset}`
       );
-      const data = await response.json();
       
       setHasMore(data.length === limit);
       
@@ -326,15 +428,22 @@ const Session = () => {
 
   const handleMovieAction = async (movieId, isLiked) => {
     try {
-      const response = await fetchWithTokenRefresh('/api/movies/session/', {
+      const totalTime = Math.floor(accumulatedTimeRef.current + 
+                       (Date.now() - startTimeRef.current) / 1000);
+      setTimeSwiped(totalTime);
+      
+      accumulatedTimeRef.current = 0;
+      startTimeRef.current = Date.now();
+      setTimer(0);
+
+      const data = await fetchWithTokenRefresh('/api/movies/session/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ movie_id: movieId, is_liked: isLiked }),
+        body: JSON.stringify({ movie_id: movieId, is_liked: isLiked, time_swiped: timeSwiped }),
       });
       
-      const data = await response.json();
       setCurrentMovieId(data.movie_id);
       fetchCurrentMovie(data.movie_id);
       if (isLiked) {
@@ -354,7 +463,7 @@ const Session = () => {
 
   const activateSession = async () => {
     try {
-      const response = await fetchWithTokenRefresh('/api/sessions/status', {
+      const data = await fetchWithTokenRefresh('/api/sessions/status', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -362,7 +471,6 @@ const Session = () => {
         body: JSON.stringify({ status: 'ACTIVE' }),
       });
       
-      const data = await response.json();
       if (data.movie_id) {
         setCurrentMovieId(data.movie_id);
         fetchCurrentMovie(data.movie_id);
@@ -407,12 +515,18 @@ const Session = () => {
           <AnimatePresence>
             {currentMovie && !showCountdown && (
               <>
-                <SwipeableMovieCard 
-                  movie={currentMovie} 
-                  onClick={() => setShowDetails(currentMovie)}
-                  onSwipe={handleSwipe}
-                  className="block1"
-                />
+                {currentMovie.id !== -1 ? (
+                  <SwipeableMovieCard 
+                    movie={currentMovie} 
+                    onClick={() => setShowDetails(currentMovie)}
+                    onSwipe={handleSwipe}
+                    className="block1"
+                  />
+                ) : (
+                  <div className="empty-movie-card">
+                    Пробная сессия закончена
+                  </div>
+                )}
               </>
             )}
           </AnimatePresence>
@@ -420,10 +534,15 @@ const Session = () => {
 
         {!showCountdown && (
           <>
-            <div className="action-buttons">
-              <XControlButton onClick={() => handleMovieAction(currentMovie.id, false)} />
-              <CheckControlButton onClick={() => handleMovieAction(currentMovie.id, true)} />
-            </div>
+            {currentMovieId !== -1 ? (
+              <div className="action-buttons">
+                <XControlButton onClick={() => handleMovieAction(currentMovie.id, false)} />
+                <CheckControlButton onClick={() => handleMovieAction(currentMovie.id, true)} />
+              </div>
+            ) : (
+              <div className='empty-space'></div>
+            )}
+            
 
             <div className="session-controls">
               <FinishSelectionButton 

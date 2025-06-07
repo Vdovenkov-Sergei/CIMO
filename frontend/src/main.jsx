@@ -6,7 +6,5 @@ import '@/styles/_variables.scss'
 import './pages/Login/Login.scss'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
     <App />
-  </React.StrictMode>,
 );

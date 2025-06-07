@@ -1,0 +1,31 @@
+@import '../../styles/variables';
+
+.waiting-screen-page {
+    height: 100vh;
+    text-align: center;
+    color: $text-color;
+    font-family: $primary-font;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-image: url('src/assets/images/background.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+  
+    &-message {
+      max-width: 600px;
+      padding: 50px;
+      background: $modal-color;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  
+      h1 {
+        font-size: 32px;
+        margin-bottom: 20px;
+        color: $text-color;
+      }
+    }
+  }

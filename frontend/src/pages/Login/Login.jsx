@@ -66,8 +66,10 @@ const Login = () => {
       }
 
       setSuccessMessage('Вход выполнен успешно!');
-      if (redirectUrl && inviteId) {
+      if (redirectUrl === '/invite' && inviteId) {
         navigate(`${redirectUrl}?id=${inviteId}`);
+      } else if (redirectUrl === '/waitingScreen') {
+        navigate(`${redirectUrl}`);
       } else {
         setTimeout(() => navigate('/modeSelection'), 1500);
       }

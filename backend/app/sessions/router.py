@@ -39,7 +39,7 @@ async def create_session(data: SSessionCreate, user: User = Depends(get_current_
     if existing_session:
         logger.warning("User already in a session.", extra={"session_id": existing_session.id, "user_id": user.id})
         raise UserAlreadyInSessionException(user_id=user.id, session_id=str(existing_session.id))
-    session = await SessionDAO.add_session(user_id=user.id, is_pair=data.is_pair)
+    session = await SessionDAO.add_session(user_id=user.id, is_pair=data.is_pair, is_onboarding=data.is_onboarding)
     return SSessionRead.model_validate(session)
 
 
@@ -95,7 +95,7 @@ async def change_session_status(
     new_status = data.status
     update_fields: dict[str, Any] = {"status": new_status}
 
-    if (session.status, new_status) == (SessionStatus.PREPARED, SessionStatus.ACTIVE):
+    if (session.status, new_status) in [(SessionStatus.PENDING, SessionStatus.ACTIVE), (SessionStatus.PREPARED, SessionStatus.ACTIVE)]:
         update_fields["started_at"] = datetime.now(UTC)
         logger.info("User started session.", extra={"time": update_fields["started_at"], "user_id": session.user_id})
     elif (session.status, new_status) == (SessionStatus.REVIEW, SessionStatus.COMPLETED):

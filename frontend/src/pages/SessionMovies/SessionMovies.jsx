@@ -17,7 +17,7 @@ const Notification = ({ movie }) => {
         className="notification-poster" 
       />
       <div className="notification-text">
-        🎉 Совпадение найдено! Фильм: {movie.name}
+        <span className='notification-match'>Совпадение найдено!</span>🎉 <p>Фильм: <span className='notification-movie-info'>{movie.name} ({movie.release_year})</span></p>
       </div>
     </div>
   );
@@ -41,6 +41,7 @@ const SessionMovies = () => {
   const [latestMessage, setLatestMessage] = useState(null);
   const ws = useRef(null);
   const sessionId = location.state?.sessionId;
+  const [queue, setQueue] = useState([]);
   
   useEffect(() => {
     if (!sessionId) {
@@ -81,23 +82,41 @@ const SessionMovies = () => {
     };
   }, []);
 
+  const enqueue = (item) => {
+    setQueue(prevQueue => [...prevQueue, item]);
+  }
+
+  const dequeue = () => {
+    if (queue.length > 0) {
+      setQueue(prevQueue => prevQueue.slice(1));
+    }
+  }
+
   useEffect(() => {
     if (latestMessage) {
-      console.log('🔔 New message from WebSocket in /session:', latestMessage);
-  
+      console.log('🔔 New WebSocket message:', latestMessage);
+
       if (latestMessage.movie) {
-        setNotificationMovie(latestMessage.movie);
-        setShowNotification(true);
-        fetchMovies(0);
-          
-        const timer = setTimeout(() => {
-          setShowNotification(false);
-        }, 3000);
-          
-        return () => clearTimeout(timer);
+        enqueue(latestMessage.movie);
       }
     }
   }, [latestMessage]);
+
+  useEffect(() => {
+    if (queue.length > 0) {
+      const item = queue[0];
+      setNotificationMovie(item);
+      setShowNotification(true);
+      fetchMovies(0);
+
+      const timer = setTimeout(() => {
+        setShowNotification(false);
+        dequeue();
+      }, 5000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [queue]);
 
   const refreshToken = async () => {
     try {
@@ -307,7 +326,7 @@ const SessionMovies = () => {
     <div className="session-movies-page">
       <Header />
 
-      <main className="movies-main container">
+      <main className="movies-main">
         <section className="movies-section">
           <h2 className="movies-section__title">Отложенные фильмы</h2>
           {movies.length > 0 ? (

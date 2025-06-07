@@ -63,7 +63,7 @@ const Nickname = () => {
       }
 
       setSuccessMessage('Никнейм успешно сохранен!');
-      setTimeout(() => navigate('/'), 2000);
+      setTimeout(() => navigate('/?redirect=/waitingScreen'), 2000);
       
     } catch (err) {
       console.error('Ошибка сохранения никнейма:', err);
@@ -73,7 +73,7 @@ const Nickname = () => {
   };
 
   const handleSkip = () => {
-    navigate('/');
+    navigate('/?redirect=/waitingScreen');
   };
 
   return (

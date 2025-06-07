@@ -7,6 +7,7 @@ import Header from '../../components/Header/Header';
 import SingleModeCard from '../../components/SingleModeCard';
 import PairModeCard from '../../components/PairModeCard';
 import ActiveSession from '../../components/ActiveSession/ActiveSession';
+import Onboarding from '../../components/Onboarding';
 
 const ModeSelection = () => {
   const navigate = useNavigate();
@@ -72,7 +73,7 @@ const ModeSelection = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ is_pair: false }),
+        body: JSON.stringify({ is_pair: false, is_onboarding: false }),
       });
       showModalCallback();
     } catch (err) {
@@ -97,11 +98,11 @@ const ModeSelection = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ status: 'PREPARED' }),
+        body: JSON.stringify({ status: 'ACTIVE' }),
       });
       
       const data = await response.json();
-      navigate('/session', { state: { session_id: sessionId, is_pair: false, movie_id: data.movie_id } });
+      navigate('/session', { state: { is_pair: false, movie_id: data.movie_id } });
     } catch (err) {
       console.error('Error preparing session:', err);
     }

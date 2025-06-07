@@ -29,6 +29,20 @@
     perspective: 1000px;
   }
   
+  .empty-movie-card {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $additional-text-color;
+    background-color: rgb(255, 255, 255, 0.02);
+    font-size: 1.2rem;
+  }
+
   .movie-card {
     width: 100%;
     height: 100%;
@@ -75,6 +89,10 @@
     .swipe-indicator {
       display: none;
     }
+  }
+
+  .empty-space {
+    height: 50px;
   }
   
   .action-buttons {
@@ -439,7 +457,7 @@
 
 .push-notification {
   position: absolute;
-  left: -350px;
+  left: -50%;
   top: 20px;
   width: 400px;
   padding: 15px;
@@ -460,12 +478,21 @@
   border-radius: 4px;
 }
 
+.notification-match {
+  color: $success-color;
+}
+
+.notification-movie-info {
+  color: $link-color;
+  font-size: 16px;
+}
+
 @keyframes slideIn {
-  from { left: -350px; }
+  from { left: -50%; }
   to { left: 20px; }
 }
 
 @keyframes slideOut {
   from { left: 20px; }
-  to { left: -350px; }
+  to { left: -50%; }
 }

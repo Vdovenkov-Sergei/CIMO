@@ -14,6 +14,7 @@ const ChangeNickname = lazy(() => import('@/pages/ChangeNickname/ChangeNickname'
 const Session = lazy(() => import('@/pages/Session/Session'));
 const SessionMovies = lazy(() => import('@/pages/SessionMovies/SessionMovies'));
 const Invite = lazy(() => import('@/pages/Invite/Invite'));
+const WaitingScreen = lazy(() => import('@/pages/WaitingScreen/WaitingScreen'));
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
             <Route path="/session" element={<Session />} />
             <Route path="/sessionMovies" element={<SessionMovies />} />
             <Route path="/invite" element={<Invite />} />
+            <Route path="/waitingScreen" element={<WaitingScreen />} />
           </Routes>
         </Suspense>
       </main>

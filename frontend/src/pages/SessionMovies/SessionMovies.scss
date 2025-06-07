@@ -23,6 +23,7 @@ $primary-font: 'Inter', sans-serif;
   .movies-main {
     flex: 1;
     padding: 40px;
+    position: relative;
   }
 
   .movies-section {
@@ -335,7 +336,7 @@ $primary-font: 'Inter', sans-serif;
 
 .push-notification {
   position: absolute;
-  left: -350px;
+  left: -50%;
   top: 20px;
   width: 400px;
   padding: 15px;
@@ -356,12 +357,21 @@ $primary-font: 'Inter', sans-serif;
   border-radius: 4px;
 }
 
+.notification-match {
+  color: $success-color;
+}
+
+.notification-movie-info {
+  color: $link-color;
+  font-size: 16px;
+}
+
 @keyframes slideIn {
-  from { left: -350px; }
+  from { left: -50%; }
   to { left: 20px; }
 }
 
 @keyframes slideOut {
   from { left: 20px; }
-  to { left: -350px; }
+  to { left: -50%; }
 }
