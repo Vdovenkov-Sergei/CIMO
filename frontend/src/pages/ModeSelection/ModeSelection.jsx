@@ -8,6 +8,7 @@ import SingleModeCard from '../../components/SingleModeCard';
 import PairModeCard from '../../components/PairModeCard';
 import ActiveSession from '../../components/ActiveSession/ActiveSession';
 import Onboarding from '../../components/Onboarding';
+import FAQComponent from '../../components/Q&A/Q&A';
 
 const ModeSelection = () => {
   const navigate = useNavigate();
@@ -198,6 +199,8 @@ const ModeSelection = () => {
             copyIconUrl={copyIconUrl}
           />
         </div>
+
+        <FAQComponent />
       </main>
 
       <Footer />
