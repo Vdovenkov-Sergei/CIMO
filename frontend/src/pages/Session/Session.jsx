@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import Tippy from '@tippyjs/react';
+import 'tippy.js/dist/tippy.css';
 import './Session.scss';
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
@@ -40,15 +42,11 @@ const CaretUp = () => (
 );
 
 const STORAGE_KEYS = {
-  CURRENT_MOVIE: 'session_current_movie',
-  LIKED_MOVIES: 'session_liked_movies',
   SHOW_COUNTDOWN: 'session_show_countdown',
-  CURRENT_MOVIE_ID: 'session_current_movie_id',
   SHOW_LIKED_MOVIES: 'session_show_liked_movies',
-  OFFSET: 'session_offset',
-  HAS_MORE: 'session_has_more',
   TIMER: 'session_timer',
-  TIME_SWIPED: 'session_time_swiped'
+  TIME_SWIPED: 'session_time_swiped',
+  STEP: 'step'
 };
 
 const Session = () => {
@@ -75,20 +73,29 @@ const Session = () => {
   const startTimeRef = useRef(null);
   const accumulatedTimeRef = useRef(0);
   const [queue, setQueue] = useState([]);
+  const [step, setStep] = useState(0);
+  const [isOnboarding, setIsOnboarding] = useState(false);
+
+  const steps = [
+    { id: 0, content: 'Нажмите на карточку, чтобы посмотреть подробную информацию о фильме. Свайпайте влево или вправо, чтобы выбрать.' },
+    { id: 1, content: 'Также можно использовать кнопки для выбора.' },
+    { id: 2, content: 'Здесь отображаются фильмы, которые вам понравились.' },
+    { id: 3, content: 'Нажмите, чтобы завершить подбор и перейти к списку выбранных фильмов.' }
+  ];
+
+  const handleNext = () => {
+    setStep(prev => prev + 1);
+  };
 
   // Сохранение состояния
   const saveState = () => {
     try {
       const stateToSave = {
-        [STORAGE_KEYS.CURRENT_MOVIE]: currentMovie,
-        [STORAGE_KEYS.LIKED_MOVIES]: likedMovies,
         [STORAGE_KEYS.SHOW_COUNTDOWN]: showCountdown,
-        [STORAGE_KEYS.CURRENT_MOVIE_ID]: currentMovieId,
         [STORAGE_KEYS.SHOW_LIKED_MOVIES]: showLikedMovies,
-        [STORAGE_KEYS.OFFSET]: offset,
-        [STORAGE_KEYS.HAS_MORE]: hasMore,
         [STORAGE_KEYS.TIMER]: timer,
-        [STORAGE_KEYS.TIME_SWIPED]: timeSwiped
+        [STORAGE_KEYS.TIME_SWIPED]: timeSwiped,
+        [STORAGE_KEYS.STEP]: step
       };
 
       Object.entries(stateToSave).forEach(([key, value]) => {
@@ -104,25 +111,18 @@ const Session = () => {
   // Восстановление состояния
   const loadState = () => {
     try {
-      const storedCurrentMovie = localStorage.getItem(STORAGE_KEYS.CURRENT_MOVIE);
-      const storedLikedMovies = localStorage.getItem(STORAGE_KEYS.LIKED_MOVIES);
       const storedShowCountdown = localStorage.getItem(STORAGE_KEYS.SHOW_COUNTDOWN);
-      const storedCurrentMovieId = localStorage.getItem(STORAGE_KEYS.CURRENT_MOVIE_ID);
       const storedShowLikedMovies = localStorage.getItem(STORAGE_KEYS.SHOW_LIKED_MOVIES);
-      const storedOffset = localStorage.getItem(STORAGE_KEYS.OFFSET);
-      const storedHasMore = localStorage.getItem(STORAGE_KEYS.HAS_MORE);
       const storedTimer = localStorage.getItem(STORAGE_KEYS.TIMER);
       const storedTimeSwiped = localStorage.getItem(STORAGE_KEYS.TIME_SWIPED);
+      const storedStep = localStorage.getItem(STORAGE_KEYS.STEP);
 
-      if (storedCurrentMovie) setCurrentMovie(JSON.parse(storedCurrentMovie));
-      if (storedLikedMovies) setLikedMovies(JSON.parse(storedLikedMovies));
       if (storedShowCountdown) setShowCountdown(JSON.parse(storedShowCountdown));
-      if (storedCurrentMovieId) setCurrentMovieId(JSON.parse(storedCurrentMovieId));
       if (storedShowLikedMovies) setShowLikedMovies(JSON.parse(storedShowLikedMovies));
-      if (storedOffset) setOffset(JSON.parse(storedOffset));
-      if (storedHasMore) setHasMore(JSON.parse(storedHasMore));
       if (storedTimer) setTimer(Number(JSON.parse(storedTimer)));
       if (storedTimeSwiped) setTimeSwiped(Number(JSON.parse(storedTimeSwiped)));
+      if (storedStep) setStep(Number(JSON.parse(storedStep)));
+      console.log(step);
     } catch (error) {
       console.error('Error loading state:', error);
     }
@@ -136,26 +136,6 @@ const Session = () => {
     localStorage.removeItem('session_accumulated_time');
     localStorage.removeItem('session_start_time');
   };
-
-  useEffect(() => {
-    loadState();
-    checkSessionStatus();
-    
-
-    if (location.state?.movie_id) {
-      setCurrentMovieId(location.state.movie_id);
-      fetchCurrentMovie(location.state.movie_id);
-    }
-    fetchLikedMovies(true);
-
-    return () => {
-      clearSavedState();
-    };
-  }, []);
-
-  useEffect(() => {
-    saveState();
-  }, [currentMovie, likedMovies, showCountdown, currentMovieId, showLikedMovies, offset, hasMore, timer, timeSwiped]);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -302,16 +282,19 @@ const Session = () => {
       fetchCurrentMovie(location.state.movie_id);
     }
     fetchLikedMovies(true);
-  
+    setIsOnboarding(location.state.is_onboarding);
     startTimer(timer);
   
     return () => {
-      clearSavedState();
       if (timerRef.current) {
         clearInterval(timerRef.current);
       }
     };
   }, []);
+
+  useEffect(() => {
+    saveState();
+  }, [showCountdown, showLikedMovies, timer, timeSwiped, step]);
 
   const refreshToken = async () => {
     try {
@@ -356,6 +339,8 @@ const Session = () => {
       const data = await fetchWithTokenRefresh('/api/sessions/me');
       if (data.status === 'PREPARED') {
         setShowCountdown(true);
+      } else {
+        activateSession();
       }
     } catch (err) {
       console.error('Error checking session status:', err);
@@ -367,6 +352,7 @@ const Session = () => {
     try {
       localStorage.removeItem('session_accumulated_time');
       localStorage.removeItem('session_start_time');
+      clearSavedState();
       await fetchWithTokenRefresh('/api/sessions/status', {
         method: 'PATCH',
         headers: {
@@ -374,7 +360,7 @@ const Session = () => {
         },
         body: JSON.stringify({ status: 'REVIEW' }),
       });
-      navigate('/sessionMovies', { state: { sessionId: sessionId } });
+      navigate('/sessionMovies', { state: { sessionId: sessionId, isOnboarding: isOnboarding } });
     } catch (err) {
       console.error('Error finishing session:', err);
     } finally {
@@ -492,6 +478,17 @@ const Session = () => {
     }
   }, [showDetails?.id]);
 
+  useEffect(() => {
+    if (step >= 0 && step < steps.length) {
+      const timer = setTimeout(() => {
+        setStep(prev => prev + 1);
+      }, 180000);
+  
+      return () => clearTimeout(timer);
+    }
+  }, [step]);
+  
+
   return (
     <div className="session-container">
       <Header />
@@ -511,46 +508,89 @@ const Session = () => {
           session_id={location.state?.session_id}
         />
 
-        <div className="movie-card-container">
-          <AnimatePresence>
-            {currentMovie && !showCountdown && (
-              <>
-                {currentMovie.id !== -1 ? (
-                  <SwipeableMovieCard 
-                    movie={currentMovie} 
-                    onClick={() => setShowDetails(currentMovie)}
-                    onSwipe={handleSwipe}
-                    className="block1"
-                  />
-                ) : (
-                  <div className="empty-movie-card">
-                    Пробная сессия закончена
-                  </div>
-                )}
-              </>
-            )}
-          </AnimatePresence>
-        </div>
+        <Tippy
+          zIndex={999}
+          content={
+            <div className='tooltip'>
+              <p className='tooltip-info'>{steps[0].content}</p>
+              <button className='tooltip-button' onClick={handleNext}>Далее</button>
+            </div>
+          }
+          interactive={true}
+          visible={step === 0 && isOnboarding}
+          placement="left"
+        >
+          <div className="movie-card-container">
+            <AnimatePresence>
+              {currentMovie && !showCountdown && (
+                <>
+                  {currentMovie.id !== -1 ? (
+                      <SwipeableMovieCard 
+                        movie={currentMovie} 
+                        onClick={() => setShowDetails(currentMovie)}
+                        onSwipe={handleSwipe}
+                        className="block1"
+                      />
+
+                  ) : (
+                    <div className="empty-movie-card">
+                      Пробная сессия закончена
+                    </div>
+                  )}
+                </>
+              )}
+            </AnimatePresence>
+          </div>
+        </Tippy>
+
+        
 
         {!showCountdown && (
           <>
-            {currentMovieId !== -1 ? (
-              <div className="action-buttons">
-                <XControlButton onClick={() => handleMovieAction(currentMovie.id, false)} />
-                <CheckControlButton onClick={() => handleMovieAction(currentMovie.id, true)} />
-              </div>
-            ) : (
-              <div className='empty-space'></div>
-            )}
+            <Tippy
+              zIndex={999}
+              content={
+                <div className='tooltip'>
+                  <p className='tooltip-info'>{steps[1].content}</p>
+                  <button className='tooltip-button' onClick={handleNext}>Далее</button>
+                </div>
+              }
+              interactive={true}
+              visible={step === 1 && isOnboarding}
+              placement="right"
+            >
+              {currentMovieId !== -1 ? (
+                <div className="action-buttons">
+                  <XControlButton onClick={() => handleMovieAction(currentMovie.id, false)} />
+                  <CheckControlButton onClick={() => handleMovieAction(currentMovie.id, true)} />
+                </div>
+              ) : (
+                <div className='empty-space'></div>
+              )}
+            </Tippy>
+
             
-
-            <div className="session-controls">
-              <FinishSelectionButton 
-                onClick={finishSession} 
-                disabled={isLoading}
-              />
-            </div>
-
+            
+            <Tippy
+              zIndex={999}
+              content={
+                <div className='tooltip'>
+                  <p className='tooltip-info'>{steps[3].content}</p>
+                  <button className='tooltip-button' onClick={() => setStep(-1)}>Далее</button>
+                </div>
+              }
+              interactive={true}
+              visible={step === 3 && isOnboarding && currentMovieId === -1}
+              placement="top"
+            >
+              <div className="session-controls">
+                <FinishSelectionButton 
+                  onClick={finishSession} 
+                  disabled={isLoading}
+                />
+              </div>
+            </Tippy>
+            
             <div className="liked-movies">
               <div 
                 className="liked-movies-header"
@@ -563,7 +603,19 @@ const Session = () => {
                 }}
               >
                 {showLikedMovies ? <CaretUp /> : <CaretDown />}
-                <h3 style={{ margin: 0 }}>Понравившиеся фильмы</h3>
+                <Tippy
+                  content={
+                    <div className='tooltip'>
+                      <p className='tooltip-info'>{steps[2].content}</p>
+                      <button className='tooltip-button' onClick={handleNext}>Далее</button>
+                    </div>
+                  }
+                  interactive={true}
+                  visible={step === 2 && isOnboarding}
+                  placement="top"
+                >
+                  <h3 style={{ margin: 0 }}>Понравившиеся фильмы</h3>
+                </Tippy>  
               </div>
               {showLikedMovies && (
                 likedMovies.length > 0 ? (
@@ -580,6 +632,7 @@ const Session = () => {
                 )
               )}
             </div>
+            
           </>
         )}
 

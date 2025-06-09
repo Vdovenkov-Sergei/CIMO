@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import Tippy from '@tippyjs/react';
+import 'tippy.js/dist/tippy.css';
 import './SessionMovies.scss';
 import WatchLaterScroll from '../../components/WatchLaterScroll';
 import FinishSessionButton from '../../components/FinishSessionButton';
@@ -42,12 +44,24 @@ const SessionMovies = () => {
   const ws = useRef(null);
   const sessionId = location.state?.sessionId;
   const [queue, setQueue] = useState([]);
+  const [step, setStep] = useState(0);
+  const isOnboarding = location.state.isOnboarding;
   
+  const steps = [
+    { id: 0, content: 'Удаляйте или откладывайте фильмы из списка понравившихся.', showed: false },
+    { id: 1, content: 'Поделитесь мнением — это помогает нам становиться лучше.', showed: false },
+    { id: 2, content: 'Нажмите, чтобы завершить текущую сессию.', showed: false }
+  ];
+
+  const handleNext = () => {
+    setStep(prev => prev + 1);
+  };
+
   useEffect(() => {
     if (!sessionId) {
       return;
     }
-
+    console.log(step);
     const protocol = import.meta.env.VITE_WS_PROTOCOL || 'ws';
     const host = import.meta.env.VITE_WS_HOST || 'localhost:8000';
     const wsUrl = `${protocol}://${host}/movies/session/ws/${sessionId}`;
@@ -322,13 +336,40 @@ const SessionMovies = () => {
     }
   };
 
+  useEffect(() => {
+    if (step >= 0 && step < steps.length) {
+      const timer = setTimeout(() => {
+        setStep(prev => prev + 1);
+      }, 180000);
+  
+      return () => clearTimeout(timer);
+    }
+  }, [step]);
+  
+
   return (
     <div className="session-movies-page">
       <Header />
 
       <main className="movies-main">
         <section className="movies-section">
-          <h2 className="movies-section__title">Отложенные фильмы</h2>
+          <div className='movies-section__title'>
+            <Tippy
+              zIndex={999}
+              content={
+                <div className='tooltip'>
+                  <p className='tooltip-info'>{steps[0].content}</p>
+                  <button className='tooltip-button' onClick={handleNext}>Далее</button>
+                </div>
+              }
+              visible={step === 0 && isOnboarding}
+              placement="bottom"
+              interactive={true}
+            >
+              <h3>Отложенные фильмы</h3>
+            </Tippy>
+          </div>
+
           {movies.length > 0 ? (
             <WatchLaterScroll 
               movies={movies} 
@@ -345,8 +386,35 @@ const SessionMovies = () => {
         </section>
 
         <div className="buttons">
-          <FinishSessionButton onClick={finishSession} />
-          <a href="https://forms.yandex.ru/u/681a215ad046880a127479a7/" className='feedback-btn' target='_blank'>Оставить обратную связь</a>
+          <Tippy
+            zIndex={999}
+            content={
+              <div className='tooltip'>
+                <p className='tooltip-info'>{steps[2].content}</p>
+                <button className='tooltip-button' onClick={() => setStep(-1)}>Готово</button>
+              </div>
+            }
+            visible={step === 2 && isOnboarding}
+            placement="right"
+            interactive={true}
+          >
+            <div><FinishSessionButton onClick={finishSession} /></div>
+          </Tippy>
+          <Tippy
+            zIndex={999}
+            content={
+              <div className='tooltip'>
+                <p className='tooltip-info'>{steps[1].content}</p>
+                <button className='tooltip-button' onClick={handleNext}>Далее</button>
+              </div>
+            }
+            visible={step === 1 && isOnboarding}
+            placement="left"
+            interactive={true}
+          >
+            <a href="https://forms.yandex.ru/u/681a215ad046880a127479a7/" className='feedback-btn' target='_blank'>Оставить отзыв</a>
+          </Tippy>
+          
         </div>
 
         {showNotification && (

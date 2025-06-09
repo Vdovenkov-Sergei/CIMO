@@ -103,7 +103,7 @@ const ModeSelection = () => {
       });
       
       const data = await response.json();
-      navigate('/session', { state: { is_pair: false, movie_id: data.movie_id } });
+      navigate('/session', { state: { is_pair: false, movie_id: data.movie_id, is_onboarding: false } });
     } catch (err) {
       console.error('Error preparing session:', err);
     }

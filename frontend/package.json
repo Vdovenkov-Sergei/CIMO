@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@popperjs/core": "^2.11.8",
+    "@tippyjs/react": "^4.2.6",
     "framer-motion": "^12.10.5",
     "prop-types": "^15.8.1",
     "react": "^19.1.0",
