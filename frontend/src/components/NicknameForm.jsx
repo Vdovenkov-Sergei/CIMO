@@ -18,7 +18,7 @@ const NicknameForm = ({
     if (backendError) return backendError;
     if (error) return error;
     if (successMessage) return successMessage;
-    return 'Никнейм должен быть уникальным';
+    return 'Никнейм должен быть уникальным.';
   };
 
   const getSubtitleClass = () => {
@@ -39,7 +39,7 @@ const NicknameForm = ({
         <div className="form__group">
           <Input
             type="text"
-            placeholder="Введите ваш никнейм"
+            placeholder="Никнейм"
             value={nickname}
             onChange={onNicknameChange}
             className="form__input"
@@ -54,7 +54,7 @@ const NicknameForm = ({
             className="form__button"
             disabled={isLoading || !nickname.trim()}
           >
-            {isLoading ? 'Сохранение...' : 'Сохранить'}
+            Сохранить
           </SubmitButton>
 
           {isSkippable && (

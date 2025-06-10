@@ -94,6 +94,7 @@ $primary-font: 'Inter', sans-serif;
     border-radius: 8px;
     transition: transform 0.3s, box-shadow 0.3s;
     min-width: 250px;
+    max-width: 250px;
 
     &:hover {
       transform: translateY(-5px);
@@ -246,6 +247,47 @@ $primary-font: 'Inter', sans-serif;
 // Адаптивность
 @media (max-width: 600px) {
   .my-movies-page {
+    .navigation {
+      font-size: 14px;
+    }
+    .movies-section__title {
+      font-size: 20px;
+    }
+    .movies-scroll-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+      padding: 0 20px;
+    }
+    .movie-card {
+      flex: 0 0 200px;
+      display: flex;
+      flex-direction: column;
+      border-radius: 8px;
+      transition: transform 0.3s, box-shadow 0.3s;
+  
+      &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+  
+      &__poster {
+        width: 100%;
+        height: 300px;
+        object-fit: cover;
+        cursor: pointer;
+        border-radius: 8px;
+      }
+  
+      &__title {
+        font-size: 16px;
+        margin: 15px;
+        text-align: center;
+        height: 50px;
+      }
+    }
+
     .movie-detail-overlay {
       position: fixed;
       top: 0;

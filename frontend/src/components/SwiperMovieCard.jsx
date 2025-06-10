@@ -90,7 +90,6 @@ const SwipeableMovieCard = ({ movie, onClick, onSwipe, className }) => {
             zIndex: 10,
           }}
         >
-          👍
         </motion.div>
         
         <motion.div 
@@ -110,7 +109,6 @@ const SwipeableMovieCard = ({ movie, onClick, onSwipe, className }) => {
             zIndex: 10,
           }}
         >
-          👎
         </motion.div>
       </motion.div>
     </motion.div>

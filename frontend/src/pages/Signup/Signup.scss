@@ -20,7 +20,7 @@ $primary-font: 'Inter', sans-serif;
   .main-content {
   display: flex;
   flex: 1;
-  padding: 40px;
+  padding: 40px 0;
   gap: 60px;
   align-items: center;
   justify-content: center;
@@ -54,7 +54,8 @@ $primary-font: 'Inter', sans-serif;
 
   // Форма авторизации
   .auth-form {
-  width: 400px;
+  width: 90%;
+  max-width: 400px;
   padding: 40px 20px;
   border-radius: 12px;
   display: flex;
@@ -152,7 +153,7 @@ $primary-font: 'Inter', sans-serif;
 
 
 // Малые экраны (мобильные устройства)
-@media (max-width: 576px) {
+@media (max-width: 600px) {
   .signup-page {
 
     .main-content {
@@ -160,7 +161,6 @@ $primary-font: 'Inter', sans-serif;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 20px;
       gap: 32px;
     }
 
@@ -174,8 +174,13 @@ $primary-font: 'Inter', sans-serif;
     }
 
     .auth-form {
-      width: 100%;
-      padding: 24px 16px;
+      width: 90%;
+      max-width: 400px;
+
+      &__title {
+        font-size: 20px;
+        font-weight: 500;
+      }
 
       .form__input {
         font-size: 13px;
@@ -189,18 +194,17 @@ $primary-font: 'Inter', sans-serif;
 }
 
 // Средние экраны (планшеты и узкие ноутбуки)
-@media (min-width: 577px) and (max-width: 1024px) {
+@media (min-width: 600px) and (max-width: 1024px) {
   .signup-page {
     .main-content {
       flex-direction: column;
       align-items: center;
-      padding: 32px;
       gap: 40px;
     }
 
     .onboarding,
     .auth-form {
-      width: 100%;
+      width: 90%;
       max-width: 400px;
     }
 

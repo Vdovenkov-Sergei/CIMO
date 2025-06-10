@@ -12,7 +12,6 @@ const Profile = () => {
     login: 'cinemood_user',
     email: 'cinemood.corp@gmail.com'
   });
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
   const refreshToken = async () => {
@@ -109,10 +108,6 @@ const Profile = () => {
     }
   };
 
-  if (isLoading) {
-    return <div className="profile-page">Загрузка...</div>;
-  }
-
   if (error) {
     return <div className="profile-page">Ошибка: {error}</div>;
   }
@@ -121,12 +116,7 @@ const Profile = () => {
     <div className="profile-page">
       <Header />
 
-      <main className="profile-main container">
-        <div className="navigation">
-          <Link to='/modeSelection' className="navigation__link">Главная страница</Link>
-          <span className="delimeter">-</span>
-          <Link to='/Profile' className="navigation__link">Профиль</Link>
-        </div>
+      <main className="profile-main">
 
         <ProfileHeader user={user} />
 

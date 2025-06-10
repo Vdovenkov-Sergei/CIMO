@@ -26,7 +26,7 @@ const VerificationCodeForm = ({
     if (backendError) return backendError;
     if (error) return error;
     if (successMessage) return successMessage;
-    return `На ${email} отправлен код подтверждения`;
+    return `На ${email} отправлен код`;
   };
 
   const getSubtitleClass = () => {
@@ -38,7 +38,7 @@ const VerificationCodeForm = ({
 
   return (
     <section className="auth-form">
-      <h2 className="auth-form__title">Введите код верификации</h2>
+      <h2 className="auth-form__title">Введите код подтверждения</h2>
       <p className={getSubtitleClass()}>
         {getSubtitleText()}
       </p>
@@ -60,7 +60,7 @@ const VerificationCodeForm = ({
           className="form__button"
           disabled={isLoading || code.length !== 6}
         >
-          {isLoading ? 'Проверка...' : 'Далее'}
+          Далее
         </SubmitButton>
 
         <SecondaryButton

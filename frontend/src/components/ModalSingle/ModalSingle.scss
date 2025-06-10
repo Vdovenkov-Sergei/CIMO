@@ -23,6 +23,11 @@
       flex-direction: column;
       justify-content: center;
       gap: 10px;
+
+      .modal__title {
+        font-size: 18px;
+        font-weight: 500;
+      }
     }
     
     .modal__buttons {
@@ -71,12 +76,11 @@
   
     @media (max-width: 600px) {
       .modal__content {
-        padding: 16px;
-        width: 95%;
+        width: 90%;
       }
     
       .modal__buttons {
-        flex-direction: column;
+        flex-direction: column-reverse;
         gap: 10px;
     
         &-cancel, &-start {

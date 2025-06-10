@@ -100,12 +100,6 @@ const ChangeNickname = () => {
       return;
     }
 
-    if (user.login === newNickname.trim()) {
-      setBackendError('Никнейм совпадает с текущим');
-      setSuccessMessage('');
-      return;
-    }
-
     setIsLoading(true);
     setBackendError('');
     setSuccessMessage('');
@@ -124,7 +118,7 @@ const ChangeNickname = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        const errorMessage = data.detail || data.message || JSON.stringify(data) || 'Ошибка обновления никнейма';
+        const errorMessage = data.detail || data.message || JSON.stringify(data) || 'Ошибка обновления никнейма.';
         setBackendError(errorMessage);
         return;
       }
@@ -133,28 +127,17 @@ const ChangeNickname = () => {
       setSuccessMessage('Никнейм успешно изменен!');
     } catch (err) {
       console.error('Ошибка:', err);
-      setBackendError("Никнейм уже занят");
+      setBackendError("Никнейм занят.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (isLoading) {
-    return <div className="change-nickname-page">Загрузка...</div>;
-  }
-
   return (
     <div className="change-nickname-page">
       <Header />
 
-      <main className="profile-main-nick container">
-        <div className="navigation">
-          <Link to='/modeSelection' className="navigation__link">Главная страница</Link>
-          <span className="delimeter">-</span>
-          <Link to='/Profile' className="navigation__link">Профиль</Link>
-          <span className="delimeter">-</span>
-          <Link to='/changeNickname' className="navigation__link">Изменить никнейм</Link>
-        </div>
+      <main className="profile-main-nick">
         
         <ProfileAvatar login={user.login} />
 

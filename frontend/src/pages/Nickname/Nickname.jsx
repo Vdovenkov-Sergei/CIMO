@@ -15,11 +15,6 @@ import NicknameForm from '../../components/NicknameForm';
 const Nickname = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const onboardingImages = [
-    { id: 1, src: onboarding1, alt: 'Демонстрация функционала 1' },
-    { id: 2, src: onboarding2, alt: 'Демонстрация функционала 2' },
-    { id: 3, src: onboarding3, alt: 'Демонстрация функционала 3' },
-  ];
 
   const user_id = location.state?.user_id || '';
   const [nickname, setNickname] = useState('');
@@ -57,7 +52,7 @@ const Nickname = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        const errorMessage = data.detail || data.message || 'Ошибка сохранения никнейма';
+        const errorMessage = data.detail || data.message || 'Ошибка сохранения никнейма.';
         setBackendError(errorMessage);
         throw new Error(errorMessage);
       }
@@ -80,7 +75,7 @@ const Nickname = () => {
     <div className="nickname-page">
       <HeaderReg className="header" />
 
-      <main className="main-content container">
+      <main className="main-content">
 
         <NicknameForm
           nickname={nickname}

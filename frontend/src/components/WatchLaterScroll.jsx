@@ -11,7 +11,7 @@ const WatchLaterScroll = ({ movies, onToggleWatchLater, onWatch, onDelete, onCar
     const container = scrollRef.current;
     if (!container) return;
 
-    const scrollAmount = 300;
+    const scrollAmount = 150;
     const newScrollLeft = direction === 'left' 
       ? container.scrollLeft - scrollAmount 
       : container.scrollLeft + scrollAmount;

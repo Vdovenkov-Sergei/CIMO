@@ -41,12 +41,12 @@ const ForgotPassword = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        const errorMessage = data.detail || data.message || 'Ошибка отправки письма';
+        const errorMessage = data.detail || data.message || 'Ошибка отправки письма.';
         setBackendError(errorMessage);
         throw new Error(errorMessage);
       }
 
-      setSuccessMessage('Письмо отправлено! Проверьте вашу почту');
+      setSuccessMessage('Письмо отправлено! Проверьте почту.');
       
     } catch (err) {
       console.error('Ошибка восстановления пароля:', err);
@@ -59,7 +59,7 @@ const ForgotPassword = () => {
     <div className="forgot-password-page">
       <HeaderReg className="header" />
 
-      <main className="main-content container">
+      <main className="main-content">
         <PasswordRecoveryForm
           email={email}
           onEmailChange={(e) => {

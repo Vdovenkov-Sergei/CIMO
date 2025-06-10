@@ -1,16 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 @import '../../styles/variables';
+@import '../../styles/global';
 
 .footer {
     padding: 40px;
     text-align: center;
     
-    .footer-title {
+    .footer__title {
       font-size: 18px;
       margin-bottom: 12px;
     }
     
-    .footer-email {
+    .footer__email {
       color: $link-color;
       text-decoration: none;
       
@@ -25,11 +26,11 @@
     .footer {
         padding: 20px;
   
-        .footer-title {
+        .footer__title {
           font-size: 16px;
         }
   
-        .footer-email {
+        .footer__email {
           font-size: 14px;
         }
     }

@@ -140,15 +140,48 @@ $primary-font: 'Inter', sans-serif;
   .profile-page {
     .profile-main {
       padding: 20px;
+
+      .profile-header {
+        .profile-avatar {
+          width: 80px;
+          height: 80px;
+        }
+  
+        .profile-login {
+          font-size: 20px;
+        }
+
+        &__link {
+          font-size: 14px;
+        }
+      }
+
+      .profile-section {
+        padding: 20px;
+        margin: 20px;
+
+        &__title {
+          font-size: 16px;
+          font-weight: 500;
+        }
+
+        .profile-info {
+          font-size: 14px;
+        }
+      }
+    
+      .profile-nav__link {
+        padding: 15px;
+
+        .profile-nav__title {
+          font-weight: 500;
+          font-size: 16px;
+        }
+        
+      }
     }
   
-    .profile-section {
-      padding: 20px;
-    }
-  
-    .profile-nav__link {
-      padding: 15px;
-    }
+    
   }
   
 }

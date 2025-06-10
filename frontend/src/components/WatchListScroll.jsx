@@ -12,7 +12,7 @@ const WatchListScroll = ({ movies, onWatch, onDelete, loadMore, hasMore, onCardC
     const container = scrollRef.current;
     if (!container) return;
 
-    const scrollAmount = 300; // Можно настроить под ваши нужды
+    const scrollAmount = 150;
     const newScrollLeft = direction === 'left' 
       ? container.scrollLeft - scrollAmount 
       : container.scrollLeft + scrollAmount;
@@ -22,7 +22,6 @@ const WatchListScroll = ({ movies, onWatch, onDelete, loadMore, hasMore, onCardC
       behavior: 'smooth'
     });
 
-    // Проверяем, нужно ли загрузить больше элементов при прокрутке вправо
     if (direction === 'right' && 
         newScrollLeft + container.clientWidth >= container.scrollWidth - 100 &&
         hasMore && 

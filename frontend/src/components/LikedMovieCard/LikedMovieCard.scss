@@ -16,3 +16,11 @@
     box-shadow: 0 0 15px 8px rgba(76, 175, 80, 1);
   }
 }
+
+@media (max-width: 600px) {
+  .liked-movie {
+    &.matched {
+      box-shadow: 0 0 10px 8px rgba(76, 175, 80, 1);
+    }
+  }
+}

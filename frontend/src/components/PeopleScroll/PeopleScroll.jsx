@@ -33,7 +33,7 @@ const PeopleScroll = ({ people, hasMore, isLoading, onLoadMore }) => {
     const container = scrollRef.current;
     if (!container) return;
 
-    const scrollAmount = 400;
+    const scrollAmount = 150;
     const newScrollLeft = direction === 'left' 
       ? container.scrollLeft - scrollAmount 
       : container.scrollLeft + scrollAmount;

@@ -16,6 +16,7 @@
     background-attachment: fixed;
   
     .invite-message {
+      display: none;
       max-width: 600px;
       padding: 50px;
       background: $modal-color;
@@ -34,3 +35,4 @@
       }
     }
   }
+

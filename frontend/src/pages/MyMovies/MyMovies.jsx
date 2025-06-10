@@ -306,13 +306,6 @@ const MyMovies = () => {
       <Header />
 
       <main className="movies-main">
-        <div className="navigation">
-          <Link to='/modeSelection' className="navigation__link">Главная страница</Link>
-          <span className="delimeter">-</span>
-          <Link to='/Profile' className="navigation__link">Профиль</Link>
-          <span className="delimeter">-</span>
-          <Link to='/myMovies' className="navigation__link">Мои фильмы</Link>
-        </div>
 
         {error && <div className="error-message">{error}</div>}
 

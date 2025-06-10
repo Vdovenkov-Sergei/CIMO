@@ -13,6 +13,7 @@ import CheckControlButton from '../../components/CheckControlButton';
 import LikedMoviesScroll from '../../components/LikedMoviesScroll';
 import MovieDetailsModal from '../../components/MovieDetailsModal/MovieDetailsModal';
 import CountdownModal from '../../components/CountdownModal/CountdownModal';
+import { placements } from '@popperjs/core';
 
 const Notification = ({ movie }) => {
   return (
@@ -518,7 +519,7 @@ const Session = () => {
           }
           interactive={true}
           visible={step === 0 && isOnboarding}
-          placement="left"
+          placement={window.innerWidth < 1200 ? "bottom" : "left"}
         >
           <div className="movie-card-container">
             <AnimatePresence>
@@ -557,7 +558,7 @@ const Session = () => {
               }
               interactive={true}
               visible={step === 1 && isOnboarding}
-              placement="right"
+              placement={window.innerWidth < 900 ? "top" : "right"}
             >
               {currentMovieId !== -1 ? (
                 <div className="action-buttons">
@@ -585,7 +586,7 @@ const Session = () => {
             >
               <div className="session-controls">
                 <FinishSelectionButton 
-                  onClick={finishSession} 
+                  onClick={finishSession}
                   disabled={isLoading}
                 />
               </div>

@@ -17,15 +17,13 @@ const RegisterForm = ({
   successMessage = '',
   buttonText = 'Далее'
 }) => {
-  // Определяем текст подзаголовка в зависимости от состояния
   const getSubtitleText = () => {
     if (backendError) return backendError;
     if (error) return error;
     if (successMessage) return successMessage;
-    return "Пожалуйста, заполните форму";
+    return "Пожалуйста, заполните форму.";
   };
 
-  // Определяем класс для подзаголовка в зависимости от состояния
   const getSubtitleClass = () => {
     let className = "auth-form__subtitle";
     if (backendError || error) className += " auth-form__subtitle--error";
@@ -80,7 +78,7 @@ const RegisterForm = ({
           className="form__button"
           disabled={isLoading}
         >
-          {isLoading ? 'Регистрация...' : buttonText}
+          {buttonText}
         </SubmitButton>
 
         <p className="form__footer-text">

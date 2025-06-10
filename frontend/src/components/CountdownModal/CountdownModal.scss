@@ -19,11 +19,11 @@
       text-align: center;
       max-width: 500px;
       width: 90%;
-    }
-  
-    &__title {
-      margin-bottom: 1.5rem;
-      font-size: 1.5rem;
+
+      h3 {
+        font-size: 18px;
+        font-weight: 500;
+      }
     }
   
     &__leave-button {
@@ -40,4 +40,11 @@
         background-color: $red-button-hover;
       }
     }
+  }
+
+  @media (max-width: 600px) {
+    .countdown-modal__content {
+      width: 90%;
+    }
+  
   }

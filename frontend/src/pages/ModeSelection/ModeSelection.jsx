@@ -181,7 +181,7 @@ const ModeSelection = () => {
     <div className="mode-selection-page">
       <Header />
 
-      <main className="main-content-modes container">
+      <main className="main-content-modes">
         <h2 className="main-title">Хотите подобрать фильм?</h2>
         
         <div className="modes-container">

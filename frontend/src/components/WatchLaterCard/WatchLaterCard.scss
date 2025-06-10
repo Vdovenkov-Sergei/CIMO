@@ -91,3 +91,16 @@
       }
   }
   
+  @media (max-width: 600px) {
+    .watch-later-movie-card {
+      &__poster {
+          &.matched {
+              box-shadow: 0 0 10px 8px rgba(76, 175, 80, 1);
+          }
+      }
+
+      &__title {
+        font-size: 18px;
+    }
+  }
+}

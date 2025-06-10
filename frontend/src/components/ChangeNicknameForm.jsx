@@ -53,10 +53,9 @@ const ChangeNicknameForm = ({
         </div>
         <SubmitButton 
           type="submit" 
-          disabled={isLoading}
           className="form__button"
         >
-          {isLoading ? 'Сохранение...' : 'Сохранить'}
+          Сохранить
         </SubmitButton>
       </form>
     </div>

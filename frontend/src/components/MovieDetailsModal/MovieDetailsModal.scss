@@ -16,9 +16,9 @@
     .movie-detail {
       background-color: $modal-color;
       width: 90%;
-      width: 700px;
+      max-width: 700px;
       max-height: 90vh;
-      border-radius: 16px;
+      border-radius: 12px;
       padding: 30px;
       overflow-y: auto;
       position: relative;
@@ -71,6 +71,7 @@
         margin-top: 20px;
         line-height: 1.6;
         margin-bottom: 40px;
+        text-align: center;
       }
     
       .meta-value.wrap-text {
@@ -106,4 +107,20 @@
     }
 }
   
-  
+@media (max-width: 600px) {
+  .movie-detail-overlay {
+    .movie-detail {
+      background-color: $modal-color;
+      width: 90%;
+      max-width: 700px;
+      max-height: 90vh;
+      border-radius: 16px;
+      padding: 20px;
+
+      h2 {
+        margin-bottom: 20px;
+        text-align: center;
+      }
+    }
+  }
+}

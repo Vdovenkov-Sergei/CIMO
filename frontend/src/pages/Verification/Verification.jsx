@@ -13,11 +13,6 @@ import Footer from '../../components/Footer/Footer';
 import VerificationCodeForm from '../../components/VerificationCodeForm';
 
 const Verification = () => {
-  const onboardingImages = [
-    { id: 1, src: onboarding1, alt: 'Демонстрация функционала 1' },
-    { id: 2, src: onboarding2, alt: 'Демонстрация функционала 2' },
-    { id: 3, src: onboarding3, alt: 'Демонстрация функционала 3' },
-  ];
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -31,7 +26,6 @@ const Verification = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [countdown, setCountdown] = useState(120);
 
-  // Таймер для кнопки повторной отправки
   useEffect(() => {
     if (countdown > 0) {
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
@@ -39,7 +33,6 @@ const Verification = () => {
     }
   }, [countdown]);
 
-  // Проверка кода верификации
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -61,12 +54,12 @@ const Verification = () => {
 
       const data = await response.json();
       if (!response.ok) {
-        const errorMessage = data.detail || data.message || 'Неверный код подтверждения';
+        const errorMessage = data.detail || data.message || 'Неверный код подтверждения.';
         setBackendError(errorMessage);
         throw new Error(errorMessage);
       }
 
-      setSuccessMessage('Код подтверждён! Перенаправляем...');
+      setSuccessMessage('Код подтверждён!');
       setTimeout(() => {
         navigate('/nickname', { 
           state: { user_id: data.id }
@@ -80,7 +73,6 @@ const Verification = () => {
     }
   };
 
-  // Повторная отправка кода
   const handleResendCode = async () => {
     setIsResending(true);
     setError('');
@@ -98,13 +90,13 @@ const Verification = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        const errorMessage = data.detail || data.message || 'Ошибка при повторной отправке кода';
+        const errorMessage = data.detail || data.message || 'Ошибка при повторной отправке кода.';
         setBackendError(errorMessage);
         throw new Error(errorMessage);
       }
 
       setCountdown(120);
-      setSuccessMessage('Новый код отправлен на вашу почту');
+      setSuccessMessage('Новый код отправлен на почту.');
       setCode(''); // Очищаем поле ввода
       
     } catch (err) {
@@ -114,20 +106,11 @@ const Verification = () => {
     }
   };
 
-  if (!email) {
-    return (
-      <div className="error-container">
-        <p>Не получен email. Пожалуйста, пройдите регистрацию сначала.</p>
-        <button onClick={() => navigate('/signup')}>Вернуться к регистрации</button>
-      </div>
-    );
-  }
-
   return (
     <div className="verification-page">
       <HeaderReg className="header" />
 
-      <main className="main-content container">
+      <main className="main-content">
 
         <VerificationCodeForm
           email={email}

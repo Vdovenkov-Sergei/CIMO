@@ -94,9 +94,7 @@ const WaitingScreen = () => {
 
   return (
     <div className="waiting-screen-page">
-      <div className="waiting-screen-message">
-        <h1>Подготавливаем для Вас пробную сессию</h1>
-      </div>
+      <h1 className='message'>Подготавливаем для Вас пробную сессию</h1>
     </div>
   );
 };

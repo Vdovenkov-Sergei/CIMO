@@ -3,23 +3,13 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination } from 'swiper/modules';
 import './Login.scss';
-
-import onboarding1 from '@/assets/images/onboarding1.png';
-import onboarding2 from '@/assets/images/onboarding2.png';
-import onboarding3 from '@/assets/images/onboarding3.png';
 import AuthForm from '../../components/AuthForm';
 import HeaderReg from '../../components/HeaderReg/HeaderReg';
 import Footer from '../../components/Footer/Footer';
-import Onboarding from '../../components/Onboarding';
 
 const Login = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const onboardingImages = [
-    { id: 1, src: onboarding1, alt: 'Демонстрация функционала 1' },
-    { id: 2, src: onboarding2, alt: 'Демонстрация функционала 2' },
-    { id: 3, src: onboarding3, alt: 'Демонстрация функционала 3' },
-  ];
 
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
@@ -60,7 +50,7 @@ const Login = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        const errorMessage = data.detail || data.message || 'Ошибка авторизации';
+        const errorMessage = data.detail || data.message || 'Ошибка авторизации.';
         setBackendError(errorMessage);
         throw new Error(errorMessage);
       }
@@ -85,7 +75,7 @@ const Login = () => {
     <div className="login-page">
       <HeaderReg className="header" />
 
-      <main className="main-content container">
+      <main className="main-content">
 
         <AuthForm
           login={login}

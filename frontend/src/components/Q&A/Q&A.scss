@@ -2,46 +2,46 @@
 @import '../../styles/variables';
 
 .faqWrapper {
+    width: 90%;
+    max-width: 1020px;
     margin-top: 50px;
     display: flex;
     flex-direction: column;
+    box-sizing: border-box;
 }
 
 .faqContainer {
-    max-width: 1020px;
     margin: 0 auto;
     font-family: Inter, sans-serif;
 }
 
 .faqHeader {
-    font-size: 30px;
+    font-size: 32px;
     text-align: center;
     margin-bottom: 30px;
 }
   
 .faqBlock {
-    border-radius: 6px;
-    overflow: hidden;
+    border-radius: 12px;
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
 .blockHeader {
-    padding: 15px 20px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    transition: background-color 0.2s;
-    border-radius: 6px;
-    background-color: rgb(255, 255, 255, 0.05);
-
+    padding: 20px;
+    cursor: pointer;
+    border-radius: 12px;
+    font-size: 20px;
+    text-decoration: none;
+    transition: transform 0.3s, box-shadow 0.3s;
     &:hover {
-        background-color: rgb(255, 255, 255, 0.1);
-    }
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
 }
 
 .blockContent {
@@ -53,11 +53,12 @@
     border-radius: 6px;
 
     &.isOpen {
-        margin-bottom: 10px;
+        margin-bottom: 20px;
         padding: 20px;
         max-height: 1000px;
     }
 }
+
 
 .question {
     margin-bottom: 15px;
@@ -103,3 +104,42 @@
 .highlight {
     color: $link-color;
 }
+
+@media (max-width: 1024px) and (min-width: 600px) {
+    .faqWrapper {
+        min-width: 500px;
+        max-width: 560px;
+    }
+}
+
+@media (max-width: 600px) {
+
+    @media (hover: hover) {
+        .blockHeader:hover {
+            background-color: rgb(255, 255, 255, 0.05);
+        }
+    }
+
+    .faqWrapper {
+        min-width: 300px;
+        max-width: 450px;
+    }
+
+    .faqHeader {
+        font-size: 22px;
+    }
+
+    .blockHeader {
+        font-size: 18px;
+    }
+
+    .questionText {
+        font-size: 16px;
+    }
+
+    .answerText {
+        font-size: 14px;
+    }
+}
+
+

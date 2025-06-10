@@ -23,21 +23,9 @@ const ResetPassword = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!token) {
-      setError('Недействительная ссылка для сброса пароля');
-      setBackendError('');
-      return;
-    }
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Пароли не совпадают');
-      setBackendError('');
-      return;
-    }
-
-    if (formData.password.length < 8) {
-      setError('Пароль должен содержать минимум 8 символов');
+      setError('Пароли не совпадают.');
       setBackendError('');
       return;
     }
@@ -62,12 +50,12 @@ const ResetPassword = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        const errorMessage = data.detail || data.message || 'Ошибка сброса пароля';
+        const errorMessage = data.detail || data.message || 'Ошибка сброса пароля.';
         setBackendError(errorMessage);
         throw new Error(errorMessage);
       }
 
-      setSuccessMessage('Пароль успешно изменен! Перенаправляем...');
+      setSuccessMessage('Пароль успешно изменен!');
       setTimeout(() => navigate('/'), 2000);
       
     } catch (err) {
@@ -81,7 +69,7 @@ const ResetPassword = () => {
     <div className="create-password-page">
       <HeaderReg className="header" />
 
-      <main className="main-content container">
+      <main className="main-content">
         <PasswordResetForm
           password={formData.password}
           confirmPassword={formData.confirmPassword}

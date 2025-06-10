@@ -18,7 +18,7 @@ const AuthForm = ({
     if (backendError) return backendError;
     if (error) return error;
     if (successMessage) return successMessage;
-    return 'Пожалуйста, авторизуйтесь';
+    return 'Пожалуйста, авторизуйтесь.';
   };
 
   const getSubtitleClass = () => {
@@ -60,7 +60,7 @@ const AuthForm = ({
         </div>
 
         <SubmitButton disabled={isLoading}>
-          {isLoading ? 'Вход...' : 'Войти'}
+          Войти
         </SubmitButton>
 
         <p className="form__footer-text">

@@ -41,7 +41,7 @@ $primary-font: 'Inter', sans-serif;
     justify-content: center;
     gap: 40px;
     width: 100%;
-    max-width: 1200px;
+    max-width: 1020px;
   }
 
   .mode-card {
@@ -111,6 +111,7 @@ $primary-font: 'Inter', sans-serif;
       justify-content: center;
       gap: 20px;
       padding: 0 20px;
+      max-width: 600px;
     }
 
     .mode-card {
@@ -135,7 +136,8 @@ $primary-font: 'Inter', sans-serif;
 @media (max-width: 600px) {
   .mode-selection-page {
     .main-title {
-      font-size: 20px;
+      font-size: 22px;
+      margin-bottom: 30px;
     }
 
     .mode-card {
@@ -155,7 +157,7 @@ $primary-font: 'Inter', sans-serif;
       }
 
       &__button {
-        font-size: 14px;
+        font-size: 16px;
         padding: 10px 16px;
         width: 300px;
       }

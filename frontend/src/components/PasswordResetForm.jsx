@@ -17,7 +17,7 @@ const PasswordResetForm = ({
     if (backendError) return backendError;
     if (error) return error;
     if (successMessage) return successMessage;
-    return 'Пароль должен включать заглавные и строчные буквы и цифры';
+    return 'Пароль должен содержать буквы и цифры.';
   };
 
   const getSubtitleClass = () => {
@@ -64,7 +64,7 @@ const PasswordResetForm = ({
           className="form__button"
           disabled={isLoading || !password || !confirmPassword}
         >
-          {isLoading ? 'Сохранение...' : 'Сохранить'}
+          Сохранить
         </SubmitButton>
       </form>
     </section>

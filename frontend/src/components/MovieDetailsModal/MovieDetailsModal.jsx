@@ -120,7 +120,7 @@ const MovieDetailsModal = ({ movie, onClose, onSwipeLeft, onSwipeRight }) => {
                   <div className="meta-value">{formatValue(movie.runtime) === "–" ? "–" : `${movie.runtime} мин`}</div>
 
                   <div className="meta-label">Возрастные ограничения:</div>
-                  <div className="meta-value">{formatValue(movie.age_rating)}</div>
+                  <div className="meta-value">{formatValue(movie.age_rating) === "–" ? "–" : `${movie.age_rating}+`}</div>
                 </div>
               </div>
             </div>

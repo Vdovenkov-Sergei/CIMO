@@ -48,9 +48,9 @@ const SessionMovies = () => {
   const isOnboarding = location.state.isOnboarding;
   
   const steps = [
-    { id: 0, content: 'Удаляйте или откладывайте фильмы из списка понравившихся.', showed: false },
-    { id: 1, content: 'Поделитесь мнением — это помогает нам становиться лучше.', showed: false },
-    { id: 2, content: 'Нажмите, чтобы завершить текущую сессию.', showed: false }
+    { id: 0, content: 'Удаляйте или откладывайте фильмы из списка понравившихся.'},
+    { id: 1, content: 'Поделитесь мнением — это помогает нам становиться лучше.'},
+    { id: 2, content: 'Нажмите, чтобы завершить текущую сессию.'}
   ];
 
   const handleNext = () => {
@@ -327,6 +327,7 @@ const SessionMovies = () => {
           status: 'COMPLETED'
         }),
       });
+      localStorage.removeItem('step');
       navigate('/modeSelection');
     } catch (err) {
       console.error('Error finishing session:', err);
@@ -346,6 +347,16 @@ const SessionMovies = () => {
     }
   }, [step]);
   
+  useEffect(() => {
+    const storedValue = localStorage.getItem('step');
+    if (storedValue !== null) {
+      setStep(Number(storedValue));
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('step', step);
+  }, [step]);
 
   return (
     <div className="session-movies-page">
@@ -395,7 +406,7 @@ const SessionMovies = () => {
               </div>
             }
             visible={step === 2 && isOnboarding}
-            placement="right"
+            placement={window.innerWidth < 1000 ? "top" : "right"}
             interactive={true}
           >
             <div><FinishSessionButton onClick={finishSession} /></div>
@@ -409,7 +420,7 @@ const SessionMovies = () => {
               </div>
             }
             visible={step === 1 && isOnboarding}
-            placement="left"
+            placement={window.innerWidth < 1000 ? "bottom" : "left"}
             interactive={true}
           >
             <a href="https://forms.yandex.ru/u/681a215ad046880a127479a7/" className='feedback-btn' target='_blank'>Оставить отзыв</a>

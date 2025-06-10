@@ -15,17 +15,19 @@
     background-repeat: no-repeat;
     background-attachment: fixed;
   
-    &-message {
-      max-width: 600px;
-      padding: 50px;
-      background: $modal-color;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  
-      h1 {
-        font-size: 32px;
-        margin-bottom: 20px;
-        color: $text-color;
-      }
+    .message {
+      padding: 20px;
+      font-size: 32px;
+      color: $text-color;
+      width: 100%;
+      max-width: 800px;
     }
   }
+
+@media (max-width: 600px) {
+  .waiting-screen-page {
+    .message {
+      font-size: 22px;
+    }
+  }
+}
