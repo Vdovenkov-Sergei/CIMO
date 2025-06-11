@@ -1,70 +1,38 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import './Invite.scss';
+import { useAuthFetch } from '../../utils/useAuthFetch';
 
 const Invite = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get('id');
-
-  const refreshToken = async () => {
-    try {
-      const response = await fetch('/api/auth/refresh', {
-        method: 'POST',
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        navigate('/');
-        throw new Error('Token refresh failed');
-      }
-      return response;
-    } catch (error) {
-      console.error('Token refresh error:', error);
-      navigate('/');
-      throw error;
-    }
-  };
-
-  const fetchWithTokenRefresh = async (url, options = {}) => {
-    const response = await fetch(url, {
-      ...options,
-      credentials: 'include',
-    });
-
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok && data.detail === "Token expired") {
-      await refreshToken();
-      const retryResponse = await fetch(url, {
-        ...options,
-        credentials: 'include',
-      });
-      return retryResponse;
-    }
-    return response;
-  };
+  const authFetch = useAuthFetch();
 
   const joinSession = async () => {
     try {
       console.log('Attempting to join session:', sessionId);
       
-      const joinResponse = await fetchWithTokenRefresh(`/api/sessions/join/${sessionId}`, {
+      const joinResponse = await authFetch(`/api/sessions/join/${sessionId}`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
       });
 
       if (!joinResponse.ok) {
-        throw new Error(joinResponse.detail);
+        throw new Error(joinResponse.data.detail);
       }
-      console.log('Join response status:', joinResponse.status);
+      console.log('Join response status:', joinResponse.data.status);
   
-      const statusResponse = await fetchWithTokenRefresh('/api/sessions/status', {
+      const { status, ok, data } = await authFetch('/api/sessions/status', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ status: 'PREPARED' }),
       });
-      console.log('Status update response:', statusResponse.status);
+      console.log('Status update response:', data.status);
       navigate(`/session?id=${sessionId}`, { 
         state: { session_id: sessionId, is_pair: true } 
       });

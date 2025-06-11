@@ -14,6 +14,7 @@ import LikedMoviesScroll from '../../components/LikedMoviesScroll';
 import MovieDetailsModal from '../../components/MovieDetailsModal/MovieDetailsModal';
 import CountdownModal from '../../components/CountdownModal/CountdownModal';
 import { placements } from '@popperjs/core';
+import { useAuthFetch } from '../../utils/useAuthFetch';
 
 const Notification = ({ movie }) => {
   return (
@@ -76,12 +77,14 @@ const Session = () => {
   const [queue, setQueue] = useState([]);
   const [step, setStep] = useState(0);
   const [isOnboarding, setIsOnboarding] = useState(false);
+  const authFetch = useAuthFetch();
 
   const steps = [
-    { id: 0, content: 'Нажмите на карточку, чтобы посмотреть подробную информацию о фильме. Свайпайте влево или вправо, чтобы выбрать.' },
-    { id: 1, content: 'Также можно использовать кнопки для выбора.' },
-    { id: 2, content: 'Здесь отображаются фильмы, которые вам понравились.' },
-    { id: 3, content: 'Нажмите, чтобы завершить подбор и перейти к списку выбранных фильмов.' }
+    { id: 0, content: 'Нажмите на карточку, чтобы посмотреть подробную информацию о фильме.' },
+    { id: 1, content: 'Свайпайте влево или вправо, чтобы выбрать.' },
+    { id: 2, content: 'Также можно использовать кнопки для выбора.' },
+    { id: 3, content: 'Здесь отображаются фильмы, которые вам понравились.' },
+    { id: 4, content: 'Нажмите, чтобы завершить подбор и перейти к списку выбранных фильмов.' }
   ];
 
   const handleNext = () => {
@@ -297,51 +300,16 @@ const Session = () => {
     saveState();
   }, [showCountdown, showLikedMovies, timer, timeSwiped, step]);
 
-  const refreshToken = async () => {
-    try {
-      const response = await fetch('/api/auth/refresh', {
-        method: 'POST',
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        navigate('/');
-        throw new Error('Token refresh failed');
-      }
-      return response;
-    } catch (error) {
-      console.error('Token refresh error:', error);
-      navigate('/');
-      throw error;
-    }
-  };
-
-  const fetchWithTokenRefresh = async (url, options = {}) => {
-    const response = await fetch(url, {
-      ...options,
-      credentials: 'include',
-    });
-
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok && data.detail === "Token expired") {
-      await refreshToken();
-      const retryResponse = await fetch(url, {
-        ...options,
-        credentials: 'include',
-      });
-      const retryData = await retryResponse.json().catch(() => ({}));
-      return retryData;
-    }
-    return data;
-  };
-
   const checkSessionStatus = async () => {
     try {
-      const data = await fetchWithTokenRefresh('/api/sessions/me');
+      const { status, ok, data } = await authFetch('/api/sessions/me', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
       if (data.status === 'PREPARED') {
         setShowCountdown(true);
-      } else {
-        activateSession();
       }
     } catch (err) {
       console.error('Error checking session status:', err);
@@ -354,7 +322,7 @@ const Session = () => {
       localStorage.removeItem('session_accumulated_time');
       localStorage.removeItem('session_start_time');
       clearSavedState();
-      await fetchWithTokenRefresh('/api/sessions/status', {
+      await authFetch('/api/sessions/status', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -371,7 +339,13 @@ const Session = () => {
 
   const fetchCurrentMovie = async (movieId) => {
     try {
-      const data = await fetchWithTokenRefresh(`/api/movies/${movieId}`);
+      const response = await fetch(`/api/movies/${movieId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await response.json();
       if (data.detail === "Movie with id=-1 not found") {
         setCurrentMovie({ id: -1 });
       }
@@ -385,7 +359,13 @@ const Session = () => {
 
   const fetchMovieDetails = async (movieId) => {
     try {
-      const data = await fetchWithTokenRefresh(`/api/movies/${movieId}/detailed`);
+      const response = await fetch(`/api/movies/${movieId}/detailed`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await response.json();
       setShowDetails(data);
     } catch (err) {
       console.error('Error fetching movie details:', err);
@@ -395,8 +375,13 @@ const Session = () => {
   const fetchLikedMovies = async (reset = false) => {
     try {
       const newOffset = reset ? 0 : offset;
-      const data = await fetchWithTokenRefresh(
-        `/api/movies/session/?limit=${limit}&offset=${newOffset}`
+      const { status, ok, data } = await authFetch(
+        `/api/movies/session/?limit=${limit}&offset=${newOffset}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
       );
       
       setHasMore(data.length === limit);
@@ -423,7 +408,7 @@ const Session = () => {
       startTimeRef.current = Date.now();
       setTimer(0);
 
-      const data = await fetchWithTokenRefresh('/api/movies/session/', {
+      const { status, ok, data } = await authFetch('/api/movies/session/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -450,7 +435,7 @@ const Session = () => {
 
   const activateSession = async () => {
     try {
-      const data = await fetchWithTokenRefresh('/api/sessions/status', {
+      const { status, ok, data } = await authFetch('/api/sessions/status', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -544,7 +529,20 @@ const Session = () => {
           </div>
         </Tippy>
 
-        
+        <Tippy
+          zIndex={999}
+          content={
+            <div className='tooltip'>
+              <p className='tooltip-info'>{steps[1].content}</p>
+              <button className='tooltip-button' onClick={handleNext}>Далее</button>
+            </div>
+          }
+          interactive={true}
+          visible={step === 1 && isOnboarding}
+          placement="bottom"
+        >
+          <div></div>
+        </Tippy>
 
         {!showCountdown && (
           <>
@@ -552,12 +550,12 @@ const Session = () => {
               zIndex={999}
               content={
                 <div className='tooltip'>
-                  <p className='tooltip-info'>{steps[1].content}</p>
+                  <p className='tooltip-info'>{steps[2].content}</p>
                   <button className='tooltip-button' onClick={handleNext}>Далее</button>
                 </div>
               }
               interactive={true}
-              visible={step === 1 && isOnboarding}
+              visible={step === 2 && isOnboarding}
               placement={window.innerWidth < 900 ? "top" : "right"}
             >
               {currentMovieId !== -1 ? (
@@ -576,12 +574,12 @@ const Session = () => {
               zIndex={999}
               content={
                 <div className='tooltip'>
-                  <p className='tooltip-info'>{steps[3].content}</p>
+                  <p className='tooltip-info'>{steps[4].content}</p>
                   <button className='tooltip-button' onClick={() => setStep(-1)}>Далее</button>
                 </div>
               }
               interactive={true}
-              visible={step === 3 && isOnboarding && currentMovieId === -1}
+              visible={step === 4 && isOnboarding && currentMovieId === -1}
               placement="top"
             >
               <div className="session-controls">
@@ -607,12 +605,12 @@ const Session = () => {
                 <Tippy
                   content={
                     <div className='tooltip'>
-                      <p className='tooltip-info'>{steps[2].content}</p>
+                      <p className='tooltip-info'>{steps[3].content}</p>
                       <button className='tooltip-button' onClick={handleNext}>Далее</button>
                     </div>
                   }
                   interactive={true}
-                  visible={step === 2 && isOnboarding}
+                  visible={step === 3 && isOnboarding}
                   placement="top"
                 >
                   <h3 style={{ margin: 0 }}>Понравившиеся фильмы</h3>

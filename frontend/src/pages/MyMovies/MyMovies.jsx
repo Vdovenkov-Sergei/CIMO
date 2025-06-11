@@ -7,6 +7,7 @@ import WatchListScroll from '../../components/WatchListScroll';
 import WatchedScroll from '../../components/WatchedScroll';
 import RateMovieModal from '../../components/RateMovieModal/RateMovieModal';
 import MovieDetailsModal from '../../components/MovieDetailsModal/MovieDetailsModal';
+import { useAuthFetch } from '../../utils/useAuthFetch';
 
 const MyMovies = () => {
   const navigate = useNavigate();
@@ -24,58 +25,8 @@ const MyMovies = () => {
   const [isPatchMode, setIsPatchMode] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const authFetch = useAuthFetch();
   const limit = 10;
-
-  const refreshToken = async () => {
-    try {
-      const response = await fetch('/api/auth/refresh', {
-        method: 'POST',
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        navigate('/');
-        throw new Error('Token refresh failed');
-      }
-      return response;
-    } catch (error) {
-      console.error('Token refresh error:', error);
-      navigate('/');
-      throw error;
-    }
-  };
-
-  const fetchWithTokenRefresh = async (url, options = {}) => {
-    try {
-      const response = await fetch(url, {
-        ...options,
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        if (errorData.detail === "Token expired") {
-          await refreshToken();
-          const retryResponse = await fetch(url, {
-            ...options,
-            credentials: 'include',
-          });
-          if (!retryResponse.ok) {
-            navigate('/');
-            throw new Error('Request failed after token refresh');
-          }
-          return retryResponse;
-        }
-        throw new Error(errorData.detail || 'Request failed');
-      }
-      return response;
-    } catch (error) {
-      if (error.message === 'Token refresh failed') {
-        navigate('/');
-      }
-      throw error;
-    }
-  };
 
   const fetchWatchlist = async (offset = 0, shouldReset = false) => {
     if (isLoading && !shouldReset) return;
@@ -84,11 +35,14 @@ const MyMovies = () => {
     setError('');
 
     try {
-      const response = await fetchWithTokenRefresh(
-        `/api/movies/later/?offset=${offset}&limit=${limit}`
+      const { status, ok, data } = await authFetch(
+        `/api/movies/later/?offset=${offset}&limit=${limit}`, {
+            method: 'GET',
+            headers: {
+            'Content-Type': 'application/json',
+          }
+        }
       );
-
-      const data = await response.json();
 
       if (!Array.isArray(data)) {
         throw new Error('Invalid data format for watchlist');
@@ -115,6 +69,7 @@ const MyMovies = () => {
     }
   };
 
+
   const fetchWatched = async (offset = 0, shouldReset = false) => {
     if (isLoading && !shouldReset) return;
     
@@ -122,11 +77,14 @@ const MyMovies = () => {
     setError('');
 
     try {
-      const response = await fetchWithTokenRefresh(
-        `/api/movies/viewed/?offset=${offset}&limit=${limit}&order_review=${reviewSort}`
+      const { status, ok, data } = await authFetch(
+        `/api/movies/viewed/?offset=${offset}&limit=${limit}&order_review=${reviewSort}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        }
       );
-
-      const data = await response.json();
 
       if (!Array.isArray(data)) {
         throw new Error('Invalid data format for watched movies');
@@ -176,7 +134,7 @@ const MyMovies = () => {
     setError('');
 
     try {
-      await fetchWithTokenRefresh('/api/movies/viewed/', {
+      await authFetch('/api/movies/viewed/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -187,8 +145,11 @@ const MyMovies = () => {
         }),
       });
 
-      await fetchWithTokenRefresh(`/api/movies/later/${movieToRate.id}`, {
+      await authFetch(`/api/movies/later/${movieToRate.id}`, {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        }
       });
 
       await Promise.all([fetchWatchlist(0, true), fetchWatched(0, true)]);
@@ -202,12 +163,13 @@ const MyMovies = () => {
     }
   };
 
+
   const handleEditRatingSubmit = async (rating) => {
     setIsLoading(true);
     setError('');
 
     try {
-      await fetchWithTokenRefresh(`/api/movies/viewed/${movieToRate.movie.id}`, {
+      await authFetch(`/api/movies/viewed/${movieToRate.movie.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -234,7 +196,7 @@ const MyMovies = () => {
     setError('');
 
     try {
-      await fetchWithTokenRefresh('/api/movies/later/', {
+      await authFetch('/api/movies/later/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -244,8 +206,11 @@ const MyMovies = () => {
         }),
       });
 
-      await fetchWithTokenRefresh(`/api/movies/viewed/${movie.id}`, {
+      await authFetch(`/api/movies/viewed/${movie.id}`, {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        }
       });
 
       await Promise.all([fetchWatchlist(0, true), fetchWatched(0, true)]);
@@ -262,8 +227,11 @@ const MyMovies = () => {
     setError('');
 
     try {
-      await fetchWithTokenRefresh(`/api/movies/later/${movieId}`, {
+      await authFetch(`/api/movies/later/${movieId}`, {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        }
       });
 
       await Promise.all([fetchWatchlist(0, true), fetchWatched(0, true)]);
@@ -287,7 +255,7 @@ const MyMovies = () => {
 
   const handleMovieCardClick = async (movieId) => {
     try {
-      const response = await fetchWithTokenRefresh(`/api/movies/${movieId}/detailed`);
+      const response = await fetch(`/api/movies/${movieId}/detailed`);
       const data = await response.json();
       setSelectedMovie(data);
       setIsDetailsModalOpen(true);

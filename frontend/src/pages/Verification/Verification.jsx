@@ -97,7 +97,7 @@ const Verification = () => {
 
       setCountdown(120);
       setSuccessMessage('Новый код отправлен на почту.');
-      setCode(''); // Очищаем поле ввода
+      setCode('');
       
     } catch (err) {
       console.error('Ошибка при повторной отправке:', err);

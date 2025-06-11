@@ -20,7 +20,7 @@ function App() {
   return (
     <BrowserRouter>
       <main>
-        <Suspense fallback={<div>Загрузка...</div>}>
+        <Suspense fallback={<div></div>}>
           <Routes>
             <Route path="/" element={<Login />} />
             <Route path="/signup" element={<Signup />} />

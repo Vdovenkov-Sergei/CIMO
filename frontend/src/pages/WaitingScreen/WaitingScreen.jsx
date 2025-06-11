@@ -1,52 +1,17 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate  } from 'react-router-dom';
 import './WaitingScreen.scss';
+import { useAuthFetch } from '../../utils/useAuthFetch';
 
 const WaitingScreen = () => {
   const navigate = useNavigate();
   const [countdown, setCountdown] = useState(5);
   const hasRun = useRef(false);
-
-  const refreshToken = async () => {
-    try {
-      const response = await fetch('/api/auth/refresh', {
-        method: 'POST',
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        navigate('/');
-        throw new Error('Token refresh failed');
-      }
-      return response;
-    } catch (error) {
-      console.error('Token refresh error:', error);
-      navigate('/');
-      throw error;
-    }
-  };
-
-  const fetchWithTokenRefresh = async (url, options = {}) => {
-    const response = await fetch(url, {
-      ...options,
-      credentials: 'include',
-    });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok && data.detail === "Token expired") {
-      await refreshToken();
-      const retryResponse = await fetch(url, {
-        ...options,
-        credentials: 'include',
-      });
-      const retryData = await retryResponse.json().catch(() => ({}));
-      return retryData;
-    }
-    return data;
-  };
+  const authFetch = useAuthFetch();
 
   const createTrySession = async () => {
     try {
-      await fetchWithTokenRefresh('/api/sessions/', {
+      const { status, ok, data } = await authFetch('/api/sessions/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -60,7 +25,7 @@ const WaitingScreen = () => {
     
   const activateSingleSession = async () => {
     try {
-      const data = await fetchWithTokenRefresh('/api/sessions/status', {
+      const { status, ok, data } = await authFetch('/api/sessions/status', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -100,3 +65,5 @@ const WaitingScreen = () => {
 };
 
 export default WaitingScreen;
+
+

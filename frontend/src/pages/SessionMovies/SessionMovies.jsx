@@ -9,6 +9,7 @@ import Footer from '../../components/Footer/Footer';
 import Header from '../../components/Header/Header';
 import MovieDetailsModal from '../../components/MovieDetailsModal/MovieDetailsModal';
 import RateMovieModal from '../../components/RateMovieModal/RateMovieModal';
+import { useAuthFetch } from '../../utils/useAuthFetch';
 
 const Notification = ({ movie }) => {
   return (
@@ -46,6 +47,7 @@ const SessionMovies = () => {
   const [queue, setQueue] = useState([]);
   const [step, setStep] = useState(0);
   const isOnboarding = location.state.isOnboarding;
+  const authFetch = useAuthFetch();
   
   const steps = [
     { id: 0, content: 'Удаляйте или откладывайте фильмы из списка понравившихся.'},
@@ -132,57 +134,6 @@ const SessionMovies = () => {
     }
   }, [queue]);
 
-  const refreshToken = async () => {
-    try {
-      const response = await fetch('/api/auth/refresh', {
-        method: 'POST',
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        navigate('/');
-        throw new Error('Token refresh failed');
-      }
-      return response;
-    } catch (error) {
-      console.error('Token refresh error:', error);
-      navigate('/');
-      throw error;
-    }
-  };
-
-  const fetchWithTokenRefresh = async (url, options = {}) => {
-    try {
-      const response = await fetch(url, {
-        ...options,
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        if (errorData.detail === "Token expired") {
-          await refreshToken();
-          const retryResponse = await fetch(url, {
-            ...options,
-            credentials: 'include',
-          });
-          if (!retryResponse.ok) {
-            navigate('/');
-            throw new Error('Request failed after token refresh');
-          }
-          return retryResponse;
-        }
-        throw new Error(errorData.detail || 'Request failed');
-      }
-      return response;
-    } catch (error) {
-      if (error.message === 'Token refresh failed') {
-        navigate('/');
-      }
-      throw error;
-    }
-  };
-
   const fetchMovies = async (offset = 0) => {
     if (isLoading) return;
     
@@ -190,11 +141,14 @@ const SessionMovies = () => {
     setError('');
 
     try {
-      const response = await fetchWithTokenRefresh(
-        `/api/movies/session/?offset=${offset}&limit=${limit}`
+      const { status, ok, data } = await authFetch(
+        `/api/movies/session/?offset=${offset}&limit=${limit}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
       );
-
-      const data = await response.json();
 
       if (!Array.isArray(data)) {
         throw new Error('Invalid data format for movies');
@@ -217,7 +171,12 @@ const SessionMovies = () => {
 
   const handleCardClick = async (movieId) => {
     try {
-      const response = await fetchWithTokenRefresh(`/api/movies/${movieId}/detailed`);
+      const response = await fetch(`/api/movies/${movieId}/detailed`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
       const data = await response.json();
       setSelectedMovie(data);
       setIsDetailsModalOpen(true);
@@ -236,7 +195,7 @@ const SessionMovies = () => {
     setError('');
 
     try {
-      await fetchWithTokenRefresh('/api/movies/later/', {
+      await authFetch('/api/movies/later/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -246,8 +205,11 @@ const SessionMovies = () => {
         }),
       });
 
-      await fetchWithTokenRefresh(`/api/movies/session/${movieId}`, {
+      await authFetch(`/api/movies/session/${movieId}`, {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
       await fetchMovies(0);
@@ -264,8 +226,11 @@ const SessionMovies = () => {
     setError('');
 
     try {
-      await fetchWithTokenRefresh(`/api/movies/session/${movieId}`, {
+      await authFetch(`/api/movies/session/${movieId}`, {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
       await fetchMovies(0);
@@ -287,7 +252,7 @@ const SessionMovies = () => {
     setError('');
 
     try {
-      await fetchWithTokenRefresh('/api/movies/viewed/', {
+      await authFetch('/api/movies/viewed/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -298,8 +263,11 @@ const SessionMovies = () => {
         }),
       });
 
-      await fetchWithTokenRefresh(`/api/movies/session/${movieToRate.id}`, {
+      await authFetch(`/api/movies/session/${movieToRate.id}`, {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
       await fetchMovies(0);
@@ -318,7 +286,7 @@ const SessionMovies = () => {
     setError('');
 
     try {
-      await fetchWithTokenRefresh('/api/sessions/status', {
+      await authFetch('/api/sessions/status', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

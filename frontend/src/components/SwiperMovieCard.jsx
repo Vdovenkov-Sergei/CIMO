@@ -33,7 +33,6 @@ const SwipeableMovieCard = ({ movie, onClick, onSwipe, className }) => {
         dragConstraints={constraintsRef}
         dragElastic={1.5}
         onDrag={(e, info) => {
-          // Определяем направление движения
           if (info.offset.x > 50) {
             setDragDirection('right');
           } else if (info.offset.x < -50) {
@@ -43,7 +42,7 @@ const SwipeableMovieCard = ({ movie, onClick, onSwipe, className }) => {
           }
         }}
         onDragEnd={(e, info) => {
-          setDragDirection(null); // Сбрасываем подсветку после отпускания
+          setDragDirection(null);
           if (info.offset.x > 200) {
             onSwipe("right");
           } else if (info.offset.x < -200) {
@@ -53,7 +52,7 @@ const SwipeableMovieCard = ({ movie, onClick, onSwipe, className }) => {
         whileTap={{ scale: 0.95 }}
         transition={{ type: 'spring', stiffness: 5000, damping: 100 }}
         style={{
-          backgroundColor: 'transparent', // Начальный цвет
+          backgroundColor: 'transparent',
         }}
       >
         <img 
@@ -72,7 +71,6 @@ const SwipeableMovieCard = ({ movie, onClick, onSwipe, className }) => {
           </div>
         </div>
         
-        {/* Индикаторы свайпа */}
         <motion.div 
           className="swipe-indicator right"
           initial={{ opacity: 0 }}

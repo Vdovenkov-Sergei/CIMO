@@ -9,67 +9,18 @@ import PairModeCard from '../../components/PairModeCard';
 import ActiveSession from '../../components/ActiveSession/ActiveSession';
 import Onboarding from '../../components/Onboarding';
 import FAQComponent from '../../components/Q&A/Q&A';
+import { useAuthFetch } from '../../utils/useAuthFetch';
 
 const ModeSelection = () => {
   const navigate = useNavigate();
   const [inviteLink, setInviteLink] = useState('');
   const [sessionId, setSessionId] = useState('');
   let activeSession = false;
-
-  const refreshToken = async () => {
-    try {
-      const response = await fetch('/api/auth/refresh', {
-        method: 'POST',
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        navigate('/');
-        throw new Error('Token refresh failed');
-      }
-      return response;
-    } catch (error) {
-      console.error('Token refresh error:', error);
-      navigate('/');
-      throw error;
-    }
-  };
-
-  const fetchWithTokenRefresh = async (url, options = {}) => {
-    try {
-      const response = await fetch(url, {
-        ...options,
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        if (errorData.detail === "Token expired") {
-          await refreshToken();
-          const retryResponse = await fetch(url, {
-            ...options,
-            credentials: 'include',
-          });
-          if (!retryResponse.ok) {
-            navigate('/');
-            throw new Error('Request failed after token refresh');
-          }
-          return retryResponse;
-        }
-        throw new Error(errorData.detail || 'Request failed');
-      }
-      return response;
-    } catch (error) {
-      if (error.message === 'Token refresh failed') {
-        navigate('/');
-      }
-      throw error;
-    }
-  };
+  const authFetch = useAuthFetch();
 
   const handleStartSingleSession = async (showModalCallback) => {
     try {
-      await fetchWithTokenRefresh('/api/sessions/', {
+      await authFetch('/api/sessions/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -84,8 +35,11 @@ const ModeSelection = () => {
 
   const handleCancelSingleSession = async () => {
     try {
-      await fetchWithTokenRefresh('/api/sessions/leave', {
+      await authFetch('/api/sessions/leave', {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
     } catch (err) {
       console.error('Error canceling session:', err);
@@ -94,7 +48,7 @@ const ModeSelection = () => {
 
   const handleConfirmSingleSession = async () => {
     try {
-      const response = await fetchWithTokenRefresh('/api/sessions/status', {
+      const { status, ok, data } = await authFetch('/api/sessions/status', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -102,7 +56,6 @@ const ModeSelection = () => {
         body: JSON.stringify({ status: 'ACTIVE' }),
       });
       
-      const data = await response.json();
       navigate('/session', { state: { is_pair: false, movie_id: data.movie_id, is_onboarding: false } });
     } catch (err) {
       console.error('Error preparing session:', err);
@@ -111,12 +64,12 @@ const ModeSelection = () => {
 
   const handleStartPairSession = async (showModalCallback) => {
     try {
-      const response = await fetchWithTokenRefresh('/api/sessions/', {
+      const { status, ok, data } = await authFetch('/api/sessions/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ is_pair: true }),
       });
-      const data = await response.json();
+
       const newSessionId = data.id;
       setSessionId(newSessionId);
       setInviteLink(`http://localhost:5173/invite?id=${newSessionId}`);
@@ -128,8 +81,11 @@ const ModeSelection = () => {
 
   const handleCancelPairSession = async () => {
     try {
-      await fetchWithTokenRefresh('/api/sessions/leave', {
+      await authFetch('/api/sessions/leave', {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
     } catch (err) {
       console.error('Error canceling pair session:', err);
@@ -138,7 +94,7 @@ const ModeSelection = () => {
 
   const handleConfirmPairSession = async () => {
     try {
-      const response = await fetchWithTokenRefresh('/api/sessions/status', {
+      const { status, ok, data } = await authFetch('/api/sessions/status', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -146,7 +102,6 @@ const ModeSelection = () => {
         body: JSON.stringify({ status: 'PREPARED' }),
       });
       
-      const data = await response.json();
       navigate(`/session?id=${sessionId}`, { state: { session_id: sessionId, is_pair: true, movie_id: data.movie_id } });
     } catch (err) {
       console.error('Error preparing pair session:', err);
@@ -155,23 +110,21 @@ const ModeSelection = () => {
 
   const checkUserSession = async () => {
     try {
-      const response = await fetchWithTokenRefresh('/api/sessions/me', {
+      const { status, ok, data } = await authFetch('/api/sessions/me', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
       });
-      
-      const data = await response.json();
 
-      if (data !== null) {
+      if (status !== 404) {
         activeSession = true;
       }
       console.log(activeSession);
     } catch (err) {
       console.error('Error checking user\'s session:', err);
     }
-  }
+  };
 
   useEffect(() => {
     checkUserSession();

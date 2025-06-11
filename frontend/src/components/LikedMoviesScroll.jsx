@@ -64,7 +64,6 @@ const LikedMoviesScroll = ({ movies, hasMore, onMovieClick, onLoadMore }) => {
             is_matched={obj.is_matched}
           />
         ))}
-        {isLoading && <div className="loading-more">Загрузка...</div>}
       </div>
 
       {showRightArrow && (

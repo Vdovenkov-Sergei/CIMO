@@ -20,12 +20,12 @@ const MovieDetailsModal = ({ movie, onClose, onSwipeLeft, onSwipeRight }) => {
     controllerRef.current = controller;
 
     try {
-      const res = await fetch(`/api/movie/roles/${movie.id}?limit=${limit}&offset=${offset}`, {
+      const response = await fetch(`/api/movie/roles/${movie.id}?limit=${limit}&offset=${offset}`, {
         credentials: 'include',
         signal: controller.signal
       });
-      if (!res.ok) throw new Error('Failed to fetch roles');
-      const data = await res.json();
+      if (!response.ok) throw new Error('Failed to fetch roles');
+      const data = await response.json();
 
       setPeople((prev) => [...prev, ...data]);
       setOffset((prev) => prev + data.length);

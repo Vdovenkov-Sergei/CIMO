@@ -5,6 +5,7 @@ import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
 import ProfileAvatar from '../../components/ProfileAvatar';
 import ChangeNicknameForm from '../../components/ChangeNicknameForm';
+import { useAuthFetch } from '../../utils/useAuthFetch';
 
 const ChangeNickname = () => {
   const navigate = useNavigate();
@@ -15,69 +16,17 @@ const ChangeNickname = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [backendError, setBackendError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-
-  const refreshToken = async () => {
-    try {
-      const response = await fetch('/api/auth/refresh', {
-        method: 'POST',
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        navigate('/');
-        throw new Error('Token refresh failed');
-      }
-      return response;
-    } catch (error) {
-      console.error('Token refresh error:', error);
-      navigate('/');
-      throw error;
-    }
-  };
-
-  const fetchWithTokenRefresh = async (url, options = {}) => {
-    try {
-      const response = await fetch(url, {
-        ...options,
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        if (errorData.detail === "Token expired") {
-          await refreshToken();
-          const retryResponse = await fetch(url, {
-            ...options,
-            credentials: 'include',
-          });
-          if (!retryResponse.ok) {
-            navigate('/');
-            throw new Error('Request failed after token refresh');
-          }
-          return retryResponse;
-        }
-        throw new Error(errorData.detail || JSON.stringify(errorData) || 'Request failed');
-      }
-      return response;
-    } catch (error) {
-      if (error.message === 'Token refresh failed') {
-        navigate('/');
-      }
-      throw error;
-    }
-  };
+  const authFetch = useAuthFetch();
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetchWithTokenRefresh('/api/users/me', {
+        const { status, ok, data } = await authFetch('/api/users/me', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json'
           },
         });
-
-        const data = await response.json();
         setUser({
           login: data.user_name || '',
           email: data.email || ''
@@ -100,12 +49,18 @@ const ChangeNickname = () => {
       return;
     }
 
+    if (user.login === newNickname.trim()) {
+      setBackendError('Никнейм совпадает с текущим');
+      setSuccessMessage('');
+      return;
+    }
+
     setIsLoading(true);
     setBackendError('');
     setSuccessMessage('');
 
     try {
-      const response = await fetchWithTokenRefresh('/api/users/me', {
+      const { status, ok, data } = await authFetch('/api/users/me', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json'
@@ -115,10 +70,8 @@ const ChangeNickname = () => {
         }),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        const errorMessage = data.detail || data.message || JSON.stringify(data) || 'Ошибка обновления никнейма.';
+      if (!ok) {
+        const errorMessage = data.detail || data.message || JSON.stringify(data) || 'Ошибка обновления никнейма';
         setBackendError(errorMessage);
         return;
       }
@@ -127,7 +80,7 @@ const ChangeNickname = () => {
       setSuccessMessage('Никнейм успешно изменен!');
     } catch (err) {
       console.error('Ошибка:', err);
-      setBackendError("Никнейм занят.");
+      setBackendError("Никнейм уже занят");
     } finally {
       setIsLoading(false);
     }
@@ -137,8 +90,7 @@ const ChangeNickname = () => {
     <div className="change-nickname-page">
       <Header />
 
-      <main className="profile-main-nick">
-        
+      <main className="profile-main-nick container">
         <ProfileAvatar login={user.login} />
 
         <ChangeNicknameForm
