@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from app.constants import Pagination
+from app.logger import movie_logger
 from app.users.dependencies import get_current_user
 from app.users.models import User
 from app.viewed_movies.dao import ViewedMovieDAO
@@ -14,9 +15,25 @@ async def add_to_viewed_list(data: SViewedMovieCreate, user: User = Depends(get_
     existing_movie = await ViewedMovieDAO.find_by_user_movie_id(user_id=user.id, movie_id=data.movie_id)
     if existing_movie:
         await ViewedMovieDAO.update_movie(user_id=user.id, movie_id=data.movie_id, update_data={"review": data.review})
+        movie_logger.info(
+            "Viewed movie update recorded.",
+            extra={
+                "user_id": user.id,
+                "movie_id": data.movie_id,
+                "review": data.review,
+            },
+        )
         return {"message": "The movie review was successfully updated."}
 
     await ViewedMovieDAO.add_movie(user_id=user.id, movie_id=data.movie_id, review=data.review)
+    movie_logger.info(
+        "Viewed movie recorded.",
+        extra={
+            "user_id": user.id,
+            "movie_id": data.movie_id,
+            "review": data.review,
+        },
+    )
     return {"message": "The movie was successfully added."}
 
 
@@ -42,4 +59,12 @@ async def update_viewed_list(
     movie_id: int, data: SViewedMovieUpdate, user: User = Depends(get_current_user)
 ) -> dict[str, str]:
     await ViewedMovieDAO.update_movie(user_id=user.id, movie_id=movie_id, update_data=data.model_dump())
+    movie_logger.info(
+        "Viewed movie update recorded.",
+        extra={
+            "user_id": user.id,
+            "movie_id": movie_id,
+            "review": data.review,
+        },
+    )
     return {"message": "The review was successfully updated."}

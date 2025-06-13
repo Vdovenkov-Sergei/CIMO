@@ -195,13 +195,13 @@ async def refresh_token(
 
 
 @router_auth.post("/logout", response_model=dict[str, str])
-async def logout_user(response: Response) -> dict[str, str]:
+async def logout_user(response: Response, user: User = Depends(get_current_user)) -> dict[str, str]:
     response.delete_cookie(Tokens.ACCESS_TOKEN)
     logger.debug("Access token deleted from cookie.")
     response.delete_cookie(Tokens.REFRESH_TOKEN)
     logger.debug("Refresh token deleted from cookie.")
 
-    logger.info("User logged out.")
+    logger.info("User logged out.", extra={"user_id": user.id})
     return {"message": "Logged out."}
 
 

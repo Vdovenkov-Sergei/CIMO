@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 
 from app.constants import Pagination
 from app.exceptions import InvalidSessionStatusException
-from app.logger import logger
+from app.logger import logger, movie_logger
 from app.movies.dao import MovieDAO
 from app.movies.schemas import SMovieRead
 from app.session_movies.dao import SessionMovieDAO
@@ -51,6 +51,16 @@ async def swipe_session_movie(
     logger.info(
         "Swipe started.", extra={"user_id": session.user_id, "movie_id": data.movie_id, "is_liked": data.is_liked}
     )
+    movie_logger.info(
+        "Swipe recorded.",
+        extra={
+            "user_id": session.user_id,
+            "movie_id": data.movie_id,
+            "is_liked": data.is_liked,
+            "time_swiped": data.time_swiped
+        },
+    )
+
     existing_movie = await SessionMovieDAO.find_by_session_user_movie_id(
         session_id=session.id, user_id=session.user_id, movie_id=data.movie_id
     )

@@ -1,12 +1,13 @@
 import random
 import uuid
 from datetime import UTC, datetime
-from typing import Any, Optional
+from typing import Any
 
 from fastapi import APIRouter, Depends
 
 from app.constants import General
 from app.exceptions import (
+    ActiveSessionNotFoundException,
     MaxParticipantsInSessionException,
     ParticipantsNotEnoughException,
     SessionAlreadyStartedException,
@@ -24,18 +25,17 @@ from app.users.models import User
 router = APIRouter(prefix="/sessions", tags=["Sessions"])
 
 
-@router.get("/me", response_model=Optional[SSessionRead])
-async def get_user_session(user: User = Depends(get_current_user)) -> Optional[SSessionRead]:
+@router.get("/me", response_model=SSessionRead)
+async def get_user_session(user: User = Depends(get_current_user)) -> SSessionRead:
     session = await SessionDAO.find_existing_session(user_id=user.id)
-    return SSessionRead.model_validate(session) if session else None
+    if not session:
+        raise ActiveSessionNotFoundException(user_id=user.id)
+    return SSessionRead.model_validate(session)
 
 
 @router.post("/", response_model=SSessionRead)
 async def create_session(data: SSessionCreate, user: User = Depends(get_current_user)) -> SSessionRead:
     existing_session = await SessionDAO.find_existing_session(user_id=user.id)
-    if existing_session and existing_session.is_pair == data.is_pair:
-        logger.info("Returning existing session of same type.", extra={"pair": data.is_pair})
-        return SSessionRead.model_validate(existing_session)
     if existing_session:
         logger.warning("User already in a session.", extra={"session_id": existing_session.id, "user_id": user.id})
         raise UserAlreadyInSessionException(user_id=user.id, session_id=str(existing_session.id))

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from app.constants import Pagination
-from app.logger import logger
+from app.logger import logger, movie_logger
 from app.users.dependencies import get_current_user
 from app.users.models import User
 from app.watch_later_movies.dao import WatchLaterMovieDAO
@@ -22,6 +22,13 @@ async def add_to_watch_later_list(
         return {"message": "The movie is already in the watch later list."}
 
     await WatchLaterMovieDAO.add_movie(user_id=user.id, movie_id=data.movie_id)
+    movie_logger.info(
+        "Watch later movie recorded.",
+        extra={
+            "user_id": user.id,
+            "movie_id": data.movie_id,
+        },
+    )
     return {"message": "The movie was successfully added."}
 
 
