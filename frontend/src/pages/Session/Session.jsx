@@ -302,7 +302,7 @@ const Session = () => {
 
   const checkSessionStatus = async () => {
     try {
-      const { status, ok, data } = await authFetch('/api/sessions/me', {
+      const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/sessions/me`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -322,7 +322,7 @@ const Session = () => {
       localStorage.removeItem('session_accumulated_time');
       localStorage.removeItem('session_start_time');
       clearSavedState();
-      await authFetch('/api/sessions/status', {
+      await authFetch(`${import.meta.env.VITE_API_URL}/sessions/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -339,7 +339,7 @@ const Session = () => {
 
   const fetchCurrentMovie = async (movieId) => {
     try {
-      const response = await fetch(`/api/movies/${movieId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/movies/${movieId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -359,7 +359,7 @@ const Session = () => {
 
   const fetchMovieDetails = async (movieId) => {
     try {
-      const response = await fetch(`/api/movies/${movieId}/detailed`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/movies/${movieId}/detailed`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -376,7 +376,7 @@ const Session = () => {
     try {
       const newOffset = reset ? 0 : offset;
       const { status, ok, data } = await authFetch(
-        `/api/movies/session/?limit=${limit}&offset=${newOffset}`, {
+        `${import.meta.env.VITE_API_URL}/movies/session/?limit=${limit}&offset=${newOffset}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -408,7 +408,7 @@ const Session = () => {
       startTimeRef.current = Date.now();
       setTimer(0);
 
-      const { status, ok, data } = await authFetch('/api/movies/session/', {
+      const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/movies/session/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -435,7 +435,7 @@ const Session = () => {
 
   const activateSession = async () => {
     try {
-      const { status, ok, data } = await authFetch('/api/sessions/status', {
+      const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/sessions/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -510,7 +510,7 @@ const Session = () => {
             <AnimatePresence>
               {currentMovie && !showCountdown && (
                 <>
-                  {currentMovie.id !== -1 ? (
+                  {currentMovieId !== -1 ? (
                       <SwipeableMovieCard 
                         movie={currentMovie} 
                         onClick={() => setShowDetails(currentMovie)}

@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './ModeSelection.scss';
-import copyIconUrl from '../../../src/assets/images/copy.svg';
 import Footer from '../../components/Footer/Footer';
 import Header from '../../components/Header/Header';
 import SingleModeCard from '../../components/SingleModeCard';
 import PairModeCard from '../../components/PairModeCard';
 import ActiveSession from '../../components/ActiveSession/ActiveSession';
-import Onboarding from '../../components/Onboarding';
 import FAQComponent from '../../components/Q&A/Q&A';
 import { useAuthFetch } from '../../utils/useAuthFetch';
 
@@ -20,7 +18,7 @@ const ModeSelection = () => {
 
   const handleStartSingleSession = async (showModalCallback) => {
     try {
-      await authFetch('/api/sessions/', {
+      await authFetch(`${import.meta.env.VITE_API_URL}/sessions/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -35,7 +33,7 @@ const ModeSelection = () => {
 
   const handleCancelSingleSession = async () => {
     try {
-      await authFetch('/api/sessions/leave', {
+      await authFetch(`${import.meta.env.VITE_API_URL}/sessions/leave`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -48,7 +46,7 @@ const ModeSelection = () => {
 
   const handleConfirmSingleSession = async () => {
     try {
-      const { status, ok, data } = await authFetch('/api/sessions/status', {
+      const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/sessions/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -64,7 +62,7 @@ const ModeSelection = () => {
 
   const handleStartPairSession = async (showModalCallback) => {
     try {
-      const { status, ok, data } = await authFetch('/api/sessions/', {
+      const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/sessions/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ is_pair: true }),
@@ -81,7 +79,7 @@ const ModeSelection = () => {
 
   const handleCancelPairSession = async () => {
     try {
-      await authFetch('/api/sessions/leave', {
+      await authFetch(`${import.meta.env.VITE_API_URL}/sessions/leave`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -94,7 +92,7 @@ const ModeSelection = () => {
 
   const handleConfirmPairSession = async () => {
     try {
-      const { status, ok, data } = await authFetch('/api/sessions/status', {
+      const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/sessions/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -110,7 +108,7 @@ const ModeSelection = () => {
 
   const checkUserSession = async () => {
     try {
-      const { status, ok, data } = await authFetch('/api/sessions/me', {
+      const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/sessions/me`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -149,7 +147,7 @@ const ModeSelection = () => {
             onCancelSession={handleCancelPairSession}
             onConfirmSession={handleConfirmPairSession}
             inviteLink={inviteLink}
-            copyIconUrl={copyIconUrl}
+            copyIconUrl='/copy.svg'
           />
         </div>
 

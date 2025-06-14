@@ -12,7 +12,7 @@ const CountdownModal = ({ isOpen, onClose, onActivate, is_pair, session_id }) =>
 
   const handleLeave = async () => {
       try {
-        await authFetch('/api/sessions/leave', {
+        await authFetch(`${import.meta.env.VITE_API_URL}/sessions/leave`, {
           method: 'DELETE',
         });
         navigate('/modeSelection');
@@ -25,7 +25,7 @@ const CountdownModal = ({ isOpen, onClose, onActivate, is_pair, session_id }) =>
   const checkSessionReady = async () => {
       try {
         console.log('Checking if session is ready...');
-        const { status, ok, data } = await authFetch(`/api/sessions/ready/${session_id}`, {
+        const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/sessions/ready/${session_id}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -90,7 +90,7 @@ const CountdownModal = ({ isOpen, onClose, onActivate, is_pair, session_id }) =>
           console.log('Countdown finished, activating session...');
           const activate = async () => {
               try {
-                  const { status, ok, data } = await authFetch('/api/sessions/status', {
+                  const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/sessions/status`, {
                       method: 'PATCH',
                       headers: {
                           'Content-Type': 'application/json',

@@ -1,14 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Pagination } from 'swiper/modules';
 import './Verification.scss';
 
-import onboarding1 from '@/assets/images/onboarding1.png';
-import onboarding2 from '@/assets/images/onboarding2.png';
-import onboarding3 from '@/assets/images/onboarding3.png';
 import HeaderReg from '../../components/HeaderReg/HeaderReg';
-import Onboarding from '../../components/Onboarding';
 import Footer from '../../components/Footer/Footer';
 import VerificationCodeForm from '../../components/VerificationCodeForm';
 
@@ -41,7 +35,7 @@ const Verification = () => {
     setBackendError('');
 
     try {
-      const response = await fetch('/api/auth/register/verify', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/register/verify`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -79,7 +73,7 @@ const Verification = () => {
     setBackendError('');
     
     try {
-      const response = await fetch('/api/auth/register/resend', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/register/resend`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

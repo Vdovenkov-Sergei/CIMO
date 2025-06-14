@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import './ChangeNickname.scss';
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
@@ -21,7 +21,7 @@ const ChangeNickname = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const { status, ok, data } = await authFetch('/api/users/me', {
+        const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/users/me`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json'
@@ -60,7 +60,7 @@ const ChangeNickname = () => {
     setSuccessMessage('');
 
     try {
-      const { status, ok, data } = await authFetch('/api/users/me', {
+      const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/users/me`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json'

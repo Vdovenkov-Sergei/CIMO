@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Pagination } from 'swiper/modules';
 import './ResetPassword.scss';
 import Footer from '../../components/Footer/Footer';
 import HeaderReg from '../../components/HeaderReg/HeaderReg';
@@ -36,7 +34,7 @@ const ResetPassword = () => {
     setSuccessMessage('');
 
     try {
-      const response = await fetch('/api/auth/password/reset', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/password/reset`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -3,7 +3,7 @@ services:
     image: postgres:17
     container_name: cimo_db
     env_file:
-      - ./backend/${ENV_FILE}
+      - ./backend/.env.${MODE}
     ports:
       - "5432:5432"
     volumes:
@@ -12,13 +12,15 @@ services:
   redis:
     image: redis:7
     container_name: cimo_redis
+    volumes:
+      - redis_data:/data
 
   backend:
     build:
       context: ./backend
     container_name: cimo_backend
     env_file:
-      - ./backend/${ENV_FILE}
+      - ./backend/.env.${MODE}
     ports:
       - "8000:8000"
     depends_on:
@@ -31,7 +33,7 @@ services:
       context: ./backend
     container_name: cimo_celery
     env_file:
-      - ./backend/${ENV_FILE}
+      - ./backend/.env.${MODE}
     depends_on:
       - redis
     command: ["/backend/docker/app.sh", "celery"]
@@ -41,7 +43,7 @@ services:
       context: ./backend
     container_name: cimo_flower
     env_file:
-      - ./backend/${ENV_FILE}
+      - ./backend/.env.${MODE}
     ports:
       - "5555:5555"
     depends_on:
@@ -53,7 +55,7 @@ services:
       context: ./backend
     container_name: cimo_beat
     env_file:
-      - ./backend/${ENV_FILE}
+      - ./backend/.env.${MODE}
     depends_on:
       - db
       - redis
@@ -65,7 +67,7 @@ services:
     container_name: cimo_load_data
     command: ["/backend/docker/load.sh"]
     env_file:
-      - ./backend/${ENV_FILE}
+      - ./backend/.env.${MODE}
     depends_on:
       - db
     volumes:
@@ -76,13 +78,16 @@ services:
   frontend:
     build:
       context: ./frontend
+      args:
+        MODE: ${MODE}
     container_name: cimo_frontend
     ports:
-      - "3000:3000"
+      - "5173:5173"
     stdin_open: true
     tty: true
     env_file:
-      - ./frontend/${ENV_FILE}
+      - ./frontend/.env.${MODE}
 
 volumes:
   postgres_data:
+  redis_data:

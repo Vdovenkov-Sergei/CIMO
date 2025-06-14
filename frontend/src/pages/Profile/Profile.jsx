@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import './Profile.scss';
 import ProfileNavLink from '../../components/ProfileNavLink';
 import ProfileHeader from '../../components/ProfileHeader';
@@ -20,7 +20,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const { status, ok, data } = await authFetch('/api/users/me', {
+        const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/users/me`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json'
@@ -44,7 +44,7 @@ const Profile = () => {
 
   const handleLogout = async () => {
     try {
-      await authFetch('/api/auth/logout', {
+      await authFetch(`${import.meta.env.VITE_API_URL}/auth/logout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

@@ -1,5 +1,4 @@
 import React from 'react';
-import eyeSlashIconUrl from '../assets/images/eye-slash.svg';
 
 const UnwatchButton = ({ onClick, alt = "Не просмотрено", className = "" }) => {
   return (
@@ -8,7 +7,7 @@ const UnwatchButton = ({ onClick, alt = "Не просмотрено", className
       className={`movie-button movie-button--secondary ${className}`}
       aria-label={alt}
     >
-      <img src={eyeSlashIconUrl} alt={alt} />
+      <img src='/eye-slash.svg' alt={alt} />
     </button>
   );
 };

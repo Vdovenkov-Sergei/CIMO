@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Pagination } from 'swiper/modules';
 import './ForgotPassword.scss';
 import Footer from '../../components/Footer/Footer';
 import HeaderReg from '../../components/HeaderReg/HeaderReg';
@@ -28,7 +26,7 @@ const ForgotPassword = () => {
     setSuccessMessage('');
 
     try {
-      const response = await fetch('/api/auth/password/forgot', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/password/forgot`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
