@@ -1,0 +1,27 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+@import '../../styles/variables';
+
+.header-reg {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background-color: #09090B;
+    height: 85px;
+    
+    .logo {
+        width: 150px;
+    }
+}
+@media (max-width: 576px) {
+    .header-reg {
+        justify-content: center;
+        padding: 16px;
+        .logo {
+            width: 120px;
+        }
+    }
+}
+
+  
+  

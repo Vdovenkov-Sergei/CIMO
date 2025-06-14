@@ -31,9 +31,13 @@ class SUserVerification(BaseSchema):
     email: EmailStr
     code: str = Field(
         ...,
-        pattern=rf"^[A-Z0-9]{Verification.CODE_LENGTH}$",
+        pattern=rf"^[A-Z0-9]{{{Verification.CODE_LENGTH}}}$",
         description=f"Code must be {Verification.CODE_LENGTH} length, can contain A-Z0-9",
     )
+
+
+class SUserResendVerification(BaseSchema):
+    email: EmailStr
 
 
 class SUserRegisterUsername(BaseSchema):

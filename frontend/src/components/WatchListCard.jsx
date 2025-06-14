@@ -2,16 +2,23 @@ import React from 'react';
 import WatchButton from './WatchButton';
 import DeleteButton from './DeleteButton';
 
-const WatchlistCard = ({ movie, onWatch, onDelete, onClick }) => {
+const WatchlistCard = ({ movie, onWatch, onDelete, onCardClick }) => {
   return (
-    <div
-      className="movie-card"
-      onClick={onClick}
-    >
-      <img src={movie.poster} alt={movie.title} className="movie-card__poster" />
-      <h3 className="movie-card__title">{movie.title}</h3>
+    <div className="movie-card">
+      <img
+        src={movie.poster_url || '/no-poster.png'}
+        alt={movie.name}
+        className="movie-card__poster"
+        onClick={() => onCardClick(movie.id)}
+        style={{ cursor: 'pointer' }}
+        onError={(e) => {
+          e.target.src = '/no-poster.png';
+          e.target.onerror = null;
+        }}
+      />
+      <h3 className="movie-card__title">{movie.name}</h3>
       <div className="movie-card__buttons">
-        <WatchButton onClick={() => onWatch(movie.id)} />
+        <WatchButton onClick={() => onWatch(movie)} />
         <DeleteButton onClick={() => onDelete(movie.id)} />
       </div>
     </div>

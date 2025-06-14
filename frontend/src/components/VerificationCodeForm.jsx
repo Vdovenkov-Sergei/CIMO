@@ -4,46 +4,72 @@ import SubmitButton from './SubmitButton';
 import SecondaryButton from './SecondaryButton';
 
 const VerificationCodeForm = ({
+  email = '',
   code = '',
   onCodeChange = () => {},
   onSubmit = () => {},
-  isLoading = false
+  onResend = () => {},
+  isLoading = false,
+  isResending = false,
+  error = '',
+  backendError = '',
+  successMessage = '',
+  countdown = 0
 }) => {
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
+
+  const getSubtitleText = () => {
+    if (backendError) return backendError;
+    if (error) return error;
+    if (successMessage) return successMessage;
+    return `На ${email} отправлен код`;
+  };
+
+  const getSubtitleClass = () => {
+    let className = "auth-form__subtitle";
+    if (backendError || error) className += " auth-form__subtitle--error";
+    if (successMessage) className += " auth-form__subtitle--success";
+    return className;
+  };
+
   return (
     <section className="auth-form">
-      <h2 className="auth-form__title">Введите код верификации</h2>
-      <p className="auth-form__subtitle">
-        На Ваш электронный адрес отправлен код подтверждения
+      <h2 className="auth-form__title">Введите код подтверждения</h2>
+      <p className={getSubtitleClass()}>
+        {getSubtitleText()}
       </p>
 
       <form className="form" onSubmit={onSubmit}>
         <div className="form__group">
           <Input
             type="text"
-            placeholder="Код подтверждения"
+            placeholder="Введите код"
             value={code}
             onChange={onCodeChange}
             className="form__input"
-            maxLength={6} // Обычно коды верификации имеют фиксированную длину
+            required
           />
         </div>
 
         <SubmitButton
           type="submit"
           className="form__button"
-          disabled={isLoading || code.length < 4} // Минимум 4 символа для кода
+          disabled={isLoading || code.length !== 6}
         >
-          {isLoading ? 'Проверка...' : 'Далее'}
+          Далее
         </SubmitButton>
 
         <SecondaryButton
-          className='secondary-btn'
           type="button"
-          disabled={isLoading}
+          onClick={onResend}
+          disabled={countdown > 0 || isResending}
         >
-          Отправить повторно
+          {countdown > 0 ? `Отправить повторно (${formatTime(countdown)})` : 'Отправить повторно'}
         </SecondaryButton>
-
       </form>
     </section>
   );

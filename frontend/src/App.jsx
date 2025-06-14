@@ -1,6 +1,5 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-//import Header from '@/components/Header/Header';
 
 const Login = lazy(() => import('@/pages/Login/Login'));
 const Signup = lazy(() => import('@/pages/Signup/Signup'));
@@ -14,11 +13,14 @@ const MyMovies = lazy(() => import('@/pages/MyMovies/MyMovies'));
 const ChangeNickname = lazy(() => import('@/pages/ChangeNickname/ChangeNickname'));
 const Session = lazy(() => import('@/pages/Session/Session'));
 const SessionMovies = lazy(() => import('@/pages/SessionMovies/SessionMovies'));
+const Invite = lazy(() => import('@/pages/Invite/Invite'));
+const WaitingScreen = lazy(() => import('@/pages/WaitingScreen/WaitingScreen'));
 
 function App() {
   return (
     <BrowserRouter>
       <main>
+        <Suspense fallback={<div></div>}>
           <Routes>
             <Route path="/" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
@@ -32,7 +34,10 @@ function App() {
             <Route path="/changeNickname" element={<ChangeNickname />} />
             <Route path="/session" element={<Session />} />
             <Route path="/sessionMovies" element={<SessionMovies />} />
+            <Route path="/invite" element={<Invite />} />
+            <Route path="/waitingScreen" element={<WaitingScreen />} />
           </Routes>
+        </Suspense>
       </main>
     </BrowserRouter>
   );

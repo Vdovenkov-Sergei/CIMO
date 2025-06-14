@@ -1,53 +1,100 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination } from 'swiper/modules';
 import './Login.scss';
-
-import onboarding1 from '@/assets/images/onboarding1.png';
-import onboarding2 from '@/assets/images/onboarding2.png';
-import onboarding3 from '@/assets/images/onboarding3.png';
 import AuthForm from '../../components/AuthForm';
-import HeaderReg from '../../components/HeaderReg';
-import Footer from '../../components/Footer'
-import Onboarding from '../../components/Onboarding';
+import HeaderReg from '../../components/HeaderReg/HeaderReg';
+import Footer from '../../components/Footer/Footer';
 
 const Login = () => {
-  const onboardingImages = [
-    { id: 1, src: onboarding1, alt: 'Демонстрация функционала 1' },
-    { id: 2, src: onboarding2, alt: 'Демонстрация функционала 2' },
-    { id: 3, src: onboarding3, alt: 'Демонстрация функционала 3' },
-  ];
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [backendError, setBackendError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const redirectUrl = searchParams.get('redirect');
+  const inviteId = searchParams.get('id');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!login.trim() || !password.trim()) {
+      setError('Заполните все поля');
+      setBackendError('');
+      return;
+    }
+
     setIsLoading(true);
-    console.log('Отправка:', { login, password });
-    setTimeout(() => setIsLoading(false), 2000);
+    setError('');
+    setBackendError('');
+    setSuccessMessage('');
+
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          login: login.trim(),
+          password: password.trim()
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        const errorMessage = data.detail || data.message || 'Ошибка авторизации.';
+        setBackendError(errorMessage);
+        throw new Error(errorMessage);
+      }
+
+      setSuccessMessage('Вход выполнен успешно!');
+      if (redirectUrl === '/invite' && inviteId) {
+        navigate(`${redirectUrl}?id=${inviteId}`);
+      } else if (redirectUrl === '/waitingScreen') {
+        navigate(`${redirectUrl}`);
+      } else {
+        setTimeout(() => navigate('/modeSelection'), 1500);
+      }
+      
+    } catch (err) {
+      console.error('Ошибка авторизации:', err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="login-page">
       <HeaderReg className="header" />
 
-      <main className="main-content container">
-        <Onboarding 
-          images={onboardingImages}
-          autoplayDelay={4000}
-          className="custom-onboarding"
-        />
+      <main className="main-content">
 
         <AuthForm
           login={login}
           password={password}
-          onLoginChange={(e) => setLogin(e.target.value)}
-          onPasswordChange={(e) => setPassword(e.target.value)}
+          onLoginChange={(e) => {
+            setLogin(e.target.value);
+            if (error) setError('');
+            if (backendError) setBackendError('');
+          }}
+          onPasswordChange={(e) => {
+            setPassword(e.target.value);
+            if (error) setError('');
+            if (backendError) setBackendError('');
+          }}
           onSubmit={handleSubmit}
           isLoading={isLoading}
+          error={error}
+          backendError={backendError}
+          successMessage={successMessage}
         />
       </main>
 

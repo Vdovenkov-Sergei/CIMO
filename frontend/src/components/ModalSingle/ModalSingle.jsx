@@ -16,7 +16,7 @@ const ModalSingle = ({
   if (!isOpen) return null;
 
   return (
-    <div className="modal">
+    <div className="single-modal">
       <div className="modal__content">
         <h3 className="modal__title">{title}</h3>
         

@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import CimoLogo from '../assets/images/CIMO_logo.svg'; // Импорт логотипа
-import ProfileIcon from '../assets/images/person-square.svg'; // Импорт иконки профиля
+import { Link, useNavigate } from 'react-router-dom';
+import CimoLogo from '/CIMO_logo.svg';
+import ProfileIcon from '../../assets/images/person-square.svg';
+import './Header.scss';
+import { useAuthFetch } from '../../utils/useAuthFetch';
 
 const Header = () => {
+  const navigate = useNavigate();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const authFetch = useAuthFetch();
 
   const toggleProfileMenu = () => {
     setIsProfileMenuOpen(!isProfileMenuOpen);
@@ -14,9 +18,25 @@ const Header = () => {
     setIsProfileMenuOpen(false);
   };
 
+  const handleLogout = async () => {
+    try {
+      await authFetch('/api/auth/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+      });
+      navigate('/');
+    } catch (err) {
+      console.error('Ошибка выхода:', err);
+    } finally {
+      closeProfileMenu();
+    }
+  };
+
   return (
     <header className="header">
-      <img src={CimoLogo} className="logo" alt="CIMO Logo" />
+      <Link to="/modeSelection"><img src={CimoLogo} className="logo" alt="CIMO Logo" /></Link>
       
       <div className="header__profile">
         <div className="profile-menu-container">
@@ -29,7 +49,15 @@ const Header = () => {
                 <Link to="/myMovies" onClick={closeProfileMenu}>Мои фильмы</Link>
               </li>
               <li>
-                <Link to="/" onClick={closeProfileMenu}>Выход</Link>
+                <a 
+                  href="#" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleLogout();
+                  }}
+                >
+                  Выход
+                </a>
               </li>
             </ul>
           )}

@@ -1,0 +1,26 @@
+.liked-movie {
+  position: relative;
+  display: inline-block;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  margin: 20px;
+
+  &__poster {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  &.matched {
+    box-shadow: 0 0 15px 8px rgba(76, 175, 80, 1);
+  }
+}
+
+@media (max-width: 600px) {
+  .liked-movie {
+    &.matched {
+      box-shadow: 0 0 10px 8px rgba(76, 175, 80, 1);
+    }
+  }
+}

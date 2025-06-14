@@ -1,35 +1,42 @@
 import React, { useState } from 'react';
-import PairModal from './PairModal/PairModal'; // Предполагаем, что у вас есть компонент PairModal
+import PairModal from './PairModal/PairModal';
 
 const PairModeCard = ({
   title = "Парный режим",
   description = "Парный режим помогает подобрать фильмы для совместного просмотра исходя из предпочтений в паре.",
   imageSrc = "src/assets/images/mode2.png",
   buttonText = "Парная сессия",
-  inviteLink = "https://example.com/invite/partner",
+  inviteLink,
   copyIconUrl = "src/assets/images/copy-icon.svg",
-  onStartSession
+  onStartSession,
+  onCancelSession,
+  onConfirmSession
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleButtonClick = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(inviteLink);
-    console.log('Ссылка скопирована:', inviteLink);
+    if (onStartSession) {
+      onStartSession(() => setIsModalOpen(true));
+    }
   };
 
   const handleConfirm = () => {
     setIsModalOpen(false);
-    if (onStartSession) {
-      onStartSession();
+    if (onConfirmSession) {
+      onConfirmSession();
     }
   };
 
   const handleCancel = () => {
     setIsModalOpen(false);
+    if (onCancelSession) {
+      onCancelSession();
+    }
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(inviteLink);
+    console.log('Ссылка скопирована:', inviteLink);
   };
 
   return (

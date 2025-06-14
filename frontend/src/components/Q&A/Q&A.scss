@@ -1,0 +1,145 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+@import '../../styles/variables';
+
+.faqWrapper {
+    width: 90%;
+    max-width: 1020px;
+    margin-top: 50px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+.faqContainer {
+    margin: 0 auto;
+    font-family: Inter, sans-serif;
+}
+
+.faqHeader {
+    font-size: 32px;
+    text-align: center;
+    margin-bottom: 30px;
+}
+  
+.faqBlock {
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.blockHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    cursor: pointer;
+    border-radius: 12px;
+    font-size: 20px;
+    text-decoration: none;
+    transition: transform 0.3s, box-shadow 0.3s;
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+}
+
+.blockContent {
+    padding: 0 20px;
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    background-color: rgb(255, 255, 255, 0.03);
+    border-radius: 6px;
+
+    &.isOpen {
+        margin-bottom: 20px;
+        padding: 20px;
+        max-height: 1000px;
+    }
+}
+
+
+.question {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgb(255, 255, 255, 0.2);
+
+    &:last-child {
+        margin-bottom: 0;
+        border-bottom: none;
+    }
+}
+
+.questionText {
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: $accent-color;
+    font-size: 20px;
+}
+
+.answerText {
+    color: $text-color;
+    line-height: 1.5;
+    font-size: 18px;
+}
+
+.arrowIcon {
+    transition: transform 0.3s;
+
+    &.isOpen {
+        transform: rotate(180deg);
+    }
+}
+
+.faq-link {
+    color: $link-color;
+    text-decoration: none;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+.highlight {
+    color: $link-color;
+}
+
+@media (max-width: 1024px) and (min-width: 600px) {
+    .faqWrapper {
+        min-width: 500px;
+        max-width: 560px;
+    }
+}
+
+@media (max-width: 600px) {
+
+    @media (hover: hover) {
+        .blockHeader:hover {
+            background-color: rgb(255, 255, 255, 0.05);
+        }
+    }
+
+    .faqWrapper {
+        min-width: 300px;
+        max-width: 450px;
+    }
+
+    .faqHeader {
+        font-size: 22px;
+    }
+
+    .blockHeader {
+        font-size: 18px;
+    }
+
+    .questionText {
+        font-size: 16px;
+    }
+
+    .answerText {
+        font-size: 14px;
+    }
+}
+
+

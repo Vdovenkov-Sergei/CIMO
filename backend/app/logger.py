@@ -28,3 +28,13 @@ formatter.json_ensure_ascii = False
 logHandler.setFormatter(formatter)
 logger.addHandler(logHandler)
 logger.setLevel(settings.LOG_LEVEL)
+
+
+movie_logger = logging.getLogger("movie")
+movie_handler = logging.FileHandler("app/logs/movie_actions.log", encoding="utf-8")
+movie_formatter = CustomJsonFormatter("%(timestamp)s %(level)s %(message)s")
+movie_formatter.json_ensure_ascii = False
+
+movie_handler.setFormatter(movie_formatter)
+movie_logger.addHandler(movie_handler)
+movie_logger.setLevel(logging.INFO)

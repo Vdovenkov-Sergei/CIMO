@@ -1,16 +1,27 @@
 import React from 'react';
 import UnwatchButton from './UnwatchButton';
 
-const WatchedCard = ({ movie, onUnwatch, onClick }) => {
+const WatchedCard = ({ review, movie, onUnwatch, onClick, onCardClick }) => {
   return (
-    <div
-      className="movie-card"
-      onClick={onClick}
-    >
-      <img src={movie.poster} alt={movie.title} className="movie-card__poster" />
-      <h3 className="movie-card__title">{movie.title}</h3>
+    <div className="movie-card">
+      <img
+        src={movie.poster_url || '/no-poster.png'}
+        alt={movie.name}
+        className="movie-card__poster"
+        onClick={() => onCardClick(movie.id)}
+        onError={(e) => {
+          e.target.src = '/no-poster.png';
+          e.target.onerror = null;
+        }}
+      />
+      <h3 className="movie-card__title">{movie.name}</h3>
+      {review && (
+        <div className="movie-rating">
+          <div className="rating-value" onClick={onClick}>{review}/10</div>
+        </div>
+      )}
       <div className="movie-card__buttons">
-        <UnwatchButton onClick={() => onUnwatch(movie.id)} />
+        <UnwatchButton onClick={() => onUnwatch(movie)} />
       </div>
     </div>
   );

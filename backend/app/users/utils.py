@@ -31,7 +31,7 @@ def generate_verification_code() -> str:
 
 async def send_verification_code(email: EmailStr) -> None:
     code = generate_verification_code()
-    attempts_key = RedisKeys.ATTEMPTS_SEND_KEY.format(email=email)
+    attempts_key = RedisKeys.ATTEMPTS_ENTER_KEY.format(email=email)
     code_key = RedisKeys.CODE_VERIFY_KEY.format(email=email)
 
     await redis_client.setex(code_key, timedelta(seconds=Verification.TIME_PENDING), code)

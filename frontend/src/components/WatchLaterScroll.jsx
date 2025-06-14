@@ -1,16 +1,74 @@
-import React from 'react';
-import WatchLaterCard from './WatchLaterCard';
+import React, { useRef, useState } from 'react';
+import WatchLaterCard from './WatchLaterCard/WatchLaterCard';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
-const WatchLaterScroll = ({ movies, onToggleWatchLater }) => {
+const WatchLaterScroll = ({ movies, onToggleWatchLater, onWatch, onDelete, onCardClick }) => {
+  const scrollRef = useRef();
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(true);
+
+  const scroll = (direction) => {
+    const container = scrollRef.current;
+    if (!container) return;
+
+    const scrollAmount = 150;
+    const newScrollLeft = direction === 'left' 
+      ? container.scrollLeft - scrollAmount 
+      : container.scrollLeft + scrollAmount;
+
+    container.scrollTo({
+      left: newScrollLeft,
+      behavior: 'smooth'
+    });
+  };
+
+  const handleScroll = () => {
+    const container = scrollRef.current;
+    if (!container) return;
+
+    setShowLeftArrow(container.scrollLeft > 0);
+    setShowRightArrow(container.scrollLeft + container.clientWidth < container.scrollWidth);
+  };
+
   return (
-    <div className="movies-scroll">
-      {movies.map(movie => (
-        <WatchLaterCard 
-          key={movie.id} 
-          movie={movie} 
-          onToggleWatchLater={onToggleWatchLater}
-        />
-      ))}
+    <div className="movies-scroll-container filled-scroll watchlist">
+      {showLeftArrow && (
+        <button 
+          className="scroll-button left" 
+          onClick={() => scroll('left')}
+          aria-label="Scroll left"
+        >
+          <FaChevronLeft />
+        </button>
+      )}
+      
+      <div 
+        className="movies-scroll" 
+        ref={scrollRef}
+        onScroll={handleScroll}
+      >
+        {movies.map(obj => (
+          <WatchLaterCard 
+            key={obj.movie.id} 
+            movie={obj.movie} 
+            onToggleWatchLater={onToggleWatchLater}
+            onWatch={onWatch}
+            onDelete={onDelete}
+            onClick={() => onCardClick(obj.movie.id)}
+            is_matched={obj.is_matched}
+          />
+        ))}
+      </div>
+
+      {showRightArrow && (
+        <button 
+          className="scroll-button right" 
+          onClick={() => scroll('right')}
+          aria-label="Scroll right"
+        >
+          <FaChevronRight />
+        </button>
+      )}
     </div>
   );
 };

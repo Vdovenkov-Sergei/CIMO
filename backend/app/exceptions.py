@@ -137,3 +137,8 @@ class MaxTimeVerifyPasswordException(ApiException):
 class SessionAlreadyStartedException(ApiException):
     status_code: int = status.HTTP_403_FORBIDDEN
     error_message: str = "Session with id={session_id} already started"
+
+
+class ActiveSessionNotFoundException(ApiException):
+    status_code: int = status.HTTP_404_NOT_FOUND
+    error_message: str = "Active session not found for user with id={user_id}"

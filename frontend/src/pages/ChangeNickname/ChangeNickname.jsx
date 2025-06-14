@@ -1,24 +1,89 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import './ChangeNickname.scss';
-import Header from '../../components/Header';
-import Footer from '../../components/Footer';
+import Header from '../../components/Header/Header';
+import Footer from '../../components/Footer/Footer';
 import ProfileAvatar from '../../components/ProfileAvatar';
-import ChangeNicknameForm from '../../components/changeNicknameForm';
+import ChangeNicknameForm from '../../components/ChangeNicknameForm';
+import { useAuthFetch } from '../../utils/useAuthFetch';
 
 const ChangeNickname = () => {
-  const user = {
-    avatar: 'src/assets/images/person-square.svg',
-    login: 'cinemood_user',
-    email: 'cinemood.corp@gmail.com'
-  };
+  const navigate = useNavigate();
+  const [user, setUser] = useState({
+    login: '',
+    email: ''
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [backendError, setBackendError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const authFetch = useAuthFetch();
 
-  const [showNicknameForm, setShowNicknameForm] = useState(false);
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const { status, ok, data } = await authFetch('/api/users/me', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+        });
+        setUser({
+          login: data.user_name || '',
+          email: data.email || ''
+        });
+      } catch (err) {
+        console.error('Ошибка:', err);
+        setBackendError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   const handleNicknameSubmit = async (newNickname) => {
-    // Здесь будет логика обновления никнейма
-    console.log('Новый никнейм:', newNickname);
-    setShowNicknameForm(false);
+    if (!newNickname.trim()) {
+      setBackendError('Введите новый никнейм');
+      setSuccessMessage('');
+      return;
+    }
+
+    if (user.login === newNickname.trim()) {
+      setBackendError('Никнейм совпадает с текущим');
+      setSuccessMessage('');
+      return;
+    }
+
+    setIsLoading(true);
+    setBackendError('');
+    setSuccessMessage('');
+
+    try {
+      const { status, ok, data } = await authFetch('/api/users/me', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          user_name: newNickname.trim()
+        }),
+      });
+
+      if (!ok) {
+        const errorMessage = data.detail || data.message || JSON.stringify(data) || 'Ошибка обновления никнейма';
+        setBackendError(errorMessage);
+        return;
+      }
+
+      setUser(prev => ({ ...prev, login: newNickname.trim() }));
+      setSuccessMessage('Никнейм успешно изменен!');
+    } catch (err) {
+      console.error('Ошибка:', err);
+      setBackendError("Никнейм уже занят");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -26,19 +91,14 @@ const ChangeNickname = () => {
       <Header />
 
       <main className="profile-main-nick container">
-        <div className="navigation">
-          <Link to='/modeSelection' className="navigation__link">Главная страница</Link>
-          <span className="delimeter">-</span>
-          <Link to='/Profile' className="navigation__link">Профиль</Link>
-          <span className="delimeter">-</span>
-          <Link to='/changeNickname' className="navigation__link">Изменить никнейм</Link>
-        </div>
-        
         <ProfileAvatar login={user.login} />
 
         <ChangeNicknameForm
           currentNickname={user.login}
           onSubmit={handleNicknameSubmit}
+          isLoading={isLoading}
+          backendError={backendError}
+          successMessage={successMessage}
         />
       </main>
 

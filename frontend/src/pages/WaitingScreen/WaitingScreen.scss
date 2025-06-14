@@ -1,0 +1,33 @@
+@import '../../styles/variables';
+
+.waiting-screen-page {
+    height: 100vh;
+    text-align: center;
+    color: $text-color;
+    font-family: $primary-font;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-image: url('src/assets/images/background.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+  
+    .message {
+      padding: 20px;
+      font-size: 32px;
+      color: $text-color;
+      width: 100%;
+      max-width: 800px;
+    }
+  }
+
+@media (max-width: 600px) {
+  .waiting-screen-page {
+    .message {
+      font-size: 22px;
+    }
+  }
+}

@@ -7,23 +7,30 @@ const SingleModeCard = ({
   imageSrc = "src/assets/images/mode1.png",
   buttonText = "Одиночная сессия",
   confirmText = "Начать",
-  onStartSession
+  onStartSession,
+  onCancelSession,
+  onConfirmSession
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleButtonClick = () => {
-    setIsModalOpen(true);
+    if (onStartSession) {
+      onStartSession(() => setIsModalOpen(true));
+    }
   };
 
   const handleConfirm = () => {
     setIsModalOpen(false);
-    if (onStartSession) {
-      onStartSession();
+    if (onConfirmSession) {
+      onConfirmSession();
     }
   };
 
   const handleCancel = () => {
     setIsModalOpen(false);
+    if (onCancelSession) {
+      onCancelSession();
+    }
   };
 
   return (

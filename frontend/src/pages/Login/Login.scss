@@ -16,27 +16,14 @@ $primary-font: 'Inter', sans-serif;
   display: flex;
   flex-direction: column;
 
-  // Стили хедера
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 40px;
-    background-color: #09090B;
-    height: 85px;
-    
-    .logo {
-        width: 150px;
-    }
-  }
-
   // Основной контент
   .main-content {
   display: flex;
   flex: 1;
-  padding: 40px;
+  padding: 40px 0;
   gap: 60px;
   align-items: center;
+  justify-content: center;
   }
 
   .onboarding {
@@ -67,7 +54,8 @@ $primary-font: 'Inter', sans-serif;
 
   // Форма авторизации
   .auth-form {
-  width: 400px;
+  width: 90%;
+  max-width: 400px;
   padding: 40px 20px;
   border-radius: 12px;
   display: flex;
@@ -85,6 +73,14 @@ $primary-font: 'Inter', sans-serif;
     color: #A1ACFF;
     margin: 0 0 32px 0;
     font-size: 14px;
+
+    &--error {
+      color: $error-color;
+    }
+
+    &--success {
+      color: $success-color;
+    }
   }
 
   .form {
@@ -152,64 +148,30 @@ $primary-font: 'Inter', sans-serif;
     }
   }
   }
-
-
-
-  // Футер
-  .footer {
-    padding: 40px;
-    text-align: center;
-    
-    .footer-title {
-      font-size: 18px;
-      margin-bottom: 12px;
-    }
-    
-    .footer-email {
-      color: $link-color;
-      text-decoration: none;
-      
-      &:hover {
-        text-decoration: underline;
-      }
-    }
-  }
 }
 
 
 
 // Малые экраны (мобильные устройства)
-@media (max-width: 576px) {
+@media (max-width: 600px) {
   .login-page {
-    .header {
-      justify-content: center;
-      padding: 16px;
-      .logo {
-        width: 120px;
-      }
-    }
 
     .main-content {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 20px;
       gap: 32px;
     }
 
-    .onboarding {
-      width: 100%;
-      min-width: unset;
-      &__image {
-        height: auto;
-        max-height: 300px;
-      }
-    }
-
     .auth-form {
-      width: 100%;
-      padding: 24px 16px;
+      width: 90%;
+      max-width: 400px;
+
+      &__title {
+        font-size: 20px;
+        font-weight: 500;
+      }
 
       .form__input {
         font-size: 13px;
@@ -219,28 +181,15 @@ $primary-font: 'Inter', sans-serif;
         font-size: 15px;
       }
     }
-
-    .footer {
-      padding: 20px;
-
-      .footer-title {
-        font-size: 16px;
-      }
-
-      .footer-email {
-        font-size: 14px;
-      }
-    }
   }
 }
 
 // Средние экраны (планшеты и узкие ноутбуки)
-@media (min-width: 577px) and (max-width: 1024px) {
+@media (min-width: 600px) and (max-width: 1024px) {
   .login-page {
     .main-content {
       flex-direction: column;
       align-items: center;
-      padding: 32px;
       gap: 40px;
     }
 

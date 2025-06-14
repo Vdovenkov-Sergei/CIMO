@@ -17,273 +17,161 @@ $primary-font: 'Inter', sans-serif;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-
-    // Стили хедера
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 40px;
-    background-color: #09090B;
-    height: 85px;
-    
-    .logo {
-        width: 150px;
-    }
-  }
-
-  // Меню профиля
-  .profile-menu-container {
-    display: flex;
-    align-items: center;
-    position: relative;
-  }
-
-  .profile-icon {
-    width: 40px;
-    height: 40px;
-    overflow: hidden;
-    cursor: pointer;
-    position: relative;
-    z-index: 101; /* Чтобы иконка была поверх меню */
-
-    &__image {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-  }
-
-  .profile-menu__list {
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    border-radius: 8px;
-    padding: 10px;
-    margin: 0;
-    list-style: none;
-    display: flex;
-    gap: 15px;
-    z-index: 100;
-    right: 100%; /* Располагаем слева от иконки */
-    margin-right: 10px; /* Отступ от иконки */
-
-    li {
-      a {
-        color: $text-color;
-        text-decoration: none;
-        font-size: 14px;
-        display: block;
-        transition: color 0.2s;
-        padding: 8px 12px;
-        white-space: nowrap;
-
-        &:hover {
-          color: $link-color;
-          background-color: rgba(255, 255, 255, 0.1);
-          border-radius: 4px;
-        }
-      }
-    }
-  }
-
-  /* Анимация появления */
-  .profile-menu__list {
-    opacity: 0;
-    transform: translateY(-50%) translateX(20px);
-    visibility: hidden;
-    transition: all 0.3s ease;
-  }
-
-  .profile-menu__list,
-  .profile-menu__list.show {
-    opacity: 1;
-    transform: translateY(-50%) translateX(0);
-    visibility: visible;
-  }
-
-  .navigation {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 30px;
-    text-align: center;
-  
-    &__link {
-      color: $link-color;
-      text-decoration: none;
-  
-      &:hover {
-        text-decoration: underline;
-      }
-    }
-  }
+  background-attachment: fixed;
   
   .profile-main-nick {
     display: flex;
     flex: 1;
     padding: 40px;
-    max-width: 800px;
     width: 100%;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-  }
-  
-  .profile-header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 40px;
-  }
-  
-  .profile-avatar {
-    width: 120px;
-    height: 120px;
-    overflow: hidden;
-    margin-bottom: 20px;
-  
-    &__image {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-  }
-  
-  .profile-login {
-    font-size: 24px;
-    font-weight: 500;
-    margin: 0;
-    color: $text-color;
-  }
-  
-  .change-nickname {
-    width: 400px;
-    padding: 40px 20px;
-    border-radius: 12px;
-    display: flex;
-    flex-direction: column;
-    background-color: #121214;
-    text-align: center;
-    
-    &__title {
-      font-size: 24px;
-      font-weight: 600;
-      margin: 0 0 8px 0;
-    }
-    
-    &__subtitle {
-      color: #A1ACFF;
-      margin: 0 0 32px 0;
-      font-size: 14px;
-    }
-  
-    .form {
+
+    .profile-header {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      align-items: center;
+      margin-bottom: 40px;
+    }
+    
+    .profile-avatar {
+      width: 120px;
+      height: 120px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    
+      &__image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+    
+    .profile-login {
+      font-size: 24px;
+      font-weight: 500;
+      margin: 0;
+      color: $text-color;
+    }
+    
+    .change-nickname {
+      width: 90%;
+      max-width: 400px;
+      padding: 40px 20px;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      background-color: #121214;
+      text-align: center;
+      
+      &__title {
+        font-size: 24px;
+        font-weight: 600;
+        margin: 0 0 8px 0;
+      }
+      
+      &__subtitle {
+        color: #A1ACFF;
+        margin: 0 0 32px 0;
+        font-size: 14px;
   
-      &__group {
+        &--error {
+          color: $error-color;
+        }
+  
+        &--success {
+          color: $success-color;
+        }
+      }
+    
+      .form {
         display: flex;
         flex-direction: column;
-        gap: 8px;
-      }
-      
-      &__input {
-        padding: 14px 16px;
-        background-color: #18181B;
-        border: 1px solid #3F3F46;
-        border-radius: 8px;
-        color: #FFFFFF;
-        font-family: 'Inter', sans-serif;
-        font-size: 14px;
-        
-        &::placeholder {
-          color: #71717A;
+        gap: 12px;
+    
+        &__group {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
         }
         
-        &:focus {
-          outline: none;
-          border-color: #A1ACFF;
+        &__input {
+          padding: 14px 16px;
+          background-color: #18181B;
+          border: 1px solid #3F3F46;
+          border-radius: 8px;
+          color: #FFFFFF;
+          font-family: 'Inter', sans-serif;
+          font-size: 14px;
+          
+          &::placeholder {
+            color: #71717A;
+          }
+          
+          &:focus {
+            outline: none;
+            border-color: #A1ACFF;
+          }
         }
-      }
-
-    &__button {
-      text-align: center;
-      padding: 12px 24px;
-      background-color: $button-color;
-      font-size: 16px;
-      color: $text-color;
-      border: none;
-      border-radius: 6px;
-      font-family: $primary-font;
-      font-weight: 500;
-      cursor: pointer;
-      
-      &:hover {
-        background-color: $button-hover-color;
+  
+      &__button {
+        text-align: center;
+        padding: 12px 24px;
+        background-color: $button-color;
+        font-size: 16px;
+        color: $text-color;
+        border: none;
+        border-radius: 6px;
+        font-family: $primary-font;
+        font-weight: 500;
+        cursor: pointer;
+        
+        &:hover {
+          background-color: $button-hover-color;
+        }
       }
     }
   }
-
-  .footer {
-    padding: 40px;
-    text-align: center;
-    
-    .footer-title {
-      font-size: 18px;
-      margin-bottom: 12px;
-    }
-    
-    .footer-email {
-      color: $link-color;
-      text-decoration: none;
-      
-      &:hover {
-        text-decoration: underline;
-      }
-    }
   }
-}
-
 }
 
 // Адаптивность
 @media (max-width: 600px) {
   .change-nickname-page {
-    .header {
-      height: auto;
-  
-      .logo {
-        width: 120px;
-      }
-    }
-  
-    .profile-menu__list {
-      flex-direction: column;
-      background-color: #18181B;
-      padding: 12px;
-      transform: translateY(20%) translateX(38%);
-    }
-  
-    .change-nickname {
-      padding: 20px;
-      min-width: 400px;
-    }
-
-    .footer {
+    .profile-main-nick {
       padding: 20px;
 
-      .footer-title {
-        font-size: 16px;
+      .profile-header {
+        .profile-avatar {
+          width: 80px;
+          height: 80px;
+        }
+  
+        .profile-login {
+          font-size: 20px;
+        }
+  
+        &__link {
+          font-size: 14px;
+        }
       }
+      .change-nickname {
+        width: 100%;
+        max-width: 400px;
+  
+        &__title {
+          font-size: 20px;
+        }
 
-      .footer-email {
-        font-size: 14px;
       }
     }
+    
   }
-  
+}
+
+@media (hover: hover) {
+  .form_button:hover {
+    background-color: $button-hover-color;
+  }
 }
