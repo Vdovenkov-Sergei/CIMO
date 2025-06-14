@@ -1,4 +1,3 @@
-import random
 import uuid
 from datetime import UTC, datetime
 
@@ -9,6 +8,7 @@ from app.exceptions import InvalidSessionStatusException
 from app.logger import logger, movie_logger
 from app.movies.dao import MovieDAO
 from app.movies.schemas import SMovieRead
+from app.recommendation.service import recommender
 from app.session_movies.dao import SessionMovieDAO
 from app.session_movies.schemas import MatchNotification, SSessionMovieCreate, SSessionMovieRead
 from app.sessions.dependencies import get_current_session
@@ -85,9 +85,10 @@ async def swipe_session_movie(
                 },
             )
 
-    # TODO Здесь будет логика обновления рекомендаций и отдачи new_movie_id
-    new_movie_id = random.randint(1, 10000)
-
+    await recommender.update_user_vector(session.id, session.user_id, data.movie_id, data.time_swiped, data.is_liked)
+    new_movie_id = await recommender.get_recommendation(
+        session.id, session.user_id, session.is_pair, session.is_onboarding
+    )
     logger.info("Swipe completed.", extra={"user_id": session.user_id, "new_movie_id": new_movie_id})
     return {"message": "The movie was successfully swiped.", "movie_id": new_movie_id}
 

@@ -1,0 +1,72 @@
+[
+  {
+    "id": 1,
+    "chat_id": 1,
+    "created_at": "2024-01-10T12:06:00Z",
+    "sender": "BOT",
+    "content": "Hello, User! How can I help you with movies today?"
+  },
+  {
+    "id": 2,
+    "chat_id": 1,
+    "created_at": "2024-01-10T12:07:00Z",
+    "sender": "USER",
+    "content": "Hi, I want to know the latest action movies."
+  },
+  {
+    "id": 3,
+    "chat_id": 1,
+    "created_at": "2024-01-10T12:08:00Z",
+    "sender": "BOT",
+    "content": "Here are the latest action movies: Avengers: Endgame, The Dark Knight."
+  },
+  {
+    "id": 4,
+    "chat_id": 2,
+    "created_at": "2024-02-15T08:36:00Z",
+    "sender": "BOT",
+    "content": "Hello, Admin! How can I assist you today?"
+  },
+  {
+    "id": 5,
+    "chat_id": 2,
+    "created_at": "2024-02-15T08:37:00Z",
+    "sender": "USER",
+    "content": "Could you recommend some sci-fi movies?"
+  },
+  {
+    "id": 6,
+    "chat_id": 2,
+    "created_at": "2024-02-15T08:38:00Z",
+    "sender": "BOT",
+    "content": "Sure! I recommend 'Inception' and 'Interstellar'."
+  },
+  {
+    "id": 7,
+    "chat_id": 3,
+    "created_at": "2024-03-05T16:51:00Z",
+    "sender": "BOT",
+    "content": "Hello, User 3! How can I help you today?"
+  },
+  {
+    "id": 8,
+    "chat_id": 3,
+    "created_at": "2024-03-05T16:52:00Z",
+    "sender": "USER",
+    "content": "I want to know the latest movies in the anime genre."
+  },
+  {
+    "id": 9,
+    "chat_id": 3,
+    "created_at": "2024-03-05T16:53:00Z",
+    "sender": "BOT",
+    "content": "The latest anime movies are 'Your Name' and 'Demon Slayer: Mugen Train'."
+  },
+  {
+    "id": 10,
+    "chat_id": 4,
+    "created_at": "2024-04-20T09:06:00Z",
+    "sender": "BOT",
+    "content": "Hello, User 4! What can I do for you today?"
+  }
+]
