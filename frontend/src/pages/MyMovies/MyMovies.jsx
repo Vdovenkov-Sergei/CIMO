@@ -36,7 +36,7 @@ const MyMovies = () => {
 
     try {
       const { status, ok, data } = await authFetch(
-        `/api/movies/later/?offset=${offset}&limit=${limit}`, {
+        `${import.meta.env.VITE_API_URL}/movies/later/?offset=${offset}&limit=${limit}`, {
             method: 'GET',
             headers: {
             'Content-Type': 'application/json',
@@ -78,7 +78,7 @@ const MyMovies = () => {
 
     try {
       const { status, ok, data } = await authFetch(
-        `/api/movies/viewed/?offset=${offset}&limit=${limit}&order_review=${reviewSort}`, {
+        `${import.meta.env.VITE_API_URL}/movies/viewed/?offset=${offset}&limit=${limit}&order_review=${reviewSort}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -134,7 +134,7 @@ const MyMovies = () => {
     setError('');
 
     try {
-      await authFetch('/api/movies/viewed/', {
+      await authFetch(`${import.meta.env.VITE_API_URL}/movies/viewed/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -145,7 +145,7 @@ const MyMovies = () => {
         }),
       });
 
-      await authFetch(`/api/movies/later/${movieToRate.id}`, {
+      await authFetch(`${import.meta.env.VITE_API_URL}/movies/later/${movieToRate.id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -169,7 +169,7 @@ const MyMovies = () => {
     setError('');
 
     try {
-      await authFetch(`/api/movies/viewed/${movieToRate.movie.id}`, {
+      await authFetch(`${import.meta.env.VITE_API_URL}/movies/viewed/${movieToRate.movie.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -196,7 +196,7 @@ const MyMovies = () => {
     setError('');
 
     try {
-      await authFetch('/api/movies/later/', {
+      await authFetch(`${import.meta.env.VITE_API_URL}/movies/later/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -206,7 +206,7 @@ const MyMovies = () => {
         }),
       });
 
-      await authFetch(`/api/movies/viewed/${movie.id}`, {
+      await authFetch(`${import.meta.env.VITE_API_URL}/movies/viewed/${movie.id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -227,7 +227,7 @@ const MyMovies = () => {
     setError('');
 
     try {
-      await authFetch(`/api/movies/later/${movieId}`, {
+      await authFetch(`${import.meta.env.VITE_API_URL}/movies/later/${movieId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -255,7 +255,7 @@ const MyMovies = () => {
 
   const handleMovieCardClick = async (movieId) => {
     try {
-      const response = await fetch(`/api/movies/${movieId}/detailed`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/movies/${movieId}/detailed`);
       const data = await response.json();
       setSelectedMovie(data);
       setIsDetailsModalOpen(true);

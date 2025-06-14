@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import CimoLogo from '/CIMO_logo.svg';
-import ProfileIcon from '../../assets/images/person-square.svg';
 import './Header.scss';
 import { useAuthFetch } from '../../utils/useAuthFetch';
 
@@ -20,7 +18,7 @@ const Header = () => {
 
   const handleLogout = async () => {
     try {
-      await authFetch('/api/auth/logout', {
+      await authFetch(`${import.meta.env.VITE_API_URL}/auth/logout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -36,7 +34,7 @@ const Header = () => {
 
   return (
     <header className="header">
-      <Link to="/modeSelection"><img src={CimoLogo} className="logo" alt="CIMO Logo" /></Link>
+      <Link to="/modeSelection"><img src='/CIMO_logo.svg' className="logo" alt="CIMO Logo" /></Link>
       
       <div className="header__profile">
         <div className="profile-menu-container">
@@ -69,7 +67,7 @@ const Header = () => {
             aria-expanded={isProfileMenuOpen}
           >
             <img 
-              src={ProfileIcon} 
+              src='/person-square.svg' 
               alt="Профиль" 
               className="profile-icon__image"
             />

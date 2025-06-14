@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Pagination } from 'swiper/modules';
 import './Signup.scss';
 import HeaderReg from '../../components/HeaderReg/HeaderReg';
 import Footer from '../../components/Footer/Footer';
@@ -51,7 +49,7 @@ const Signup = () => {
     setSuccessMessage('');
     
     try {
-      const response = await fetch('/api/auth/register/email', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/register/email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

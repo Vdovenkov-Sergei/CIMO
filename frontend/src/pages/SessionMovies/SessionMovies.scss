@@ -1,5 +1,5 @@
+@use '../../styles/variables' as *;
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-@import '../../styles/variables';
 
 // Базовые переменные
 $bg-color: #09090B;
@@ -13,7 +13,7 @@ $primary-font: 'Inter', sans-serif;
   font-family: $primary-font;
   display: flex;
   flex-direction: column;
-  background-image: url('src/assets/images/background.png');
+  background-image: url('/background.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

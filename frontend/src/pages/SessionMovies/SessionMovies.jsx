@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
 import './SessionMovies.scss';
@@ -142,7 +142,7 @@ const SessionMovies = () => {
 
     try {
       const { status, ok, data } = await authFetch(
-        `/api/movies/session/?offset=${offset}&limit=${limit}`, {
+        `${import.meta.env.VITE_API_URL}/movies/session/?offset=${offset}&limit=${limit}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -171,7 +171,7 @@ const SessionMovies = () => {
 
   const handleCardClick = async (movieId) => {
     try {
-      const response = await fetch(`/api/movies/${movieId}/detailed`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/movies/${movieId}/detailed`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -195,7 +195,7 @@ const SessionMovies = () => {
     setError('');
 
     try {
-      await authFetch('/api/movies/later/', {
+      await authFetch(`${import.meta.env.VITE_API_URL}/movies/later/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -205,7 +205,7 @@ const SessionMovies = () => {
         }),
       });
 
-      await authFetch(`/api/movies/session/${movieId}`, {
+      await authFetch(`${import.meta.env.VITE_API_URL}/movies/session/${movieId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -226,7 +226,7 @@ const SessionMovies = () => {
     setError('');
 
     try {
-      await authFetch(`/api/movies/session/${movieId}`, {
+      await authFetch(`${import.meta.env.VITE_API_URL}/movies/session/${movieId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -252,7 +252,7 @@ const SessionMovies = () => {
     setError('');
 
     try {
-      await authFetch('/api/movies/viewed/', {
+      await authFetch(`${import.meta.env.VITE_API_URL}/movies/viewed/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -263,7 +263,7 @@ const SessionMovies = () => {
         }),
       });
 
-      await authFetch(`/api/movies/session/${movieToRate.id}`, {
+      await authFetch(`${import.meta.env.VITE_API_URL}/movies/session/${movieToRate.id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -286,7 +286,7 @@ const SessionMovies = () => {
     setError('');
 
     try {
-      await authFetch('/api/sessions/status', {
+      await authFetch(`${import.meta.env.VITE_API_URL}/sessions/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

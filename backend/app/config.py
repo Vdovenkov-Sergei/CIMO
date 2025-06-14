@@ -23,25 +23,6 @@ class Settings(BaseSettings):
     def sync_database_url(self) -> str:
         return f"postgresql+psycopg2://{self.DB_USER}:{self.DB_PASS}" f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
-    TEST_DB_HOST: str
-    TEST_DB_PORT: int
-    TEST_DB_USER: str
-    TEST_DB_PASS: str
-    TEST_DB_NAME: str
-
-    @property
-    def test_async_database_url(self) -> str:
-        return f"postgresql+asyncpg://" \
-               f"{self.TEST_DB_USER}:{self.TEST_DB_PASS}" \
-               f"@{self.TEST_DB_HOST}:{self.TEST_DB_PORT}/{self.TEST_DB_NAME}"
-         
-        
-    @property
-    def test_sync_database_url(self) -> str:
-        return f"postgresql+psycopg2://" \
-               f"{self.TEST_DB_USER}:{self.TEST_DB_PASS}" \
-               f"@{self.TEST_DB_HOST}:{self.TEST_DB_PORT}/{self.TEST_DB_NAME}"
-
     SECRET_KEY: str
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
@@ -50,7 +31,7 @@ class Settings(BaseSettings):
     REDIS_HOST: str
     REDIS_PORT: int
     CACHE_TTL: int
-      
+
     @property
     def redis_url(self) -> str:
         return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}"
@@ -63,6 +44,25 @@ class Settings(BaseSettings):
     FRONTEND_URL: str
 
     SENTRY_DSN: str
+    
+    # Test database settings
+    TEST_DB_HOST: str = "localhost"
+    TEST_DB_PORT: int = 5432
+    TEST_DB_USER: str = "postgres"
+    TEST_DB_PASS: str = "postgres"
+    TEST_DB_NAME: str = "test"
+
+    @property
+    def test_async_database_url(self) -> str:
+        return f"postgresql+asyncpg://" \
+               f"{self.TEST_DB_USER}:{self.TEST_DB_PASS}" \
+               f"@{self.TEST_DB_HOST}:{self.TEST_DB_PORT}/{self.TEST_DB_NAME}"
+
+    @property
+    def test_sync_database_url(self) -> str:
+        return f"postgresql+psycopg2://" \
+               f"{self.TEST_DB_USER}:{self.TEST_DB_PASS}" \
+               f"@{self.TEST_DB_HOST}:{self.TEST_DB_PORT}/{self.TEST_DB_NAME}"
 
 
 settings = Settings()  # type: ignore

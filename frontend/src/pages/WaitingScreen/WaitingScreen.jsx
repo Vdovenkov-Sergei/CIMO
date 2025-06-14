@@ -11,7 +11,7 @@ const WaitingScreen = () => {
 
   const createTrySession = async () => {
     try {
-      const { status, ok, data } = await authFetch('/api/sessions/', {
+      const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/sessions/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -25,7 +25,7 @@ const WaitingScreen = () => {
     
   const activateSingleSession = async () => {
     try {
-      const { status, ok, data } = await authFetch('/api/sessions/status', {
+      const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/sessions/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

@@ -1,15 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Pagination } from 'swiper/modules';
 import './Nickname.scss';
 
-import onboarding1 from '@/assets/images/onboarding1.png';
-import onboarding2 from '@/assets/images/onboarding2.png';
-import onboarding3 from '@/assets/images/onboarding3.png';
 import Footer from '../../components/Footer/Footer';
 import HeaderReg from '../../components/HeaderReg/HeaderReg';
-import Onboarding from '../../components/Onboarding';
 import NicknameForm from '../../components/NicknameForm';
 
 const Nickname = () => {
@@ -38,7 +32,7 @@ const Nickname = () => {
     setSuccessMessage('');
 
     try {
-      const response = await fetch('/api/auth/register/username', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/register/username`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
