@@ -1,4 +1,3 @@
-import random
 import uuid
 from datetime import UTC, datetime
 from typing import Any
@@ -99,7 +98,8 @@ async def check_ready_participants(session_id: uuid.UUID) -> bool:
         logger.warning("Not enough participants.", extra={"session_id": session_id, "count": len(participants)})
         raise ParticipantsNotEnoughException
 
-    ready_flag = all(p.status == SessionStatus.PREPARED for p in participants)
+    READY_STATUSES = {SessionStatus.PREPARED, SessionStatus.ACTIVE, SessionStatus.REVIEW}
+    ready_flag = all(p.status in READY_STATUSES for p in participants)
     if ready_flag:
         logger.info("All participants are ready.")
     else:

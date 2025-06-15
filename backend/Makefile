@@ -2,7 +2,7 @@ MAIN_APP = app.main:app
 CELERY_APP = app.tasks.celery:celery_app
 SRC_CODE_DIR = app/
 POETRY_CMD = poetry run
-EXCLUDE = migrations
+EXCLUDE = migrations models
 
 .PHONY: run celery flower beat test format lint dev style clean
 
