@@ -44,10 +44,10 @@ const CaretUp = () => (
 );
 
 const STORAGE_KEYS = {
+  //CURRENT_MOVIE_ID: 'session_current_movie_id',
   SHOW_COUNTDOWN: 'session_show_countdown',
   SHOW_LIKED_MOVIES: 'session_show_liked_movies',
-  TIMER: 'session_timer',
-  TIME_SWIPED: 'session_time_swiped',
+  START_TIME: 'session_start_time',
   STEP: 'step'
 };
 
@@ -69,11 +69,7 @@ const Session = () => {
   const [notificationMovie, setNotificationMovie] = useState(null);
   const [latestMessage, setLatestMessage] = useState(null);
   const ws = useRef(null);
-  const [timeSwiped, setTimeSwiped] = useState(0);
-  const [timer, setTimer] = useState(0);
-  const timerRef = useRef(null);
-  const startTimeRef = useRef(null);
-  const accumulatedTimeRef = useRef(0);
+  const [startTime, setStartTime] = useState(0);
   const [queue, setQueue] = useState([]);
   const [step, setStep] = useState(0);
   const [isOnboarding, setIsOnboarding] = useState(false);
@@ -95,10 +91,10 @@ const Session = () => {
   const saveState = () => {
     try {
       const stateToSave = {
+        //[STORAGE_KEYS.CURRENT_MOVIE_ID]: currentMovieId,
         [STORAGE_KEYS.SHOW_COUNTDOWN]: showCountdown,
         [STORAGE_KEYS.SHOW_LIKED_MOVIES]: showLikedMovies,
-        [STORAGE_KEYS.TIMER]: timer,
-        [STORAGE_KEYS.TIME_SWIPED]: timeSwiped,
+        [STORAGE_KEYS.START_TIME]: startTime,
         [STORAGE_KEYS.STEP]: step
       };
 
@@ -115,16 +111,16 @@ const Session = () => {
   // Восстановление состояния
   const loadState = () => {
     try {
+      //const storedCurrentMovieId = localStorage.getItem(STORAGE_KEYS.CURRENT_MOVIE_ID);
       const storedShowCountdown = localStorage.getItem(STORAGE_KEYS.SHOW_COUNTDOWN);
       const storedShowLikedMovies = localStorage.getItem(STORAGE_KEYS.SHOW_LIKED_MOVIES);
-      const storedTimer = localStorage.getItem(STORAGE_KEYS.TIMER);
-      const storedTimeSwiped = localStorage.getItem(STORAGE_KEYS.TIME_SWIPED);
+      const storedStartTime = localStorage.getItem(STORAGE_KEYS.START_TIME);
       const storedStep = localStorage.getItem(STORAGE_KEYS.STEP);
 
+      //if (storedCurrentMovieId) setCurrentMovieId(JSON.parse(storedCurrentMovieId));
       if (storedShowCountdown) setShowCountdown(JSON.parse(storedShowCountdown));
       if (storedShowLikedMovies) setShowLikedMovies(JSON.parse(storedShowLikedMovies));
-      if (storedTimer) setTimer(Number(JSON.parse(storedTimer)));
-      if (storedTimeSwiped) setTimeSwiped(Number(JSON.parse(storedTimeSwiped)));
+      if (storedStartTime) setStartTime(Number(JSON.parse(storedStartTime)));
       if (storedStep) setStep(Number(JSON.parse(storedStep)));
       console.log(step);
     } catch (error) {
@@ -137,21 +133,19 @@ const Session = () => {
     Object.values(STORAGE_KEYS).forEach(key => {
       localStorage.removeItem(key);
     });
-    localStorage.removeItem('session_accumulated_time');
-    localStorage.removeItem('session_start_time');
   };
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const sessionId = searchParams.get('id');
     setSessionId(sessionId);
-      
     if (!sessionId) {
       return;
     }
   
-    const protocol = import.meta.env.VITE_WS_PROTOCOL || 'ws';
-    const host = import.meta.env.VITE_WS_HOST || 'localhost:8000';
+    const url = new URL(import.meta.env.VITE_API_URL);
+    const protocol = url.protocol === 'https:' ? 'wss' : 'ws';
+    const host = url.host;
     const wsUrl = `${protocol}://${host}/movies/session/ws/${sessionId}`;
       
     ws.current = new WebSocket(wsUrl);
@@ -220,89 +214,25 @@ const Session = () => {
     }
   }, [queue]);
 
-  const startTimer = () => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-    }
-    
-    startTimeRef.current = Date.now() - timer * 1000;
-    
-    timerRef.current = setInterval(() => {
-      const currentTime = Date.now();
-      const elapsedSinceStart = Math.floor((currentTime - startTimeRef.current) / 1000);
-      setTimer(accumulatedTimeRef.current + elapsedSinceStart);
-    }, 1000);
-  };
-
-  useEffect(() => {
-    const savedAccumulatedTime = localStorage.getItem('session_accumulated_time');
-    const savedStartTime = localStorage.getItem('session_start_time');
-    
-    if (savedAccumulatedTime && savedStartTime) {
-      const parsedAccumulated = parseFloat(savedAccumulatedTime);
-      const parsedStartTime = parseInt(savedStartTime, 10);
-      
-      if (Date.now() - parsedStartTime < 86400000) {
-        accumulatedTimeRef.current = parsedAccumulated;
-        startTimeRef.current = parsedStartTime;
-        const elapsedSinceSave = Math.floor((Date.now() - parsedStartTime) / 1000);
-        setTimer(parsedAccumulated + elapsedSinceSave);
-      }
-    }
-    
-    startTimer();
-
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    const handleBeforeUnload = () => {
-      const currentAccumulated = Math.floor(accumulatedTimeRef.current + 
-                               (Date.now() - startTimeRef.current) / 1000);
-      
-      localStorage.setItem('session_accumulated_time', currentAccumulated.toString());
-      localStorage.setItem('session_start_time', Date.now().toString());
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      handleBeforeUnload();
-    };
-  }, []);
-
   useEffect(() => {
     loadState();
     checkSessionStatus();
-  
-  
-    if (location.state?.movie_id) {
-      setCurrentMovieId(location.state.movie_id);
-      fetchCurrentMovie(location.state.movie_id);
-    }
+
     fetchLikedMovies(true);
-    setIsOnboarding(location.state.is_onboarding);
-    startTimer(timer);
+    if (location.state?.is_onboarding) {
+      setIsOnboarding(location.state.is_onboarding);
+    }
   
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-    };
+    return;
   }, []);
 
   useEffect(() => {
     saveState();
-  }, [showCountdown, showLikedMovies, timer, timeSwiped, step]);
+  }, [showCountdown, showLikedMovies, startTime, step]);
 
   const checkSessionStatus = async () => {
     try {
-      const { status, ok, data } = await authFetch('/api/sessions/me', {
+      const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/sessions/me`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -310,6 +240,8 @@ const Session = () => {
       });
       if (data.status === 'PREPARED') {
         setShowCountdown(true);
+      } else {
+        activateSession();
       }
     } catch (err) {
       console.error('Error checking session status:', err);
@@ -317,29 +249,13 @@ const Session = () => {
   };
 
   const finishSession = async () => {
-    setIsLoading(true);
-    try {
-      localStorage.removeItem('session_accumulated_time');
-      localStorage.removeItem('session_start_time');
-      clearSavedState();
-      await authFetch('/api/sessions/status', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: 'REVIEW' }),
-      });
-      navigate('/sessionMovies', { state: { sessionId: sessionId, isOnboarding: isOnboarding } });
-    } catch (err) {
-      console.error('Error finishing session:', err);
-    } finally {
-      setIsLoading(false);
-    }
+    clearSavedState();
+    navigate('/sessionMovies', { state: { sessionId: sessionId, isOnboarding: isOnboarding } });
   };
 
   const fetchCurrentMovie = async (movieId) => {
     try {
-      const response = await fetch(`/api/movies/${movieId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/movies/${movieId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -351,6 +267,7 @@ const Session = () => {
       }
       else {
         setCurrentMovie(data);
+        setStartTime(Date.now());
       }
     } catch (err) {
       console.error('Error fetching current movie:', err);
@@ -359,7 +276,7 @@ const Session = () => {
 
   const fetchMovieDetails = async (movieId) => {
     try {
-      const response = await fetch(`/api/movies/${movieId}/detailed`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/movies/${movieId}/detailed`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -376,7 +293,7 @@ const Session = () => {
     try {
       const newOffset = reset ? 0 : offset;
       const { status, ok, data } = await authFetch(
-        `/api/movies/session/?limit=${limit}&offset=${newOffset}`, {
+        `${import.meta.env.VITE_API_URL}/movies/session/?limit=${limit}&offset=${newOffset}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -400,15 +317,9 @@ const Session = () => {
 
   const handleMovieAction = async (movieId, isLiked) => {
     try {
-      const totalTime = Math.floor(accumulatedTimeRef.current + 
-                       (Date.now() - startTimeRef.current) / 1000);
-      setTimeSwiped(totalTime);
-      
-      accumulatedTimeRef.current = 0;
-      startTimeRef.current = Date.now();
-      setTimer(0);
+      const timeSwiped = (Date.now() - startTime) / 1000;
 
-      const { status, ok, data } = await authFetch('/api/movies/session/', {
+      const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/movies/session/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -435,14 +346,13 @@ const Session = () => {
 
   const activateSession = async () => {
     try {
-      const { status, ok, data } = await authFetch('/api/sessions/status', {
+      const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/sessions/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ status: 'ACTIVE' }),
       });
-      
       if (data.movie_id) {
         setCurrentMovieId(data.movie_id);
         fetchCurrentMovie(data.movie_id);
@@ -510,7 +420,7 @@ const Session = () => {
             <AnimatePresence>
               {currentMovie && !showCountdown && (
                 <>
-                  {currentMovie.id !== -1 ? (
+                  {currentMovieId !== -1 ? (
                       <SwipeableMovieCard 
                         movie={currentMovie} 
                         onClick={() => setShowDetails(currentMovie)}

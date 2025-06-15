@@ -23,10 +23,6 @@ venv/
 Dockerfile
 docker-compose.yml
 
-# Secrets
-.env
-.env.*
-
 # IDE
 .vscode/
 .idea/

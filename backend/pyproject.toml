@@ -51,6 +51,7 @@ mypy = "^1.15.0"
 isort = "^6.0.0"
 httpx = "^0.28.1"
 ruff = "^0.9.5"
+pytest-asyncio = "^1.0.0"
 
 [tool.isort]
 profile = "black"

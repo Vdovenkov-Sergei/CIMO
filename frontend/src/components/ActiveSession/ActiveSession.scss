@@ -1,4 +1,4 @@
-@import '../../styles/variables';
+@use '../../styles/variables' as *;
 
 .active-session-modal {
     position: fixed;
@@ -24,13 +24,22 @@
       justify-content: center;
       gap: 10px;
     }
+
+    &__title {
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    &__description {
+      color: #ffffffb4;
+    }
     
     &__buttons {
       display: flex;
       justify-content: space-around;
       margin-top: 20px;
     
-      .cancel {
+      .finish-session {
         width: 150px;
         padding: 12px 24px;
         text-decoration: none;
@@ -49,7 +58,7 @@
         }
       }
     
-      .start {
+      .restart-session {
         width: 150px;
         padding: 12px 24px;
         text-decoration: none;
@@ -72,14 +81,14 @@
     @media (max-width: 600px) {
       &__content {
         padding: 16px;
-        width: 95%;
+        width: 90%;
       }
     
       &__buttons {
-        flex-direction: column;
+        flex-direction: column-reverse;
         gap: 10px;
     
-        &-cancel, &-start {
+        .finish-session, .restart-session {
           width: 100%;
         }
       }

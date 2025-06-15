@@ -1,7 +1,7 @@
 import uuid
 import pytest
 from app.sessions.dao import SessionDAO
-from app.sessions.models import Session, SessionStatus
+from app.sessions.models import SessionStatus
 
 
 @pytest.mark.parametrize(
@@ -43,10 +43,10 @@ async def test_update_and_delete_session(prepare_database):
     )
     assert affected == 1
 
-    deleted = await SessionDAO.delete_session(session_id=session_id, user_id=user_id)
+    deleted = await SessionDAO.leave_session(session_id=session_id, user_id=user_id)
     assert deleted == 1
 
-    deleted_none = await SessionDAO.delete_session(session_id=session_id, user_id=user_id)
+    deleted_none = await SessionDAO.leave_session(session_id=session_id, user_id=user_id)
     assert deleted_none == 0
 
 

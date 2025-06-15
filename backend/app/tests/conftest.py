@@ -7,7 +7,7 @@ from httpx import AsyncClient, ASGITransport
 
 from app.chats.dao import ChatDAO
 from app.config import settings
-from app.database import Base, engine
+from app.database import Base, async_engine as engine
 from app.main import app as fastapi_app
 from app.messages.dao import MessageDAO
 from app.movie_roles.dao import MovieRoleDAO

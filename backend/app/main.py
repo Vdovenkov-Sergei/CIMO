@@ -1,6 +1,7 @@
 # type: ignore
 
 import logging
+import os
 import time
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -76,6 +77,10 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
             exc_info=True,
         )
         raise
+
+    if not os.path.exists(faiss_index.path):
+        logger.info("FAISS index file not found, building index...")
+        faiss_index.build()
 
     faiss_index.load()
     yield

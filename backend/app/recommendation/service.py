@@ -8,10 +8,11 @@ from typing import Optional
 import numpy as np
 import numpy.typing as npt
 
-from app.constants import RedisKeys
+from app.constants import General, RedisKeys
 from app.database import redis_bin_client, redis_client
 from app.logger import logger
 from app.recommendation.index import FaissIndex, faiss_index
+from app.recommendation.movie_cache_manager import MovieCacheManager
 
 BASE_DIR = Path(__file__).parent.parent
 ONBOARDING_FILE_PATH = BASE_DIR / "data" / "recommender" / "onboarding.json"
@@ -32,7 +33,7 @@ class RecommendationService:
             self.popular_movies = json.load(file)
 
     async def update_user_vector(
-        self, session_id: uuid.UUID, user_id: int, movie_id: int, time_swiped: int, is_liked: bool = False
+        self, session_id: uuid.UUID, user_id: int, movie_id: int, time_swiped: float, is_liked: bool = False
     ) -> None:
 
         logger.info(
@@ -43,21 +44,20 @@ class RecommendationService:
         user_swipes_key = RedisKeys.USER_SESSION_SWIPES_KEY.format(session_id=session_id, user_id=user_id)
         user_vector_key = RedisKeys.USER_VECTOR_KEY.format(user_id=user_id)
         norm_key = RedisKeys.USER_VECTOR_NORM_KEY.format(user_id=user_id)
-
-        user_vector_bytes = await redis_bin_client.get(user_vector_key)
         norm_koef = await redis_client.get(norm_key)
         user_swipes = await redis_client.get(user_swipes_key)
         user_likes = await redis_client.get(user_likes_key)
 
-        await redis_client.set(user_swipes_key, (int(user_swipes) + 1) % self.SWIPES_ITER)
-        u_old = self.load_or_default(user_vector_bytes, self.faiss_index.index.d)
+        await redis_client.set(user_swipes_key, (int(user_swipes or 0) + 1) % self.SWIPES_ITER)
+        u_old = await self.load_user_vector(user_id)
         Z_old = float(norm_koef) if norm_koef else 0.0
         v = self.faiss_index.index.reconstruct(movie_id).reshape(1, -1)
         w = math.log(1 + time_swiped)
+
         if is_liked:
             u_new = (Z_old * u_old + w * v) / (Z_old + w)
             Z_new = Z_old + w
-            await redis_client.set(user_likes_key, (int(user_likes) + 1) % self.LIKES_ITER)
+            await redis_client.set(user_likes_key, (int(user_likes or 0) + 1) % self.LIKES_ITER)
         else:
             penalized = self.BETA * w
             u_new = (Z_old * u_old - penalized * v) / (Z_old + penalized)
@@ -101,7 +101,7 @@ class RecommendationService:
 
         raw_onboard_list = await redis_client.get(onboard_list_key)
         if raw_onboard_list is None:
-            onboard_list = recommender.generate_onboarding_list()
+            onboard_list = self.generate_onboarding_list()
             logger.debug(
                 "Generated new onboarding list.",
                 extra={"session_id": str(session_id), "user_id": user_id, "length": len(onboard_list)},
@@ -130,10 +130,9 @@ class RecommendationService:
         if random_movie is not None:
             logger.info("Returned popular movie by probability.", extra={"user_id": user_id, "movie_id": random_movie})
             return random_movie
-        user_vector_key = RedisKeys.USER_VECTOR_KEY.format(user_id=user_id)
-        user_vector_bytes = await redis_bin_client.get(user_vector_key)
-        user_vector = self.load_or_default(user_vector_bytes, self.faiss_index.index.d)
-        movie_id = int(np.random.choice(self.faiss_index.search(user_vector)))
+
+        user_vector = await self.load_user_vector(user_id)
+        movie_id = await self.get_new_movie_id(user_id, user_vector)
         logger.info("Successfully fetched user recommendation.", extra={"user_id": user_id, "movie_id": movie_id})
         return movie_id
 
@@ -149,33 +148,35 @@ class RecommendationService:
 
         pair_key = RedisKeys.SESSION_PAIR_REC_KEY.format(session_id=session_id)
         existing = await redis_client.get(pair_key)
+        recently_seen_ids = await MovieCacheManager.get(user_id=user_id)
+
         if existing:
-            movie_str, recommender_id_str = existing.split(":")
-            recommender_id = int(recommender_id_str)
-            if recommender_id != user_id:
+            movie_id, recommender_id = map(int, existing.split(":"))
+            if recommender_id != user_id and movie_id not in recently_seen_ids:
+                await MovieCacheManager.add(user_id=user_id, movie_id=movie_id)
                 logger.info(
                     "Returning cached pair recommendation.",
-                    extra={"session_id": str(session_id), "user_id": user_id, "movie_id": int(movie_str)},
+                    extra={"session_id": str(session_id), "user_id": user_id, "movie_id": movie_id},
                 )
-                return int(movie_str)
+                return movie_id
 
-        users_key = RedisKeys.SESSION_USERS_KEY.format(session_id=session_id)
-        users = await redis_client.smembers(users_key)
-        user1, user2 = [int(user_id) for user_id in users]
+        session_users_key = RedisKeys.SESSION_USERS_KEY.format(session_id=session_id)
+        session_users = await redis_client.smembers(session_users_key)
+        if len(session_users) != General.PAIR:
+            logger.debug(
+                "Not enough users in session for pair recommendation.",
+                extra={"session_id": str(session_id), "user_id": user_id, "session_users": session_users},
+            )
+            return -1
 
-        u1_bytes = await redis_bin_client.get(RedisKeys.USER_VECTOR_KEY.format(user_id=user1))
-        u2_bytes = await redis_bin_client.get(RedisKeys.USER_VECTOR_KEY.format(user_id=user2))
-        u1 = self.load_or_default(u1_bytes, self.faiss_index.index.d)
-        u2 = self.load_or_default(u2_bytes, self.faiss_index.index.d)
-
-        likes1 = await redis_client.get(RedisKeys.USER_SESSION_LIKES_KEY.format(session_id=session_id, user_id=user1))
-        likes2 = await redis_client.get(RedisKeys.USER_SESSION_LIKES_KEY.format(session_id=session_id, user_id=user2))
-        C1 = int(likes1) if likes1 else 1
-        C2 = int(likes2) if likes2 else 1
-
-        alpha = C1 / (C1 + C2)
+        user_id1, user_id2 = map(int, session_users)
+        u1, u2 = await self.load_user_vector(user_id1), await self.load_user_vector(user_id2)
+        C1 = await self.get_likes_count(session_id, user_id1)
+        C2 = await self.get_likes_count(session_id, user_id2)
+        alpha = C1 / (C1 + C2) if (C1 + C2) > 0 else 0.5
         u_pair = (alpha * u1 + (1 - alpha) * u2).astype(np.float32)
-        movie_id = int(np.random.choice(self.faiss_index.search(u_pair)))
+
+        movie_id = await self.get_new_movie_id(user_id, u_pair)
         await redis_client.set(pair_key, f"{movie_id}:{user_id}")
         logger.info(
             "Successfully fetched pair recommendation.",
@@ -196,10 +197,31 @@ class RecommendationService:
             return int(random.choice(self.popular_movies))
         return None
 
-    def load_or_default(self, vector_bytes: Optional[bytes], dim: int) -> npt.NDArray[np.float32]:
-        if vector_bytes:
-            return np.frombuffer(vector_bytes, dtype=np.float32).reshape(1, -1)
-        return np.zeros((1, dim), dtype=np.float32)
+    async def load_user_vector(self, user_id: int) -> npt.NDArray[np.float32]:
+        user_vector_key = RedisKeys.USER_VECTOR_KEY.format(user_id=user_id)
+        user_vector_bytes = await redis_bin_client.get(user_vector_key)
+        if user_vector_bytes is None:
+            return np.random.rand(1, self.faiss_index.index.d).astype(np.float32)
+        return np.frombuffer(user_vector_bytes, dtype=np.float32).reshape(1, -1)
+
+    async def get_likes_count(self, session_id: uuid.UUID, user_id: int) -> int:
+        user_likes_key = RedisKeys.USER_SESSION_LIKES_KEY.format(session_id=session_id, user_id=user_id)
+        likes = await redis_client.get(user_likes_key)
+        return int(likes) if likes else 1
+
+    async def get_new_movie_id(self, user_id: int, user_vector: npt.NDArray[np.float32]) -> int:    
+        recently_seen_ids = await MovieCacheManager.get(user_id=user_id)
+        candidates = self.faiss_index.search(user_vector)
+        unseen_candidates = [mid for mid in candidates if mid not in recently_seen_ids]
+
+        if not unseen_candidates:
+            logger.warning("All candidates already seen. Expanding search space.", extra={"user_id": user_id})
+            extended_candidates = self.faiss_index.search(user_vector, k=len(candidates) * 3)
+            unseen_candidates = [mid for mid in extended_candidates if mid not in recently_seen_ids]
+
+        movie_id = int(np.random.choice(unseen_candidates))
+        await MovieCacheManager.add(user_id=user_id, movie_id=movie_id)
+        return movie_id
 
 
 recommender = RecommendationService(faiss_index=faiss_index)

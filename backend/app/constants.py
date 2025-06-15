@@ -40,12 +40,14 @@ class RedisKeys:
 
     USER_VECTOR_KEY: str = "vector:user:{user_id}"
     USER_VECTOR_NORM_KEY: str = "vector:user:{user_id}:norm"
+    USER_RECENTLY_SEEN_KEY: str = "user:{user_id}:recently_seen"
 
     SESSION_USERS_KEY: str = "session:{session_id}:users"
     SESSION_PAIR_REC_KEY: str = "session:{session_id}:pair"
     USER_SESSION_LIKES_KEY: str = "session:{session_id}:user:{user_id}:likes"
     USER_SESSION_SWIPES_KEY: str = "session:{session_id}:user:{user_id}:swipes"
-    SESSION_KEY: str = "session:{session_id}:*"
+    PATTERN_SESSION_KEY: str = "session:{session_id}:*"
+    PATTERN_USER_SESSION_KEY: str = "session:{session_id}:user:{user_id}:*"
 
     USER_ONBOARDING_LIST: str = "session:{session_id}:user:{user_id}:onboarding_lst"
 
@@ -57,4 +59,4 @@ class General:
     ROUND: int = 4
     VOWELS: str = "aeiou"
     CVC_MASK: list[bool] = [False, True, False]
-    K_NEAREST: int = 10
+    K_NEAREST: int = 100

@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       EnvironmentPlugin([
-        'VITE_API_URL'
+        'VITE_API_URL',
       ])
     ],
     resolve: {

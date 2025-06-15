@@ -1,7 +1,7 @@
 import { UnauthorizedError } from '@/utils/exceptions';
 
 export const refreshToken = async () => {
-  const response = await fetch('/api/auth/refresh', {
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/refresh`, {
     method: 'POST',
     credentials: 'include',
   });
