@@ -59,13 +59,28 @@ const SessionMovies = () => {
     setStep(prev => prev + 1);
   };
 
+  const updateSessionStatus = async () => {
+    try {
+      const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/sessions/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: 'REVIEW' }),
+      });
+    } catch (err) {
+      console.error('Error updating session status:', err);
+    }
+  };
+
   useEffect(() => {
     if (!sessionId) {
       return;
     }
-    console.log(step);
-    const protocol = import.meta.env.VITE_WS_PROTOCOL || 'ws';
-    const host = import.meta.env.VITE_WS_HOST || 'localhost:8000';
+
+    const url = new URL(import.meta.env.VITE_API_URL);
+    const protocol = url.protocol === 'https:' ? 'wss' : 'ws';
+    const host = url.host;
     const wsUrl = `${protocol}://${host}/movies/session/ws/${sessionId}`;
     
     ws.current = new WebSocket(wsUrl);
@@ -164,6 +179,10 @@ const SessionMovies = () => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    updateSessionStatus();
+  }, []);
 
   useEffect(() => {
     fetchMovies(0);
@@ -320,20 +339,6 @@ const SessionMovies = () => {
     if (storedValue !== null) {
       setStep(Number(storedValue));
     }
-  }, []);
-
-  useEffect(() => {
-    window.history.pushState(null, '', window.location.href);
-
-    const handlePopState = () => {
-      window.history.pushState(null, '', window.location.href);
-    };
-
-    window.addEventListener('popstate', handlePopState);
-
-    return () => {
-      window.removeEventListener('popstate', handlePopState);
-    };
   }, []);
 
   useEffect(() => {

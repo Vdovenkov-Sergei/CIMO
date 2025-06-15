@@ -4,7 +4,8 @@ import './ConfirmationModal.scss';
 
 const ConfirmationModal = ({
   isOpen = false,
-  title = 'Вы уверены, что хотите закончить сессию?',
+  title = 'Вы уверены?',
+  description = 'Несохранённые данные будут потеряны.',
   cancelText = 'Отмена',
   confirmText = 'Закончить',
   children,
@@ -17,6 +18,7 @@ const ConfirmationModal = ({
     <div className="confirmation-modal">
       <div className="confirmation-modal__content">
         <h3 className="confirmation-modal__title">{title}</h3>
+        <p className="confirmation-modal__description">{description}</p>
         
         {children && <div className="confirmation-modal__body">{children}</div>}
         
@@ -43,6 +45,7 @@ const ConfirmationModal = ({
 ConfirmationModal.propTypes = {
   isOpen: PropTypes.bool,
   title: PropTypes.string,
+  description: PropTypes.string,
   cancelText: PropTypes.string,
   confirmText: PropTypes.string,
   onCancel: PropTypes.func.isRequired,

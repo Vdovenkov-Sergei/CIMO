@@ -63,20 +63,6 @@ const ResetPassword = () => {
     }
   };
 
-  useEffect(() => {
-    window.history.pushState(null, '', window.location.href);
-
-    const handlePopState = () => {
-      window.history.pushState(null, '', window.location.href);
-    };
-
-    window.addEventListener('popstate', handlePopState);
-
-    return () => {
-      window.removeEventListener('popstate', handlePopState);
-    };
-  }, []);
-
   return (
     <div className="create-password-page">
       <HeaderReg className="header" />

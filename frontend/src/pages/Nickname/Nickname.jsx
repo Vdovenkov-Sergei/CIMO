@@ -17,20 +17,6 @@ const Nickname = () => {
   const [backendError, setBackendError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  useEffect(() => {
-    window.history.pushState(null, '', window.location.href);
-
-    const handlePopState = () => {
-      window.history.pushState(null, '', window.location.href);
-    };
-
-    window.addEventListener('popstate', handlePopState);
-
-    return () => {
-      window.removeEventListener('popstate', handlePopState);
-    };
-  }, []);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     

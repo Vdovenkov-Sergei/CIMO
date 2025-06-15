@@ -24,6 +24,15 @@
       justify-content: center;
       gap: 10px;
     }
+
+    &__title {
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    &__description {
+      color: #ffffffb4;
+    }
     
     &__buttons {
       display: flex;

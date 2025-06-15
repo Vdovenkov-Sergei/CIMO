@@ -4,9 +4,10 @@ import './ActiveSession.scss';
 
 const ActiveSession = ({
   isOpen = false,
-  title = 'У Вас уже есть активная сессия. Что Вы хотите с ней сделать?',
+  title = 'У вас есть незавершённая сессия.',
+  description = 'Хотите вернуться к ней?',
   cancelText = 'Завершить',
-  confirmText = 'Продолжить',
+  confirmText = 'Вернуться',
   children,
   onCancel,
   onConfirm
@@ -17,6 +18,7 @@ const ActiveSession = ({
     <div className="active-session-modal">
       <div className="active-session-modal__content">
         <h3 className="active-session-modal__title">{title}</h3>
+        <p className="active-session-modal__description">{description}</p>
         
         {children && <div className="active-session-modal__body">{children}</div>}
         
@@ -43,6 +45,7 @@ const ActiveSession = ({
 ActiveSession.propTypes = {
   isOpen: PropTypes.bool,
   title: PropTypes.string,
+  description: PropTypes.string,
   cancelText: PropTypes.string,
   confirmText: PropTypes.string,
   onCancel: PropTypes.func.isRequired,
