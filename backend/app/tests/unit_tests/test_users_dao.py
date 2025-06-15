@@ -28,7 +28,7 @@ async def test_find_user_by_id(id, email, is_exist, prepare_database):
     ]
 )
 async def test_find_user_by_username(user_name, is_exist, prepare_database):
-    user = await UserDAO.get_by_login(user_name)
+    user = await UserDAO.find_by_login(login=user_name)
 
     if is_exist:
         assert user

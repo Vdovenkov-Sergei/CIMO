@@ -29,7 +29,7 @@ async def test_swipe_session_movie(email, password, is_pair, movie_id, ac: Async
         poster_url="test_url.com"
     )
 
-    payload = {"movie_id": movie_id, "is_liked": True}
+    payload = {"movie_id": movie_id, "is_liked": True, "time_swiped": 15}
     response = await ac.post("/movies/session/", json=payload)
     assert response.status_code == 200
     assert response.json()["movie_id"] == movie_id

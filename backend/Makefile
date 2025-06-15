@@ -1,3 +1,5 @@
+# Run in Git Bash
+
 MAIN_APP = app.main:app
 CELERY_APP = app.tasks.celery:celery_app
 SRC_CODE_DIR = app/
@@ -19,7 +21,7 @@ beat:
 	$(POETRY_CMD) celery -A $(CELERY_APP) beat --loglevel=INFO
 
 test:
-	$(POETRY_CMD) python -m pytest -k "$(TEST_NAME)" -m "$(MARKERS)" -q --cov=$(SRC_CODE_DIR) --cov-report=term-missing
+	MODE=TEST $(POETRY_CMD) pytest 
 
 format:
 	$(POETRY_CMD) black $(SRC_CODE_DIR) --exclude=$(EXCLUDE)

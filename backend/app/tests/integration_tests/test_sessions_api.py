@@ -4,7 +4,8 @@ from httpx import AsyncClient
 from app.sessions.dao import SessionDAO
 from app.sessions.models import SessionStatus
 from app.users.dao import UserDAO
-from app.users.utils import Hashing, ACCESS_TOKEN, REFRESH_TOKEN
+from app.users.utils import Hashing
+from app.constants import Tokens
 
 
 @pytest.mark.parametrize("email, password, is_pair, expected_status", [
@@ -20,11 +21,11 @@ async def test_create_session(email, password, is_pair, expected_status, ac: Asy
 
     response = await ac.post("/auth/login", json={"login": email, "password": password})
 
-    access_token = response.cookies.get(ACCESS_TOKEN)
-    refresh_token = response.cookies.get(REFRESH_TOKEN)
+    access_token = response.cookies.get(Tokens.ACCESS_TOKEN)
+    refresh_token = response.cookies.get(Tokens.REFRESH_TOKEN)
 
-    ac.cookies.set(ACCESS_TOKEN, access_token)
-    ac.cookies.set(REFRESH_TOKEN, refresh_token)
+    ac.cookies.set(Tokens.ACCESS_TOKEN, access_token)
+    ac.cookies.set(Tokens.REFRESH_TOKEN, refresh_token)
 
     response = await ac.post("/sessions/", json={"is_pair": is_pair})
     assert response.status_code == expected_status
@@ -48,11 +49,11 @@ async def test_get_user_session(email, password, expected_status, ac: AsyncClien
     response = await ac.post("/auth/login", json={"login": user.email, "password": password})
     assert response.status_code == expected_status
 
-    access_token = response.cookies.get(ACCESS_TOKEN)
-    refresh_token = response.cookies.get(REFRESH_TOKEN)
+    access_token = response.cookies.get(Tokens.ACCESS_TOKEN)
+    refresh_token = response.cookies.get(Tokens.REFRESH_TOKEN)
 
-    ac.cookies.set(ACCESS_TOKEN, access_token)
-    ac.cookies.set(REFRESH_TOKEN, refresh_token)
+    ac.cookies.set(Tokens.ACCESS_TOKEN, access_token)
+    ac.cookies.set(Tokens.REFRESH_TOKEN, refresh_token)
 
     response = await ac.get("/sessions/me")
     assert response.status_code == expected_status
@@ -75,11 +76,11 @@ async def test_join_session(ac: AsyncClient, clean_database):
 
     response = await ac.post("/auth/login", json={"login": user2.email, "password": "joinerpass"})
 
-    access_token = response.cookies.get(ACCESS_TOKEN)
-    refresh_token = response.cookies.get(REFRESH_TOKEN)
+    access_token = response.cookies.get(Tokens.ACCESS_TOKEN)
+    refresh_token = response.cookies.get(Tokens.REFRESH_TOKEN)
 
-    ac.cookies.set(ACCESS_TOKEN, access_token)
-    ac.cookies.set(REFRESH_TOKEN, refresh_token)
+    ac.cookies.set(Tokens.ACCESS_TOKEN, access_token)
+    ac.cookies.set(Tokens.REFRESH_TOKEN, refresh_token)
 
     response = await ac.post(f"/sessions/join/{session.id}")
     assert response.status_code == 200
@@ -132,11 +133,11 @@ async def test_change_session_status(ac: AsyncClient, clean_database):
 
     response = await ac.post("/auth/login", json={"login": user.email, "password": "status123"})
 
-    access_token = response.cookies.get(ACCESS_TOKEN)
-    refresh_token = response.cookies.get(REFRESH_TOKEN)
+    access_token = response.cookies.get(Tokens.ACCESS_TOKEN)
+    refresh_token = response.cookies.get(Tokens.REFRESH_TOKEN)
 
-    ac.cookies.set(ACCESS_TOKEN, access_token)
-    ac.cookies.set(REFRESH_TOKEN, refresh_token)
+    ac.cookies.set(Tokens.ACCESS_TOKEN, access_token)
+    ac.cookies.set(Tokens.REFRESH_TOKEN, refresh_token)
 
     response = await ac.patch("/sessions/status", json={"status": "ACTIVE"})
     assert response.status_code == 200
@@ -153,11 +154,11 @@ async def test_leave_session(ac: AsyncClient, clean_database):
 
     response = await ac.post("/auth/login", json={"login": user.email, "password": "leavepass"})
 
-    access_token = response.cookies.get(ACCESS_TOKEN)
-    refresh_token = response.cookies.get(REFRESH_TOKEN)
+    access_token = response.cookies.get(Tokens.ACCESS_TOKEN)
+    refresh_token = response.cookies.get(Tokens.REFRESH_TOKEN)
 
-    ac.cookies.set(ACCESS_TOKEN, access_token)
-    ac.cookies.set(REFRESH_TOKEN, refresh_token)
+    ac.cookies.set(Tokens.ACCESS_TOKEN, access_token)
+    ac.cookies.set(Tokens.REFRESH_TOKEN, refresh_token)
 
     response = await ac.delete("/sessions/leave")
     assert response.status_code == 200

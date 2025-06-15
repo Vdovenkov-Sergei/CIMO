@@ -73,7 +73,7 @@ class SessionDAO(BaseDAO[Session]):
             query = query.limit(limit)
         async with async_session_maker() as session:
             result = await session.execute(query)
-            return result.scalars().all()
+            return result.all()
 
     @classmethod
     @log_db_delete("Clean completed sessions")
