@@ -1,17 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import './ActiveSession.scss';
-import CancelButton from '../CancelButton';
-import StartButton from '../StartButton';
 
 const ActiveSession = ({
   isOpen = false,
   title = 'У Вас уже есть активная сессия. Что Вы хотите с ней сделать?',
   cancelText = 'Завершить',
   confirmText = 'Продолжить',
+  children,
   onCancel,
-  onConfirm,
-  children
+  onConfirm
 }) => {
   if (!isOpen) return null;
 
@@ -23,17 +21,19 @@ const ActiveSession = ({
         {children && <div className="active-session-modal__body">{children}</div>}
         
         <div className="active-session-modal__buttons">
-          <CancelButton
-            className='cancel'
-            onClick={onCancel}>
+          <button
+            className='finish-session'
+            onClick={onCancel}
+          >
             {cancelText}
-          </CancelButton>
+          </button>
           
-          <StartButton
-            className='start'
-            onClick={onConfirm}>
+          <button
+            className='restart-session'
+            onClick={onConfirm}
+          >
             {confirmText}
-          </StartButton>
+          </button>
         </div>
       </div>
     </div>

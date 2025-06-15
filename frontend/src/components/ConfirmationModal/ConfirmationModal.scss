@@ -1,6 +1,6 @@
 @use '../../styles/variables' as *;
 
-.active-session-modal {
+.confirmation-modal {
     position: fixed;
     top: 0;
     left: 0;
@@ -30,7 +30,7 @@
       justify-content: space-around;
       margin-top: 20px;
     
-      .finish-session {
+      .cancel {
         width: 150px;
         padding: 12px 24px;
         text-decoration: none;
@@ -49,7 +49,7 @@
         }
       }
     
-      .restart-session {
+      .confirm {
         width: 150px;
         padding: 12px 24px;
         text-decoration: none;
@@ -79,20 +79,7 @@
         flex-direction: column-reverse;
         gap: 10px;
     
-        .finish-session, .restart-session {
-          width: 100%;
-        }
-      }
-    
-      .invite-link-container {
-        flex-direction: column;
-        gap: 8px;
-    
-        input {
-          width: 100%;
-        }
-    
-        .copy {
+        .cancel, .confirm {
           width: 100%;
         }
       }

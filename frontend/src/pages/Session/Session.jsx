@@ -44,6 +44,7 @@ const CaretUp = () => (
 );
 
 const STORAGE_KEYS = {
+  CURRENT_MOVIE: 'session_current_movie',
   SHOW_COUNTDOWN: 'session_show_countdown',
   SHOW_LIKED_MOVIES: 'session_show_liked_movies',
   TIMER: 'session_timer',
@@ -95,6 +96,7 @@ const Session = () => {
   const saveState = () => {
     try {
       const stateToSave = {
+        [STORAGE_KEYS.CURRENT_MOVIE]: currentMovieId,
         [STORAGE_KEYS.SHOW_COUNTDOWN]: showCountdown,
         [STORAGE_KEYS.SHOW_LIKED_MOVIES]: showLikedMovies,
         [STORAGE_KEYS.TIMER]: timer,
@@ -115,12 +117,14 @@ const Session = () => {
   // Восстановление состояния
   const loadState = () => {
     try {
+      const storedCurrentMovie = localStorage.getItem(STORAGE_KEYS.CURRENT_MOVIE);
       const storedShowCountdown = localStorage.getItem(STORAGE_KEYS.SHOW_COUNTDOWN);
       const storedShowLikedMovies = localStorage.getItem(STORAGE_KEYS.SHOW_LIKED_MOVIES);
       const storedTimer = localStorage.getItem(STORAGE_KEYS.TIMER);
       const storedTimeSwiped = localStorage.getItem(STORAGE_KEYS.TIME_SWIPED);
       const storedStep = localStorage.getItem(STORAGE_KEYS.STEP);
 
+      if (storedCurrentMovie) setCurrentMovie(Number(JSON.parse(storedCurrentMovie)));
       if (storedShowCountdown) setShowCountdown(JSON.parse(storedShowCountdown));
       if (storedShowLikedMovies) setShowLikedMovies(JSON.parse(storedShowLikedMovies));
       if (storedTimer) setTimer(Number(JSON.parse(storedTimer)));
@@ -286,13 +290,29 @@ const Session = () => {
       fetchCurrentMovie(location.state.movie_id);
     }
     fetchLikedMovies(true);
-    setIsOnboarding(location.state.is_onboarding);
+    if (location.state?.isOnboarding) {
+      setIsOnboarding(location.state.is_onboarding);
+    }
     startTimer(timer);
   
     return () => {
       if (timerRef.current) {
         clearInterval(timerRef.current);
       }
+    };
+  }, []);
+
+  useEffect(() => {
+    window.history.pushState(null, '', window.location.href);
+
+    const handlePopState = () => {
+      window.history.pushState(null, '', window.location.href);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
     };
   }, []);
 

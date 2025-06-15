@@ -8,13 +8,25 @@ import PairModeCard from '../../components/PairModeCard';
 import ActiveSession from '../../components/ActiveSession/ActiveSession';
 import FAQComponent from '../../components/Q&A/Q&A';
 import { useAuthFetch } from '../../utils/useAuthFetch';
+import ConfirmationModal from '../../components/ConfirmationModal/ConfirmationModal';
+
+const STORAGE_KEYS = {
+  CURRENT_MOVIE: 'session_current_movie',
+  SHOW_COUNTDOWN: 'session_show_countdown',
+  SHOW_LIKED_MOVIES: 'session_show_liked_movies',
+  TIMER: 'session_timer',
+  TIME_SWIPED: 'session_time_swiped',
+  STEP: 'step'
+};
 
 const ModeSelection = () => {
   const navigate = useNavigate();
   const [inviteLink, setInviteLink] = useState('');
   const [sessionId, setSessionId] = useState('');
-  let activeSession = false;
+  const [activeSession, setActiveSession] = useState(false);
   const authFetch = useAuthFetch();
+  const [isActiveSessionModalOpen, setIsActiveSessionModalOpen] = useState(false);
+  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
 
   const handleStartSingleSession = async (showModalCallback) => {
     try {
@@ -100,9 +112,43 @@ const ModeSelection = () => {
         body: JSON.stringify({ status: 'PREPARED' }),
       });
       
-      navigate(`/session?id=${sessionId}`, { state: { session_id: sessionId, is_pair: true, movie_id: data.movie_id } });
+      navigate(`/session?id=${sessionId}`, { state: { session_id: sessionId, is_pair: true, movie_id: data.movie_id, is_onboarding: false } });
     } catch (err) {
       console.error('Error preparing pair session:', err);
+    }
+  };
+
+  const handleFinishActiveSession = () => {
+    setIsActiveSessionModalOpen(false);
+    setIsConfirmationModalOpen(true);
+  };
+
+  const handleCancelConfirmation = () => {
+    setIsConfirmationModalOpen(false);
+    setIsActiveSessionModalOpen(true);
+  };
+
+  const clearSavedState = () => {
+    Object.values(STORAGE_KEYS).forEach(key => {
+      localStorage.removeItem(key);
+    });
+    localStorage.removeItem('session_accumulated_time');
+    localStorage.removeItem('session_start_time');
+  };
+
+  const handleConfirmFinish = async () => {
+    setIsConfirmationModalOpen(false);
+    clearSavedState();
+    try {
+      await authFetch(`${import.meta.env.VITE_API_URL}/sessions/leave`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+    } catch (err) {
+      console.error('Error finishing session:', err);
     }
   };
 
@@ -116,7 +162,8 @@ const ModeSelection = () => {
       });
 
       if (status !== 404) {
-        activeSession = true;
+        setActiveSession(true);
+        setIsActiveSessionModalOpen(true);
       }
       console.log(activeSession);
     } catch (err) {
@@ -127,6 +174,20 @@ const ModeSelection = () => {
   useEffect(() => {
     checkUserSession();
   }, [])
+
+  useEffect(() => {
+    window.history.pushState(null, '', window.location.href);
+
+    const handlePopState = () => {
+      window.history.pushState(null, '', window.location.href);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
 
   return (
     <div className="mode-selection-page">
@@ -152,6 +213,18 @@ const ModeSelection = () => {
         </div>
 
         <FAQComponent />
+
+        <ActiveSession
+          isOpen={isActiveSessionModalOpen}
+          onCancel={handleFinishActiveSession}
+          onConfirm={() => { }}
+        />
+
+        <ConfirmationModal
+          isOpen={isConfirmationModalOpen}
+          onCancel={handleCancelConfirmation}
+          onConfirm={handleConfirmFinish}
+        />
       </main>
 
       <Footer />
