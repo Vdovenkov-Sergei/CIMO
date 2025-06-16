@@ -44,7 +44,7 @@ class Settings(BaseSettings):
     FRONTEND_URL: str
 
     SENTRY_DSN: str
-    
+
     # Test database settings
     TEST_DB_HOST: str = "localhost"
     TEST_DB_PORT: int = 5432
@@ -54,15 +54,19 @@ class Settings(BaseSettings):
 
     @property
     def test_async_database_url(self) -> str:
-        return f"postgresql+asyncpg://" \
-               f"{self.TEST_DB_USER}:{self.TEST_DB_PASS}" \
-               f"@{self.TEST_DB_HOST}:{self.TEST_DB_PORT}/{self.TEST_DB_NAME}"
+        return (
+            f"postgresql+asyncpg://"
+            f"{self.TEST_DB_USER}:{self.TEST_DB_PASS}"
+            f"@{self.TEST_DB_HOST}:{self.TEST_DB_PORT}/{self.TEST_DB_NAME}"
+        )
 
     @property
     def test_sync_database_url(self) -> str:
-        return f"postgresql+psycopg2://" \
-               f"{self.TEST_DB_USER}:{self.TEST_DB_PASS}" \
-               f"@{self.TEST_DB_HOST}:{self.TEST_DB_PORT}/{self.TEST_DB_NAME}"
+        return (
+            f"postgresql+psycopg2://"
+            f"{self.TEST_DB_USER}:{self.TEST_DB_PASS}"
+            f"@{self.TEST_DB_HOST}:{self.TEST_DB_PORT}/{self.TEST_DB_NAME}"
+        )
 
 
 settings = Settings()  # type: ignore

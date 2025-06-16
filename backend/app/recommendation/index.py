@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Optional
 
 import faiss
 import numpy as np
@@ -13,6 +14,17 @@ class FaissIndex:
     def __init__(self) -> None:
         self.path: Path = Path(__file__).parent.parent / "data" / "recommender" / "index.faiss"
         self.embeddings_path: Path = Path(__file__).parent.parent / "data" / "recommender" / "movie_embeddings.csv"
+        self.index: Optional[faiss.Index] = None
+
+    def initialize(self) -> None:
+        if self.index is not None:
+            return
+        if not self.path.exists():
+            logger.info("FAISS index file not found, building index...")
+            self.build()
+        else:
+            logger.info("FAISS index file found, loading index...")
+            self.load()
 
     def build(self) -> None:
         try:
@@ -20,7 +32,7 @@ class FaissIndex:
             movie_vectors = df.values.astype(np.float32)
 
             n, dim = movie_vectors.shape
-            logger.info(f"Successfully loaded movie embeddings.", extra={"count": n, "dim": dim})
+            logger.info("Successfully loaded movie embeddings.", extra={"count": n, "dim": dim})
 
             norms = np.linalg.norm(movie_vectors, axis=1)
             if not np.allclose(norms, 1.0, atol=1e-5):
@@ -34,7 +46,7 @@ class FaissIndex:
             logger.info("Successfully created FAISS index with external IDs.")
 
             faiss.write_index(self.index, str(self.path))
-            logger.info(f"Successfully saved FAISS index.", extra={"path": str(self.path)})
+            logger.info("Successfully saved FAISS index.", extra={"path": str(self.path)})
 
         except Exception as err:
             logger.critical(
@@ -46,7 +58,7 @@ class FaissIndex:
 
     def load(self) -> None:
         try:
-            self.index: faiss.Index = faiss.read_index(str(self.path))
+            self.index: faiss.Index = faiss.read_index(str(self.path))  # type: ignore
             logger.info("Successfully loaded FAISS index.", extra={"path": str(self.path), "ntotal": self.index.ntotal})
         except Exception as err:
             logger.critical(
@@ -57,10 +69,10 @@ class FaissIndex:
     def search(self, vector: npt.NDArray[np.float32], k: int = General.K_NEAREST) -> npt.NDArray[np.int64]:
         if self.index is None:
             logger.warning("FAISS index not loaded, attempting to load it now.")
-            self.load()
+            self.initialize()
 
         faiss.normalize_L2(vector)
-        distances, indices = self.index.search(vector, k)
+        distances, indices = self.index.search(vector, k)  # type: ignore
         result = np.asarray(indices[0], dtype=np.int64)
         logger.debug(
             "Search completed in FAISS index.",

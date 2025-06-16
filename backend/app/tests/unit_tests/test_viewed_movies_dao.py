@@ -1,4 +1,5 @@
 import pytest
+
 from app.viewed_movies.dao import ViewedMovieDAO
 
 

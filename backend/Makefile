@@ -4,7 +4,7 @@ MAIN_APP = app.main:app
 CELERY_APP = app.tasks.celery:celery_app
 SRC_CODE_DIR = app/
 POETRY_CMD = poetry run
-EXCLUDE = migrations models
+EXCLUDE = migrations
 
 .PHONY: run celery flower beat test format lint dev style clean
 
@@ -29,7 +29,7 @@ format:
 
 lint:
 	$(POETRY_CMD) ruff check $(SRC_CODE_DIR) --exclude=$(EXCLUDE)
-	$(POETRY_CMD) mypy $(SRC_CODE_DIR) --exclude=$(EXCLUDE)
+	$(POETRY_CMD) mypy $(SRC_CODE_DIR)
 
 style: format lint
 

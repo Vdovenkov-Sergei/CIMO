@@ -1,4 +1,7 @@
 # type: ignore
+# ruff: noqa
+# black: noqa
+# isort: skip_file
 
 from app.users.models import User
 from app.movies.models import Movie

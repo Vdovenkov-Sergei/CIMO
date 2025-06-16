@@ -1,16 +1,16 @@
 import pytest
 from httpx import AsyncClient
 
+from app.constants import Tokens
 from app.sessions.dao import SessionDAO
 from app.sessions.models import SessionStatus
 from app.users.dao import UserDAO
 from app.users.utils import Hashing
-from app.constants import Tokens
 
 
-@pytest.mark.parametrize("email, password, is_pair, expected_status", [
-    ("sess_test@example.com", "s3ssionpass", True, 200)
-])
+@pytest.mark.parametrize(
+    "email, password, is_pair, expected_status", [("sess_test@example.com", "s3ssionpass", True, 200)]
+)
 async def test_create_session(email, password, is_pair, expected_status, ac: AsyncClient, clean_database):
     hashed_pw = Hashing.get_password_hash(password)
     user = await UserDAO.add_record(
@@ -34,9 +34,7 @@ async def test_create_session(email, password, is_pair, expected_status, ac: Asy
     assert data["is_pair"] == is_pair
 
 
-@pytest.mark.parametrize("email, password, expected_status", [
-    ("sess_test@example.com", "s3ssionpass", 200)
-])
+@pytest.mark.parametrize("email, password, expected_status", [("sess_test@example.com", "s3ssionpass", 200)])
 async def test_get_user_session(email, password, expected_status, ac: AsyncClient, clean_database):
     hashed_pw = Hashing.get_password_hash(password)
     user = await UserDAO.add_record(
@@ -102,15 +100,11 @@ async def test_check_ready_participants(ac: AsyncClient, clean_database):
     await SessionDAO.add_record(id=session.id, user_id=user2.id, is_pair=True)
 
     await SessionDAO.update_session(
-        session_id=session.id,
-        user_id=user1.id,
-        update_data={"status": SessionStatus.PREPARED}
+        session_id=session.id, user_id=user1.id, update_data={"status": SessionStatus.PREPARED}
     )
 
     await SessionDAO.update_session(
-        session_id=session.id,
-        user_id=user2.id,
-        update_data={"status": SessionStatus.PREPARED}
+        session_id=session.id, user_id=user2.id, update_data={"status": SessionStatus.PREPARED}
     )
 
     response = await ac.get(f"/sessions/ready/{session.id}")
@@ -126,9 +120,7 @@ async def test_change_session_status(ac: AsyncClient, clean_database):
     )
     session = await SessionDAO.add_record(user_id=user.id, is_pair=False)
     await SessionDAO.update_session(
-        session_id=session.id,
-        user_id=user.id,
-        update_data={"status": SessionStatus.PREPARED}
+        session_id=session.id, user_id=user.id, update_data={"status": SessionStatus.PREPARED}
     )
 
     response = await ac.post("/auth/login", json={"login": user.email, "password": "status123"})
@@ -150,8 +142,7 @@ async def test_leave_session(ac: AsyncClient, clean_database):
         hashed_password=Hashing.get_password_hash("leavepass"),
         user_name="leaveuser",
     )
-    session = await SessionDAO.add_record(user_id=user.id, is_pair=False)
-
+    await SessionDAO.add_record(user_id=user.id, is_pair=False)
     response = await ac.post("/auth/login", json={"login": user.email, "password": "leavepass"})
 
     access_token = response.cookies.get(Tokens.ACCESS_TOKEN)

@@ -114,7 +114,10 @@ async def change_session_status(
     new_status = data.status
     update_fields: dict[str, Any] = {"status": new_status}
 
-    if (session.status, new_status) in [(SessionStatus.PENDING, SessionStatus.ACTIVE), (SessionStatus.PREPARED, SessionStatus.ACTIVE)]:
+    if (session.status, new_status) in [
+        (SessionStatus.PENDING, SessionStatus.ACTIVE),
+        (SessionStatus.PREPARED, SessionStatus.ACTIVE),
+    ]:
         update_fields["started_at"] = datetime.now(UTC)
         logger.info("User started session.", extra={"time": update_fields["started_at"], "user_id": session.user_id})
     elif (session.status, new_status) == (SessionStatus.REVIEW, SessionStatus.COMPLETED):

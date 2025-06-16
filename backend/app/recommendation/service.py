@@ -51,7 +51,7 @@ class RecommendationService:
         await redis_client.set(user_swipes_key, (int(user_swipes or 0) + 1) % self.SWIPES_ITER)
         u_old = await self.load_user_vector(user_id)
         Z_old = float(norm_koef) if norm_koef else 0.0
-        v = self.faiss_index.index.reconstruct(movie_id).reshape(1, -1)
+        v = self.faiss_index.index.reconstruct(movie_id).reshape(1, -1)  # type: ignore
         w = math.log(1 + time_swiped)
 
         if is_liked:
@@ -110,7 +110,7 @@ class RecommendationService:
             onboard_list = json.loads(raw_onboard_list)
             logger.debug(
                 "Loaded existing onboarding list.",
-                extra={"session_id": str(session_id), "user_id": user_id, "length": len(onboard_list)},  # type: ignore
+                extra={"session_id": str(session_id), "user_id": user_id, "length": len(onboard_list)},
             )
 
         if not onboard_list:
@@ -201,7 +201,7 @@ class RecommendationService:
         user_vector_key = RedisKeys.USER_VECTOR_KEY.format(user_id=user_id)
         user_vector_bytes = await redis_bin_client.get(user_vector_key)
         if user_vector_bytes is None:
-            return np.random.rand(1, self.faiss_index.index.d).astype(np.float32)
+            return np.random.rand(1, self.faiss_index.index.d).astype(np.float32)  # type: ignore
         return np.frombuffer(user_vector_bytes, dtype=np.float32).reshape(1, -1)
 
     async def get_likes_count(self, session_id: uuid.UUID, user_id: int) -> int:
@@ -209,7 +209,7 @@ class RecommendationService:
         likes = await redis_client.get(user_likes_key)
         return int(likes) if likes else 1
 
-    async def get_new_movie_id(self, user_id: int, user_vector: npt.NDArray[np.float32]) -> int:    
+    async def get_new_movie_id(self, user_id: int, user_vector: npt.NDArray[np.float32]) -> int:
         recently_seen_ids = await MovieCacheManager.get(user_id=user_id)
         candidates = self.faiss_index.search(user_vector)
         unseen_candidates = [mid for mid in candidates if mid not in recently_seen_ids]

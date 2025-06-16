@@ -2,7 +2,7 @@ import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Any, Optional, Sequence
 
-from sqlalchemy import and_, or_, select
+from sqlalchemy import Row, and_, or_, select
 
 from app.dao.base import BaseDAO
 from app.dao.decorators import (
@@ -65,7 +65,7 @@ class SessionDAO(BaseDAO[Session]):
     @log_query_time
     async def _find_session_ids_by_filters(
         cls, *, filters: Optional[list[Any]] = None, limit: Optional[int] = None
-    ) -> Sequence[uuid.UUID]:
+    ) -> Sequence[Row[tuple[uuid.UUID, int]]]:
         query = select(cls.model.id, cls.model.user_id)
         if filters is not None:
             query = query.where(*filters)

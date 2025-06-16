@@ -10,11 +10,7 @@ class ApiException(HTTPException):
         if "detail" in kwargs:
             raise RuntimeError("Detail is not allowed")
         message = self.error_message.format(**kwargs)
-        detail = {
-            "message": message,
-            "error_code": self.error_code,
-            "params": kwargs
-        }
+        detail = {"message": message, "error_code": self.error_code, "params": kwargs}
         super().__init__(status_code=self.status_code, detail=detail)
 
 

@@ -1,10 +1,11 @@
 import pytest
 from httpx import AsyncClient
-from app.users.dao import UserDAO
+
+from app.constants import RedisKeys, Tokens, Verification
 from app.database import redis_client
+from app.users.dao import UserDAO
 from app.users.models import User
 from app.users.utils import Hashing
-from app.constants import Verification, Tokens, RedisKeys
 
 
 @pytest.mark.parametrize(
