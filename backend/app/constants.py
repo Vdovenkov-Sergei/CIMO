@@ -12,7 +12,7 @@ class Validation:
     USERNAME_REGEX: str = r"^[a-zA-Z0-9_.]+$"
     MIN_PASSWORD_LEN: int = 8
     MAX_PASSWORD_LEN: int = 24
-    MIN_USERNAME_LEN: int = 5
+    MIN_USERNAME_LEN: int = 1
     MAX_USERNAME_LEN: int = 30
 
 
