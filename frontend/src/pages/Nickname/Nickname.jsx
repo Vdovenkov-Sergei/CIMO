@@ -5,6 +5,7 @@ import './Nickname.scss';
 import Footer from '../../components/Footer/Footer';
 import HeaderReg from '../../components/HeaderReg/HeaderReg';
 import NicknameForm from '../../components/NicknameForm';
+import { errorMessages } from '../../utils/exceptions';
 
 const Nickname = () => {
   const navigate = useNavigate();
@@ -19,10 +20,9 @@ const Nickname = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!nickname.trim()) {
-      setError('Введите никнейм');
-      setBackendError('');
+
+    if (/user_\d+/.test(nickname.trim())) {
+      setBackendError('Никнейм недоступен.');
       return;
     }
 
@@ -46,7 +46,7 @@ const Nickname = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        const errorMessage = data.detail || data.message || 'Ошибка сохранения никнейма.';
+        const errorMessage = errorMessages[data.detail.error_code] || 'Ошибка сохранения никнейма.';
         setBackendError(errorMessage);
         throw new Error(errorMessage);
       }

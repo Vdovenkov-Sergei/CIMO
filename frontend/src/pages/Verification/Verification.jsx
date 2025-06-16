@@ -5,6 +5,7 @@ import './Verification.scss';
 import HeaderReg from '../../components/HeaderReg/HeaderReg';
 import Footer from '../../components/Footer/Footer';
 import VerificationCodeForm from '../../components/VerificationCodeForm';
+import { errorMessages } from '../../utils/exceptions';
 
 const Verification = () => {
 
@@ -33,6 +34,7 @@ const Verification = () => {
     setIsLoading(true);
     setError('');
     setBackendError('');
+    setSuccessMessage('');
 
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/register/verify`, {
@@ -48,7 +50,7 @@ const Verification = () => {
 
       const data = await response.json();
       if (!response.ok) {
-        const errorMessage = data.detail || data.message || 'Неверный код подтверждения.';
+        const errorMessage = errorMessages[data.detail.error_code] || 'Неверный код подтверждения.';
         setBackendError(errorMessage);
         throw new Error(errorMessage);
       }
@@ -84,8 +86,9 @@ const Verification = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        const errorMessage = data.detail || data.message || 'Ошибка при повторной отправке кода.';
+        const errorMessage = errorMessages[data.detail.error_code] || 'Ошибка при повторной отправке кода.';
         setBackendError(errorMessage);
+        setSuccessMessage('');
         throw new Error(errorMessage);
       }
 

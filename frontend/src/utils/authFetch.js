@@ -11,7 +11,7 @@ export const refreshToken = async () => {
       console.warn('Failed to parse JSON:', err);
       return {};
     });
-    throw new UnauthorizedError(data.detail);
+    throw new UnauthorizedError(data.detail.message);
   }
 };
 
@@ -26,7 +26,7 @@ export const fetchWithTokenRefresh = async (url, options = {}) => {
     return {};
   });
 
-  if (response.status === 401 && data.detail === "Token expired") {
+  if (response.status === 401 && data.detail.message === "Token expired") {
     await refreshToken();
     const retryResponse = await fetch(url, {
       ...options,

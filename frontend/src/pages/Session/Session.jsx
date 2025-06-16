@@ -262,7 +262,7 @@ const Session = () => {
         },
       });
       const data = await response.json();
-      if (data.detail === "Movie with id=-1 not found") {
+      if (!response.ok && data.detail.message === "Movie with id=-1 not found") {
         setCurrentMovie({ id: -1 });
       }
       else {

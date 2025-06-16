@@ -4,6 +4,7 @@ import './ResetPassword.scss';
 import Footer from '../../components/Footer/Footer';
 import HeaderReg from '../../components/HeaderReg/HeaderReg';
 import PasswordResetForm from '../../components/PasswordResetForm';
+import { errorMessages } from '../../utils/exceptions';
 
 const ResetPassword = () => {
   const navigate = useNavigate();
@@ -48,7 +49,7 @@ const ResetPassword = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        const errorMessage = data.detail || data.message || 'Ошибка сброса пароля.';
+        const errorMessage = errorMessages[data.detail.error_code] || 'Ошибка сброса пароля.';
         setBackendError(errorMessage);
         throw new Error(errorMessage);
       }

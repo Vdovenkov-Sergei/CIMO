@@ -4,6 +4,7 @@ import './Signup.scss';
 import HeaderReg from '../../components/HeaderReg/HeaderReg';
 import Footer from '../../components/Footer/Footer';
 import RegisterForm from '../../components/RegisterForm';
+import { errorMessages } from '../../utils/exceptions';
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -43,6 +44,15 @@ const Signup = () => {
       return;
     }
 
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!regex.test(formData.email)) {
+      setBackendError('Некорректная почта');
+      setSuccessMessage('');
+      setError('');
+      return;
+    }
+
     setIsLoading(true);
     setError('');
     setBackendError('');
@@ -63,7 +73,7 @@ const Signup = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        const errorMessage = data.detail || data.message || 'Ошибка регистрации';
+        const errorMessage = errorMessages[data.detail.error_code] || 'Ошибка регистрации';
         setBackendError(errorMessage);
         throw new Error(errorMessage);
       }

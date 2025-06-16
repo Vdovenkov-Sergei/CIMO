@@ -14,6 +14,15 @@ const ForgotPassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!regex.test(email)) {
+      setBackendError('Некорректная почта');
+      setSuccessMessage('');
+      setError('');
+      return;
+    }
+
     if (!email.trim()) {
       setError('Введите email');
       setBackendError('');
@@ -39,11 +48,12 @@ const ForgotPassword = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        const errorMessage = data.detail || data.message || 'Ошибка отправки письма.';
+        const errorMessage = data.detail.message || 'Ошибка отправки письма.';
         setBackendError(errorMessage);
         throw new Error(errorMessage);
       }
 
+      console.log(email);
       setSuccessMessage('Письмо отправлено! Проверьте почту.');
       
     } catch (err) {

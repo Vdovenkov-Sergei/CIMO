@@ -6,6 +6,7 @@ import './Login.scss';
 import AuthForm from '../../components/AuthForm';
 import HeaderReg from '../../components/HeaderReg/HeaderReg';
 import Footer from '../../components/Footer/Footer';
+import { errorMessages } from '../../utils/exceptions';
 
 const Login = () => {
   const [searchParams] = useSearchParams();
@@ -50,7 +51,7 @@ const Login = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        const errorMessage = data.detail || data.message || 'Ошибка авторизации.';
+        const errorMessage = errorMessages[data.detail.error_code] || 'Ошибка авторизации.';
         setBackendError(errorMessage);
         throw new Error(errorMessage);
       }

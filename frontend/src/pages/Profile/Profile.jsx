@@ -10,35 +10,35 @@ import { useAuthFetch } from '../../utils/useAuthFetch';
 const Profile = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState({
-    login: 'cinemood_user',
-    email: 'cinemood.corp@gmail.com'
+    login: '',
+    email: ''
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const authFetch = useAuthFetch();
 
+  const fetchUserData = async () => {
+    try {
+      const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/users/me`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+      });
+
+      setUser({
+        login: data.user_name,
+        email: data.email
+      });
+    } catch (err) {
+      console.error('Ошибка:', err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/users/me`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-        });
-
-        setUser({
-          login: data.user_name || 'cinemood_user',
-          email: data.email || 'cinemood.corp@gmail.com'
-        });
-      } catch (err) {
-        console.error('Ошибка:', err);
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchUserData();
   }, []);
 
