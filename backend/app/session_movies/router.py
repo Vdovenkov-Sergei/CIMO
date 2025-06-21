@@ -57,7 +57,7 @@ async def swipe_session_movie(
             "user_id": session.user_id,
             "movie_id": data.movie_id,
             "is_liked": data.is_liked,
-            "time_swiped": data.time_swiped
+            "time_swiped": data.time_swiped,
         },
     )
 

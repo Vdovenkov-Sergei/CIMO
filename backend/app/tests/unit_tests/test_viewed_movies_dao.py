@@ -1,4 +1,5 @@
 import pytest
+
 from app.viewed_movies.dao import ViewedMovieDAO
 
 
@@ -35,5 +36,5 @@ async def test_delete_movie(user_id, movie_id, expected_deleted, prepare_databas
     ],
 )
 async def test_update_review(user_id, movie_id, new_review, expected_updated, prepare_database):
-    updated = await ViewedMovieDAO.update_review(user_id=user_id, movie_id=movie_id, review=new_review)
+    updated = await ViewedMovieDAO.update_movie(user_id=user_id, movie_id=movie_id, update_data={"review": new_review})
     assert updated == expected_updated

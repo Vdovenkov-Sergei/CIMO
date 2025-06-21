@@ -5,11 +5,12 @@ import Input from './Input';
 const ChangeNicknameForm = ({ 
   currentNickname, 
   onSubmit, 
-  isLoading = false, 
+  isLoading = false,
   backendError = '', 
   successMessage = '' 
 }) => {
   const [nickname, setNickname] = useState(currentNickname);
+  const [inputValue, setInputValue] = useState('');
 
   useEffect(() => {
     setNickname(currentNickname);
@@ -34,6 +35,7 @@ const ChangeNicknameForm = ({
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit(nickname);
+    setInputValue('');
   };
 
   return (
@@ -46,9 +48,15 @@ const ChangeNicknameForm = ({
           <Input
             type="text"
             id="nickname"
+            value={inputValue}
             placeholder="Никнейм"
-            onChange={(e) => setNickname(e.target.value)}
+            onChange={(e) => {
+                setNickname(e.target.value);
+                setInputValue(e.target.value);
+              }
+            }
             required
+            minLength="1"
           />
         </div>
         <SubmitButton 

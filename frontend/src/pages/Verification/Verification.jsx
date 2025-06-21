@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Pagination } from 'swiper/modules';
 import './Verification.scss';
 
-import onboarding1 from '@/assets/images/onboarding1.png';
-import onboarding2 from '@/assets/images/onboarding2.png';
-import onboarding3 from '@/assets/images/onboarding3.png';
 import HeaderReg from '../../components/HeaderReg/HeaderReg';
-import Onboarding from '../../components/Onboarding';
 import Footer from '../../components/Footer/Footer';
 import VerificationCodeForm from '../../components/VerificationCodeForm';
+import { errorMessages } from '../../utils/exceptions';
+
+const STORAGE_KEYS = {
+  END_TIME: 'verification_end_time'
+};
 
 const Verification = () => {
 
@@ -25,6 +24,43 @@ const Verification = () => {
   const [backendError, setBackendError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [countdown, setCountdown] = useState(120);
+  const [endTime, setEndTime] = useState(Math.floor(Date.now() / 1000 + 120));
+
+  const saveState = () => {
+    try {
+      const stateToSave = {
+        [STORAGE_KEYS.END_TIME]: endTime
+      };
+
+      Object.entries(stateToSave).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          localStorage.setItem(key, JSON.stringify(value));
+        }
+      });
+    } catch (error) {
+      console.error('Error saving state:', error);
+    }
+  };
+
+  const loadState = () => {
+    try {
+      const endTime = localStorage.getItem(STORAGE_KEYS.END_TIME);
+
+      if (endTime) {
+        setEndTime(Number(JSON.parse(endTime)));
+        console.log(endTime);
+        setCountdown(Math.floor(endTime - (Date.now() / 1000)));
+      }
+    } catch (error) {
+      console.error('Error loading state:', error);
+    }
+  };
+
+  const clearSavedState = () => {
+    Object.values(STORAGE_KEYS).forEach(key => {
+      localStorage.removeItem(key);
+    });
+  };
 
   useEffect(() => {
     if (countdown > 0) {
@@ -33,15 +69,26 @@ const Verification = () => {
     }
   }, [countdown]);
 
+  useEffect(() => {
+    loadState();
+    
+    return;
+  }, []);
+  
+  useEffect(() => {
+    saveState();
+  }, [endTime]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     setIsLoading(true);
     setError('');
     setBackendError('');
+    setSuccessMessage('');
 
     try {
-      const response = await fetch('/api/auth/register/verify', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/register/verify`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -54,12 +101,14 @@ const Verification = () => {
 
       const data = await response.json();
       if (!response.ok) {
-        const errorMessage = data.detail || data.message || 'Неверный код подтверждения.';
+        if (data.detail.error_code === 'MAX_ATTEMPTS_ENTER_CODE') setCountdown(0);
+        const errorMessage = errorMessages[data.detail.error_code] || 'Неверный код подтверждения.';
         setBackendError(errorMessage);
         throw new Error(errorMessage);
       }
 
       setSuccessMessage('Код подтверждён!');
+      clearSavedState();
       setTimeout(() => {
         navigate('/nickname', { 
           state: { user_id: data.id }
@@ -79,7 +128,7 @@ const Verification = () => {
     setBackendError('');
     
     try {
-      const response = await fetch('/api/auth/register/resend', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/register/resend`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -90,11 +139,13 @@ const Verification = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        const errorMessage = data.detail || data.message || 'Ошибка при повторной отправке кода.';
+        const errorMessage = errorMessages[data.detail.error_code] || 'Ошибка при повторной отправке кода.';
         setBackendError(errorMessage);
+        setSuccessMessage('');
         throw new Error(errorMessage);
       }
 
+      setEndTime(Math.floor(Date.now() / 1000 + 120));
       setCountdown(120);
       setSuccessMessage('Новый код отправлен на почту.');
       setCode('');

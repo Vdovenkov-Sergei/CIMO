@@ -41,7 +41,7 @@ const RegisterForm = ({
       <form className="form" onSubmit={onSubmit}>
         <div className="form__group">
           <Input
-            type="email"
+            type="text"
             placeholder="Почта"
             value={email}
             onChange={onEmailChange}
@@ -70,6 +70,7 @@ const RegisterForm = ({
             onChange={onConfirmPasswordChange}
             className="form__input"
             required
+            minLength="8"
           />
         </div>
 

@@ -2,7 +2,7 @@ import uuid
 from datetime import date, datetime
 
 from redis import asyncio as aioredis
-from sqlalchemy import ARRAY, TIMESTAMP, UUID, BigInteger, Boolean, Date, Float, String, Text, NullPool, create_engine
+from sqlalchemy import ARRAY, TIMESTAMP, UUID, BigInteger, Boolean, Date, Float, NullPool, String, Text, create_engine
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 

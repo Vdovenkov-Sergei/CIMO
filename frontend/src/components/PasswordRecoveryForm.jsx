@@ -35,7 +35,7 @@ const PasswordRecoveryForm = ({
       <form className="form" onSubmit={onSubmit}>
         <div className="form__group">
           <Input
-            type="email"
+            type="text"
             placeholder="Почта"
             value={email}
             onChange={onEmailChange}

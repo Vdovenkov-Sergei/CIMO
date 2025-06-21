@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import './Profile.scss';
 import ProfileNavLink from '../../components/ProfileNavLink';
 import ProfileHeader from '../../components/ProfileHeader';
@@ -10,47 +10,49 @@ import { useAuthFetch } from '../../utils/useAuthFetch';
 const Profile = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState({
-    login: 'cinemood_user',
-    email: 'cinemood.corp@gmail.com'
+    login: '',
+    email: ''
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const authFetch = useAuthFetch();
+  const [isNotFound, setIsNotFound] = useState(false);
+
+  const fetchUserData = async () => {
+    try {
+      const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/users/me`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+      });
+      if (!ok && data.detail.error_code === 'USER_NOT_FOUND') {
+        setIsNotFound(true);
+      }
+      setUser({
+        login: data.user_name,
+        email: data.email
+      });
+    } catch (err) {
+      console.error('Ошибка:', err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const { status, ok, data } = await authFetch('/api/users/me', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-        });
-
-        setUser({
-          login: data.user_name || 'cinemood_user',
-          email: data.email || 'cinemood.corp@gmail.com'
-        });
-      } catch (err) {
-        console.error('Ошибка:', err);
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchUserData();
   }, []);
 
   const handleLogout = async () => {
     try {
-      await authFetch('/api/auth/logout', {
+      await authFetch(`${import.meta.env.VITE_API_URL}/auth/logout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
       });
-      
       navigate('/');
     } catch (err) {
       console.error('Ошибка выхода:', err);
@@ -58,8 +60,13 @@ const Profile = () => {
     }
   };
 
-  if (error) {
-    return <div className="profile-page">Ошибка: {error}</div>;
+  if (isNotFound) {
+    return (
+      <div className="error">
+        <h1 className='code'>404</h1>
+        <h3 className="text">Страница не найдена</h3>
+      </div>
+    );
   }
 
   return (

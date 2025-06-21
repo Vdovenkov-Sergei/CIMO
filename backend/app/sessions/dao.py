@@ -2,7 +2,7 @@ import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Any, Optional, Sequence
 
-from sqlalchemy import and_, or_, select
+from sqlalchemy import Row, and_, or_, select
 
 from app.dao.base import BaseDAO
 from app.dao.decorators import (
@@ -48,7 +48,7 @@ class SessionDAO(BaseDAO[Session]):
     @log_db_delete("Delete session")
     async def leave_session(cls, *, session_id: uuid.UUID, user_id: int) -> int:
         count = await cls.delete_record(filters=[cls.model.id == session_id, cls.model.user_id == user_id])
-        await RedisSessionService.clear_session_keys(session_id=session_id)
+        await RedisSessionService.clear_session_keys(session_id=session_id, user_id=user_id)
         return count
 
     @classmethod
@@ -65,24 +65,24 @@ class SessionDAO(BaseDAO[Session]):
     @log_query_time
     async def _find_session_ids_by_filters(
         cls, *, filters: Optional[list[Any]] = None, limit: Optional[int] = None
-    ) -> Sequence[uuid.UUID]:
-        query = select(cls.model.id)
+    ) -> Sequence[Row[tuple[uuid.UUID, int]]]:
+        query = select(cls.model.id, cls.model.user_id)
         if filters is not None:
             query = query.where(*filters)
         if limit is not None:
             query = query.limit(limit)
         async with async_session_maker() as session:
             result = await session.execute(query)
-            return result.scalars().all()
+            return result.all()
 
     @classmethod
     @log_db_delete("Clean completed sessions")
     async def clean_completed_sessions(cls) -> int:
         filters = [cls.model.status == SessionStatus.COMPLETED]
-        session_ids = await cls._find_session_ids_by_filters(filters=filters)
+        session_user_ids = await cls._find_session_ids_by_filters(filters=filters)
         count = await cls.delete_record(filters=filters)
-        for session_id in session_ids:
-            await RedisSessionService.clear_session_keys(session_id=session_id)
+        for session_id, user_id in session_user_ids:
+            await RedisSessionService.clear_session_keys(session_id=session_id, user_id=user_id)
         return count
 
     @classmethod
@@ -105,8 +105,8 @@ class SessionDAO(BaseDAO[Session]):
                 ),
             )
         ]
-        session_ids = await cls._find_session_ids_by_filters(filters=filters)
+        session_user_ids = await cls._find_session_ids_by_filters(filters=filters)
         count = await cls.delete_record(filters=filters)
-        for session_id in session_ids:
-            await RedisSessionService.clear_session_keys(session_id=session_id)
+        for session_id, user_id in session_user_ids:
+            await RedisSessionService.clear_session_keys(session_id=session_id, user_id=user_id)
         return count

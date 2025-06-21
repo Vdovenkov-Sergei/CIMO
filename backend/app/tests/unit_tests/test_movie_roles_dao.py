@@ -1,15 +1,9 @@
 import pytest
+
 from app.movie_roles.dao import MovieRoleDAO
-from app.movie_roles.models import MovieRole
 
 
-@pytest.mark.parametrize(
-    "movie_id, expected_found",
-    [
-        (1, True),
-        (9999, False)
-    ]
-)
+@pytest.mark.parametrize("movie_id, expected_found", [(1, True), (9999, False)])
 async def test_get_movie_roles(movie_id, expected_found, prepare_database):
     roles = await MovieRoleDAO.get_movie_roles(movie_id=movie_id, limit=10, offset=0)
 

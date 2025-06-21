@@ -77,7 +77,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
         )
         raise
 
-    faiss_index.load()
+    faiss_index.initialize()
     yield
 
     logger.info("Shutting down application...")

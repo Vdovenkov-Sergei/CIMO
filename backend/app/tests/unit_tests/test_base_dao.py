@@ -30,7 +30,7 @@ async def test_add_record_and_delete_record(prepare_database):
 
     fetched = await MessageDAO.find_by_id(new_message.id)
     assert fetched is not None
-    assert fetched.content== "Hello from test"
+    assert fetched.content == "Hello from test"
 
     deleted_count = await MessageDAO.delete_record(filters=[Message.id == new_message.id])
     assert deleted_count == 1

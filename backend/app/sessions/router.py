@@ -1,4 +1,3 @@
-import random
 import uuid
 from datetime import UTC, datetime
 from typing import Any
@@ -99,7 +98,8 @@ async def check_ready_participants(session_id: uuid.UUID) -> bool:
         logger.warning("Not enough participants.", extra={"session_id": session_id, "count": len(participants)})
         raise ParticipantsNotEnoughException
 
-    ready_flag = all(p.status == SessionStatus.PREPARED for p in participants)
+    READY_STATUSES = {SessionStatus.PREPARED, SessionStatus.ACTIVE, SessionStatus.REVIEW}
+    ready_flag = all(p.status in READY_STATUSES for p in participants)
     if ready_flag:
         logger.info("All participants are ready.")
     else:
@@ -114,7 +114,10 @@ async def change_session_status(
     new_status = data.status
     update_fields: dict[str, Any] = {"status": new_status}
 
-    if (session.status, new_status) in [(SessionStatus.PENDING, SessionStatus.ACTIVE), (SessionStatus.PREPARED, SessionStatus.ACTIVE)]:
+    if (session.status, new_status) in [
+        (SessionStatus.PENDING, SessionStatus.ACTIVE),
+        (SessionStatus.PREPARED, SessionStatus.ACTIVE),
+    ]:
         update_fields["started_at"] = datetime.now(UTC)
         logger.info("User started session.", extra={"time": update_fields["started_at"], "user_id": session.user_id})
     elif (session.status, new_status) == (SessionStatus.REVIEW, SessionStatus.COMPLETED):

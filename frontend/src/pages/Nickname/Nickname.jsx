@@ -1,16 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Pagination } from 'swiper/modules';
 import './Nickname.scss';
 
-import onboarding1 from '@/assets/images/onboarding1.png';
-import onboarding2 from '@/assets/images/onboarding2.png';
-import onboarding3 from '@/assets/images/onboarding3.png';
 import Footer from '../../components/Footer/Footer';
 import HeaderReg from '../../components/HeaderReg/HeaderReg';
-import Onboarding from '../../components/Onboarding';
 import NicknameForm from '../../components/NicknameForm';
+import { errorMessages } from '../../utils/exceptions';
 
 const Nickname = () => {
   const navigate = useNavigate();
@@ -25,10 +20,9 @@ const Nickname = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!nickname.trim()) {
-      setError('Введите никнейм');
-      setBackendError('');
+
+    if (/user_\d+/.test(nickname.trim())) {
+      setBackendError('Никнейм недоступен.');
       return;
     }
 
@@ -38,7 +32,7 @@ const Nickname = () => {
     setSuccessMessage('');
 
     try {
-      const response = await fetch('/api/auth/register/username', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/register/username`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -52,7 +46,7 @@ const Nickname = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        const errorMessage = data.detail || data.message || 'Ошибка сохранения никнейма.';
+        const errorMessage = errorMessages[data.detail.error_code] || 'Ошибка сохранения никнейма.';
         setBackendError(errorMessage);
         throw new Error(errorMessage);
       }
@@ -70,6 +64,10 @@ const Nickname = () => {
   const handleSkip = () => {
     navigate('/?redirect=/waitingScreen');
   };
+
+  useEffect(() => {
+    localStorage.removeItem('verification_end_time');
+  });
 
   return (
     <div className="nickname-page">

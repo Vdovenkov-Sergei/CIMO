@@ -55,10 +55,10 @@ ORDER BY ordinal_position;
 
 ### Basic Startup of All Services
 
-To build and start all main containers, run command below and replace `{ENV_FILE}` with the desired environment file name:
+To build and start all main containers, run command below and replace `{MODE}` with the desired environment mode:
 
 ```bash
-ENV_FILE={ENV_FILE} docker compose up -d
+MODE={MODE} docker compose up -d
 ```
 
 This will start the following services:
@@ -78,7 +78,7 @@ The `load-data` container is not started automatically — it's launched manuall
 The `load-data` container is configured with the `manual` profile — it doesn't run automatically to prevent reloading data on each start.
 
 ```bash
-ENV_FILE={ENV_FILE} docker compose --profile manual up
+MODE={MODE} docker compose --profile manual up
 ```
 
 * The data will be loaded using an Alembic / Python script.
@@ -87,5 +87,5 @@ ENV_FILE={ENV_FILE} docker compose --profile manual up
 To show real-time logs from all running containers, you can use command below:
 
 ```bash
-ENV_FILE={ENV_FILE} docker compose logs -f
+MODE={MODE} docker compose logs -f
 ```

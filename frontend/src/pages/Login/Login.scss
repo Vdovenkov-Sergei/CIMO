@@ -1,6 +1,6 @@
+@use '../../styles/variables' as *;
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 @import 'swiper/swiper-bundle.css';
-@import '../../styles/variables';
 
 // Базовые переменные
 $bg-color: #09090B;
@@ -149,8 +149,6 @@ $primary-font: 'Inter', sans-serif;
   }
   }
 }
-
-
 
 // Малые экраны (мобильные устройства)
 @media (max-width: 600px) {

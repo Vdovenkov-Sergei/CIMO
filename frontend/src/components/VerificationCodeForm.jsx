@@ -67,6 +67,7 @@ const VerificationCodeForm = ({
           type="button"
           onClick={onResend}
           disabled={countdown > 0 || isResending}
+          className={countdown > 0 || isResending ? "disabled" : ""}
         >
           {countdown > 0 ? `Отправить повторно (${formatTime(countdown)})` : 'Отправить повторно'}
         </SecondaryButton>

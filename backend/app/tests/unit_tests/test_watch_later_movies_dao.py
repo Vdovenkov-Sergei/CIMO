@@ -1,4 +1,5 @@
 import pytest
+
 from app.watch_later_movies.dao import WatchLaterMovieDAO
 
 
