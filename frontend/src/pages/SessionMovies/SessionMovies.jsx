@@ -48,6 +48,8 @@ const SessionMovies = () => {
   const [step, setStep] = useState(0);
   const isOnboarding = location.state.isOnboarding;
   const authFetch = useAuthFetch();
+  const [forbidden, setForbidden] = useState(false);
+  const [isNotFound, setIsNotFound] = useState(false);
   
   const steps = [
     { id: 0, content: 'Удаляйте или откладывайте фильмы из списка понравившихся.'},
@@ -68,6 +70,8 @@ const SessionMovies = () => {
         },
         body: JSON.stringify({ status: 'REVIEW' }),
       });
+      if (!ok && data.detail.error_code === 'USER_NOT_IN_SESSION') setForbidden(true);
+      if (!ok && data.detail.error_code === 'USER_NOT_FOUND') setIsNotFound(true);
     } catch (err) {
       console.error('Error updating session status:', err);
     }
@@ -165,13 +169,19 @@ const SessionMovies = () => {
         }
       );
 
+      if (!ok && data.detail.error_code === 'INVALID_SESSION_STATUS') setForbidden(true);
+      if (!ok && data.detail.error_code === 'USER_NOT_IN_SESSION') setForbidden(true);
+      if (!ok && data.detail.error_code === 'USER_NOT_FOUND') setIsNotFound(true);
+
       if (!Array.isArray(data)) {
         throw new Error('Invalid data format for movies');
       }
 
-      setMovies(data);
-      setOffset(data.length);
-      setHasMore(data.length === limit);
+      if (ok) {
+        setMovies(data);
+        setOffset(data.length);
+        setHasMore(data.length === limit);
+      }
     } catch (err) {
       console.error('Error fetching movies:', err);
       setError(err.message);
@@ -214,7 +224,7 @@ const SessionMovies = () => {
     setError('');
 
     try {
-      await authFetch(`${import.meta.env.VITE_API_URL}/movies/later/`, {
+      const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/movies/later/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -224,14 +234,23 @@ const SessionMovies = () => {
         }),
       });
 
-      await authFetch(`${import.meta.env.VITE_API_URL}/movies/session/${movieId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      if (!ok && data.detail.error_code === 'USER_NOT_FOUND') setIsNotFound(true);
 
-      await fetchMovies(0);
+      if (ok) {
+        const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/movies/session/${movieId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!ok && data.detail.error_code === 'INVALID_SESSION_STATUS') setForbidden(true);
+        if (!ok && data.detail.error_code === 'USER_NOT_IN_SESSION') setForbidden(true);
+        if (!ok && data.detail.error_code === 'USER_NOT_FOUND') setIsNotFound(true);
+
+        if (ok) await fetchMovies(0);
+      }
+
     } catch (err) {
       console.error('Error toggling watch later:', err);
       setError(err.message);
@@ -245,14 +264,17 @@ const SessionMovies = () => {
     setError('');
 
     try {
-      await authFetch(`${import.meta.env.VITE_API_URL}/movies/session/${movieId}`, {
+      const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/movies/session/${movieId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         },
       });
+      if (!ok && data.detail.error_code === 'INVALID_SESSION_STATUS') setForbidden(true);
+      if (!ok && data.detail.error_code === 'USER_NOT_IN_SESSION') setForbidden(true);
+      if (!ok && data.detail.error_code === 'USER_NOT_FOUND') setIsNotFound(true);
 
-      await fetchMovies(0);
+      if (ok) await fetchMovies(0);
     } catch (err) {
       console.error('Error deleting movie:', err);
       setError(err.message);
@@ -261,51 +283,12 @@ const SessionMovies = () => {
     }
   };
 
-  const handleWatchClick = (movieId) => {
-    setMovieToRate({ id: movieId });
-    setIsRatingModalOpen(true);
-  };
-
-  const handleRatingSubmit = async (rating) => {
-    setIsLoading(true);
-    setError('');
-
-    try {
-      await authFetch(`${import.meta.env.VITE_API_URL}/movies/viewed/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          movie_id: movieToRate.id,
-          review: rating.toString()
-        }),
-      });
-
-      await authFetch(`${import.meta.env.VITE_API_URL}/movies/session/${movieToRate.id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      await fetchMovies(0);
-    } catch (err) {
-      console.error('Error submitting rating:', err);
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-      setIsRatingModalOpen(false);
-      setMovieToRate(null);
-    }
-  };
-
   const finishSession = async () => {
     setIsLoading(true);
     setError('');
 
     try {
-      await authFetch(`${import.meta.env.VITE_API_URL}/sessions/status`, {
+      const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/sessions/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -314,8 +297,13 @@ const SessionMovies = () => {
           status: 'COMPLETED'
         }),
       });
-      localStorage.removeItem('step');
-      navigate('/modeSelection');
+      if (!ok && data.detail.error_code === 'USER_NOT_IN_SESSION') setForbidden(true);
+      if (!ok && data.detail.error_code === 'USER_NOT_FOUND') setIsNotFound(true);
+      if (ok) {
+        localStorage.removeItem('step');
+        navigate('/modeSelection');
+      }
+      
     } catch (err) {
       console.error('Error finishing session:', err);
       setError(err.message);
@@ -345,6 +333,24 @@ const SessionMovies = () => {
     localStorage.setItem('step', step);
   }, [step]);
 
+  if (forbidden) {
+    return (
+      <div className='error'>
+        <h1 className='code'>403</h1>
+        <h3 className='text'>Что-то пошло не так. Попробуйте снова.</h3>
+      </div>
+    )
+  }
+  
+  if (isNotFound) {
+    return (
+      <div className='error'>
+        <h1 className='code'>404</h1>
+        <h3 className='text'>Страница не найдена</h3>
+      </div>
+    );
+  }
+
   return (
     <div className="session-movies-page">
       <Header />
@@ -372,7 +378,7 @@ const SessionMovies = () => {
             <WatchLaterScroll 
               movies={movies} 
               onToggleWatchLater={handleToggleWatchLater}
-              onWatch={handleWatchClick}
+              onWatch={() => {}}
               onDelete={handleDelete}
               onCardClick={handleCardClick}
             />
@@ -426,14 +432,6 @@ const SessionMovies = () => {
         movie={selectedMovie}
         onClose={handleCloseModal}
         isOpen={isDetailsModalOpen}
-      />
-
-      <RateMovieModal
-        isOpen={isRatingModalOpen}
-        onClose={() => setIsRatingModalOpen(false)}
-        onSubmit={handleRatingSubmit}
-        movie={movieToRate}
-        isLoading={isLoading}
       />
 
       <Footer />

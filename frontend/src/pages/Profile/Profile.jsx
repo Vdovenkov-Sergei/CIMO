@@ -16,6 +16,7 @@ const Profile = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const authFetch = useAuthFetch();
+  const [isNotFound, setIsNotFound] = useState(false);
 
   const fetchUserData = async () => {
     try {
@@ -25,7 +26,9 @@ const Profile = () => {
           'Content-Type': 'application/json'
         },
       });
-
+      if (!ok && data.detail.error_code === 'USER_NOT_FOUND') {
+        setIsNotFound(true);
+      }
       setUser({
         login: data.user_name,
         email: data.email
@@ -50,7 +53,6 @@ const Profile = () => {
           'Content-Type': 'application/json'
         },
       });
-      
       navigate('/');
     } catch (err) {
       console.error('Ошибка выхода:', err);
@@ -58,8 +60,13 @@ const Profile = () => {
     }
   };
 
-  if (error) {
-    return <div className="profile-page">Ошибка: {error}</div>;
+  if (isNotFound) {
+    return (
+      <div className="error">
+        <h1 className='code'>404</h1>
+        <h3 className="text">Страница не найдена</h3>
+      </div>
+    );
   }
 
   return (

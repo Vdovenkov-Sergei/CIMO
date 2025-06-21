@@ -74,6 +74,9 @@ const Session = () => {
   const [step, setStep] = useState(0);
   const [isOnboarding, setIsOnboarding] = useState(false);
   const authFetch = useAuthFetch();
+  const [isNotFound, setIsNotFound] = useState(false);
+  const [badRequest, setBadRequest] = useState(false);
+  const [forbidden, setForbidden] = useState(false);
 
   const steps = [
     { id: 0, content: 'Нажмите на карточку, чтобы посмотреть подробную информацию о фильме.' },
@@ -218,7 +221,7 @@ const Session = () => {
     loadState();
     checkSessionStatus();
 
-    fetchLikedMovies(true);
+    // fetchLikedMovies(true);
     if (location.state?.is_onboarding) {
       setIsOnboarding(location.state.is_onboarding);
     }
@@ -238,11 +241,18 @@ const Session = () => {
           'Content-Type': 'application/json',
         },
       });
-      if (data.status === 'PREPARED') {
+      if (!ok && data.detail.error_code === 'USER_NOT_FOUND') setIsNotFound(true);
+      else if (!ok && data.detail.error_code === 'ACTIVE_SESSION_NOT_FOUND') setIsNotFound(true);
+
+      if (ok) {
+        if (data.status === 'PREPARED') {
         setShowCountdown(true);
-      } else {
-        activateSession();
+        } else {
+          await activateSession();
+          await fetchLikedMovies(true);
+        }
       }
+      
     } catch (err) {
       console.error('Error checking session status:', err);
     }
@@ -300,15 +310,20 @@ const Session = () => {
           },
         }
       );
+
+      if (!ok && data.detail.error_code === 'INVALID_SESSION_STATUS') setForbidden(true);
+      else if (!ok && data.detail.error_code === 'USER_NOT_IN_SESSION') setForbidden(true);
+      else if (!ok && data.detail.error_code === 'USER_NOT_FOUND') setIsNotFound(true);
+      else if (ok) {
+        setHasMore(data.length === limit);
       
-      setHasMore(data.length === limit);
-      
-      if (reset) {
-        setLikedMovies(data);
-        setOffset(data.length);
-      } else {
-        setLikedMovies(prev => [...prev, ...data]);
-        setOffset(prev => prev + data.length);
+        if (reset) {
+          setLikedMovies(data);
+          setOffset(data.length);
+        } else {
+          setLikedMovies(prev => [...prev, ...data]);
+          setOffset(prev => prev + data.length);
+        }
       }
     } catch (err) {
       console.error('Error fetching liked movies:', err);
@@ -326,11 +341,15 @@ const Session = () => {
         },
         body: JSON.stringify({ movie_id: movieId, is_liked: isLiked, time_swiped: timeSwiped }),
       });
-      
-      setCurrentMovieId(data.movie_id);
-      fetchCurrentMovie(data.movie_id);
-      if (isLiked) {
-        fetchLikedMovies(true);
+      if (!ok && data.detail.error_code === 'INVALID_SESSION_STATUS') setForbidden(true);
+      else if (!ok && data.detail.error_code === 'USER_NOT_IN_SESSION') setForbidden(true);
+      else if (!ok && data.detail.error_code === 'USER_NOT_FOUND') setIsNotFound(true);
+      else if (ok) {
+        setCurrentMovieId(data.movie_id);
+        fetchCurrentMovie(data.movie_id);
+        if (isLiked) {
+          fetchLikedMovies(true);
+        }
       }
     } catch (err) {
       console.error('Error handling movie action:', err);
@@ -353,10 +372,15 @@ const Session = () => {
         },
         body: JSON.stringify({ status: 'ACTIVE' }),
       });
-      if (data.movie_id) {
-        setCurrentMovieId(data.movie_id);
-        fetchCurrentMovie(data.movie_id);
+      if (!ok && data.detail.error_code === 'USER_NOT_IN_SESSION') setForbidden(true);
+      else if (!ok && data.detail.error_code === 'USER_NOT_FOUND') setIsNotFound(true);
+      else if (ok) {
+        if (data.movie_id) {
+          setCurrentMovieId(data.movie_id);
+          fetchCurrentMovie(data.movie_id);
+        }
       }
+
     } catch (err) {
       console.error('Error activating session:', err);
     }
@@ -384,6 +408,32 @@ const Session = () => {
     }
   }, [step]);
   
+  if (isNotFound) {
+    return (
+      <div className='error'>
+        <h1 className='code'>404</h1>
+        <h3 className='text'>Страница не найдена</h3>
+      </div>
+    );
+  }
+
+  if (badRequest) {
+    return (
+      <div className="error">
+        <h1 className="code">Упс</h1>
+        <h3 className="text">Вы уже участвуете в другом подборе фильмов - завершите его прежде, чем начать новый.</h3>
+      </div>
+    )
+  }
+
+  if (forbidden) {
+    return (
+      <div className='error'>
+        <h1 className='code'>403</h1>
+        <h3 className='text'>Что-то пошло не так. Попробуйте снова.</h3>
+      </div>
+    )
+  }
 
   return (
     <div className="session-container">

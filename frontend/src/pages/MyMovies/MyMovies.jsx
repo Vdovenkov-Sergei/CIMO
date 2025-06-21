@@ -27,6 +27,7 @@ const MyMovies = () => {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const authFetch = useAuthFetch();
   const limit = 10;
+  const [isNotFound, setIsNotFound] = useState(false);
 
   const fetchWatchlist = async (offset = 0, shouldReset = false) => {
     if (isLoading && !shouldReset) return;
@@ -43,24 +44,28 @@ const MyMovies = () => {
           }
         }
       );
+      if (!ok && data.detail.error_code === 'USER_NOT_FOUND') setIsNotFound(true);
 
-      if (!Array.isArray(data)) {
-        throw new Error('Invalid data format for watchlist');
+      if (ok) {
+        if (!Array.isArray(data)) {
+          throw new Error('Invalid data format for watchlist');
+        }
+  
+        if (shouldReset || offset === 0) {
+          setWatchlistMovies(data);
+          setWatchlistOffset(data.length);
+        } else {
+          const newMovies = data.filter(newMovie => 
+            !watchlistMovies.some(existingMovie => 
+              existingMovie.movie.id === newMovie.movie.id
+            )
+          );
+          setWatchlistMovies(prev => [...prev, ...newMovies]);
+          setWatchlistOffset(prev => prev + newMovies.length);
+        }
+        setHasMoreWatchlist(data.length === limit);
       }
-
-      if (shouldReset || offset === 0) {
-        setWatchlistMovies(data);
-        setWatchlistOffset(data.length);
-      } else {
-        const newMovies = data.filter(newMovie => 
-          !watchlistMovies.some(existingMovie => 
-            existingMovie.movie.id === newMovie.movie.id
-          )
-        );
-        setWatchlistMovies(prev => [...prev, ...newMovies]);
-        setWatchlistOffset(prev => prev + newMovies.length);
-      }
-      setHasMoreWatchlist(data.length === limit);
+      
     } catch (err) {
       console.error('Error fetching watchlist:', err);
       setError(err.message);
@@ -86,23 +91,26 @@ const MyMovies = () => {
         }
       );
 
-      if (!Array.isArray(data)) {
-        throw new Error('Invalid data format for watched movies');
+      if (!ok && data.detail.error_code === 'USER_NOT_FOUND') setIsNotFound(true);
+      if (ok) {
+        if (!Array.isArray(data)) {
+          throw new Error('Invalid data format for watched movies');
+        }
+  
+        if (shouldReset || offset === 0) {
+          setWatchedMovies(data);
+          setWatchedOffset(data.length);
+        } else {
+          const newMovies = data.filter(newMovie => 
+            !watchedMovies.some(existingMovie => 
+              existingMovie.movie.id === newMovie.movie.id
+            )
+          );
+          setWatchedMovies(prev => [...prev, ...newMovies]);
+          setWatchedOffset(prev => prev + newMovies.length);
+        }
+        setHasMoreWatched(data.length === limit);
       }
-
-      if (shouldReset || offset === 0) {
-        setWatchedMovies(data);
-        setWatchedOffset(data.length);
-      } else {
-        const newMovies = data.filter(newMovie => 
-          !watchedMovies.some(existingMovie => 
-            existingMovie.movie.id === newMovie.movie.id
-          )
-        );
-        setWatchedMovies(prev => [...prev, ...newMovies]);
-        setWatchedOffset(prev => prev + newMovies.length);
-      }
-      setHasMoreWatched(data.length === limit);
     } catch (err) {
       console.error('Error fetching watched movies:', err);
       setError(err.message);
@@ -134,7 +142,7 @@ const MyMovies = () => {
     setError('');
 
     try {
-      await authFetch(`${import.meta.env.VITE_API_URL}/movies/viewed/`, {
+      const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/movies/viewed/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -145,14 +153,18 @@ const MyMovies = () => {
         }),
       });
 
-      await authFetch(`${import.meta.env.VITE_API_URL}/movies/later/${movieToRate.id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-
-      await Promise.all([fetchWatchlist(0, true), fetchWatched(0, true)]);
+      if (!ok && data.detail.error_code === 'USER_NOT_FOUND') setIsNotFound(true);
+      if (ok) {
+        const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/movies/later/${movieToRate.id}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+        if (!ok && data.detail.error_code === 'USER_NOT_FOUND') setIsNotFound(true);
+        if (ok) await Promise.all([fetchWatchlist(0, true), fetchWatched(0, true)]);
+      }
+      
     } catch (err) {
       console.error('Error submitting rating:', err);
       setError(err.message);
@@ -169,7 +181,7 @@ const MyMovies = () => {
     setError('');
 
     try {
-      await authFetch(`${import.meta.env.VITE_API_URL}/movies/viewed/${movieToRate.movie.id}`, {
+      const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/movies/viewed/${movieToRate.movie.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -179,8 +191,8 @@ const MyMovies = () => {
           review: rating.toString()
         }),
       });
-
-      await fetchWatched(0, true);
+      if (!ok && data.detail.error_code === 'USER_NOT_FOUND') setIsNotFound(true);
+      if (ok) await fetchWatched(0, true);
     } catch (err) {
       console.error('Error updating review:', err);
       setError(err.message);
@@ -196,7 +208,7 @@ const MyMovies = () => {
     setError('');
 
     try {
-      await authFetch(`${import.meta.env.VITE_API_URL}/movies/later/`, {
+      const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/movies/later/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -205,15 +217,18 @@ const MyMovies = () => {
           movie_id: movie.id
         }),
       });
+      if (!ok && data.detail.error_code === 'USER_NOT_FOUND') setIsNotFound(true);
+      if (ok) {
+        const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/movies/viewed/${movie.id}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+        if (!ok && data.detail.error_code === 'USER_NOT_FOUND') setIsNotFound(true);
+        if (ok) await Promise.all([fetchWatchlist(0, true), fetchWatched(0, true)]);
+      }
 
-      await authFetch(`${import.meta.env.VITE_API_URL}/movies/viewed/${movie.id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-
-      await Promise.all([fetchWatchlist(0, true), fetchWatched(0, true)]);
     } catch (err) {
       console.error('Error marking as unwatched:', err);
       setError(err.message);
@@ -227,14 +242,14 @@ const MyMovies = () => {
     setError('');
 
     try {
-      await authFetch(`${import.meta.env.VITE_API_URL}/movies/later/${movieId}`, {
+      const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/movies/later/${movieId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         }
       });
-
-      await Promise.all([fetchWatchlist(0, true), fetchWatched(0, true)]);
+      if (!ok && data.detail.error_code === 'USER_NOT_FOUND') setIsNotFound(true);
+      if (ok) await Promise.all([fetchWatchlist(0, true), fetchWatched(0, true)]);
     } catch (err) {
       console.error('Error removing movie:', err);
       setError(err.message);
@@ -268,6 +283,15 @@ const MyMovies = () => {
   const handleCloseModal = () => {
     setSelectedMovie(null);
   };
+
+  if (isNotFound) {
+    return (
+      <div className='error'>
+        <h1 className='code'>404</h1>
+        <h3 className='text'>Страница не найдена</h3>
+      </div>
+    );
+  }
 
   return (
     <div className="my-movies-page">

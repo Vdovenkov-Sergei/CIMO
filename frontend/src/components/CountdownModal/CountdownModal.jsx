@@ -62,20 +62,14 @@ const CountdownModal = ({ isOpen, onClose, onActivate, is_pair, session_id }) =>
   }, [isOpen, is_pair, session_id]);
 
   useEffect(() => {
-    if (isOpen && !is_pair && !isReady) {
-        console.log('Single session detected — skipping wait and starting countdown immediately.');
-        setIsReady(true);
-    }
-}, [isOpen, is_pair, isReady]);
-
-  useEffect(() => {
       if (!isOpen || !isReady) return;
 
       console.log('Starting countdown...');
       const timer = setInterval(() => {
           setCountdown(prev => {
               if (prev <= 1) {
-                  clearInterval(timer);
+                clearInterval(timer);
+                onClose();
                   return 0;
               }
               return prev - 1;
@@ -84,31 +78,6 @@ const CountdownModal = ({ isOpen, onClose, onActivate, is_pair, session_id }) =>
 
       return () => clearInterval(timer);
   }, [isOpen, isReady]);
-
-  useEffect(() => {
-      if (countdown === 0 && isOpen) {
-          console.log('Countdown finished, activating session...');
-          const activate = async () => {
-              try {
-                  const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/sessions/status`, {
-                      method: 'PATCH',
-                      headers: {
-                          'Content-Type': 'application/json',
-                      },
-                      body: JSON.stringify({ status: 'ACTIVE' }),
-                  });
-                  
-                  if (onActivate) {
-                      onActivate(data.movie_id);
-                  }
-                  onClose();
-              } catch (err) {
-                  console.error('Error activating session:', err);
-              }
-          };
-          activate();
-      }
-  }, [countdown, isOpen]);
 
   if (!isOpen) return null;
 

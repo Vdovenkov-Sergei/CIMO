@@ -7,7 +7,7 @@ export const errorMessages = {
 
   EMAIL_ALREADY_EXISTS: "Пользователь с таким email уже зарегистрирован.",
   USERNAME_ALREADY_EXISTS: "Никнейм уже занят.",
-  // USER_NOT_FOUND: "", // 404 not found page
+  USER_NOT_FOUND: "Пользователя с таким email не существует.", // 404 not found page
   INVALID_VERIFICATION_CODE: "Неверный код подтверждения.",
   VERIFICATION_CODE_EXPIRED: "Срок действия кода истёк. Запросите новый.",
   MAX_ATTEMPTS_ENTER_CODE: "Превышено число попыток. Запросите новый код.",

@@ -32,12 +32,6 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.email || !formData.password || !formData.confirmPassword) {
-      setError('Все поля обязательны для заполнения');
-      setBackendError('');
-      return;
-    }
-    
     if (formData.password !== formData.confirmPassword) {
       setError('Пароли не совпадают');
       setBackendError('');
@@ -78,6 +72,7 @@ const Signup = () => {
         throw new Error(errorMessage);
       }
 
+      localStorage.removeItem('verification_end_time');
       setSuccessMessage('Письмо отправлено. Проверьте почту.');
       
       setTimeout(() => {

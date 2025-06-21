@@ -18,6 +18,7 @@ const ChangeNickname = () => {
   const [backendError, setBackendError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const authFetch = useAuthFetch();
+  const [isNotFound, setIsNotFound] = useState(false);
 
   const fetchUserData = async () => {
     try {
@@ -27,6 +28,7 @@ const ChangeNickname = () => {
           'Content-Type': 'application/json'
         },
       });
+      if (!ok && data.detail.error_code === 'USER_NOT_FOUND') setIsNotFound(true);
       setUser({
         login: data.user_name,
         email: data.email
@@ -77,6 +79,8 @@ const ChangeNickname = () => {
         }),
       });
 
+      if (!ok && data.detail.error_code === 'USER_NOT_FOUND') setIsNotFound(true);
+
       if (!ok) {
         const errorMessage = errorMessages[data.detail.error_code] || JSON.stringify(data) || 'Ошибка обновления никнейма';
         setBackendError(errorMessage);
@@ -98,6 +102,13 @@ const ChangeNickname = () => {
       setIsLoading(false);
     }
   };
+
+  if (isNotFound) return (
+    <div className="error">
+      <h1 className='code'>404</h1>
+      <h3 className='text'>Страница не найдена</h3>
+    </div>
+  );
 
   return (
     <div className="change-nickname-page">

@@ -26,17 +26,22 @@ const ModeSelection = () => {
   const authFetch = useAuthFetch();
   const [isActiveSessionModalOpen, setIsActiveSessionModalOpen] = useState(false);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
+  const [isNotFound, setIsNotFound] = useState(false);
+  const [badRequest, setBadRequest] = useState(false);
+  const [forbidden, setForbidden] = useState(false);
 
   const checkExistingSession = async () => {
     try {
-      const { status, data } = await authFetch(`${import.meta.env.VITE_API_URL}/sessions/me`, {
+      const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/sessions/me`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
       });
 
-      if (status === 404) {
+      if (!ok && data.detail.error_code === 'USER_NOT_FOUND') setIsNotFound(true);
+
+      if (!ok) {
         setActiveSessionData(null);
         return null;
       } else {
@@ -58,14 +63,16 @@ const ModeSelection = () => {
     }
 
     try {
-      await authFetch(`${import.meta.env.VITE_API_URL}/sessions/`, {
+      const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/sessions/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ is_pair: false, is_onboarding: false }),
       });
-      showModalCallback();
+      if (!ok && data.detail.error_code === 'USER_ALREADY_IN_SESSION') setBadRequest(true);
+      else if (!ok && data.detail.error_code === 'USER_NOT_FOUND') setIsNotFound(true);
+      else if (ok) showModalCallback();
     } catch (err) {
       console.error('Error starting single session:', err);
     }
@@ -73,12 +80,14 @@ const ModeSelection = () => {
 
   const handleCancelSingleSession = async () => {
     try {
-      await authFetch(`${import.meta.env.VITE_API_URL}/sessions/leave`, {
+      const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/sessions/leave`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         },
       });
+      if (!ok && data.detail.error_code === 'USER_NOT_IN_SESSION') setForbidden(true);
+      else if (!ok && data.detail.error_code === 'USER_NOT_FOUND') setIsNotFound(true);
     } catch (err) {
       console.error('Error canceling session:', err);
     }
@@ -101,11 +110,14 @@ const ModeSelection = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ is_pair: true }),
       });
-
-      const newSessionId = data.id;
-      setSessionId(newSessionId);
-      setInviteLink(`http://localhost:5173/invite?id=${newSessionId}`);
-      showModalCallback();
+      if (!ok && data.detail.error_code === 'USER_ALREADY_IN_SESSION') setBadRequest(true);
+      else if (!ok && data.detail.error_code === 'USER_NOT_FOUND') setIsNotFound(true);
+      else if (ok) {
+        const newSessionId = data.id;
+        setSessionId(newSessionId);
+        setInviteLink(`http://localhost:5173/invite?id=${newSessionId}`);
+        showModalCallback();
+      }
     } catch (err) {
       console.error('Error starting pair session:', err);
     }
@@ -113,12 +125,14 @@ const ModeSelection = () => {
 
   const handleCancelPairSession = async () => {
     try {
-      await authFetch(`${import.meta.env.VITE_API_URL}/sessions/leave`, {
+      const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/sessions/leave`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         },
       });
+      if (!ok && data.detail.error_code === 'USER_NOT_IN_SESSION') setForbidden(true);
+      else if (!ok && data.detail.error_code === 'USER_NOT_FOUND') setIsNotFound(true);
     } catch (err) {
       console.error('Error canceling pair session:', err);
     }
@@ -133,8 +147,9 @@ const ModeSelection = () => {
         },
         body: JSON.stringify({ status: 'PREPARED' }),
       });
-      
-      navigate(`/session?id=${sessionId}`, { state: { session_id: sessionId, is_pair: true, is_onboarding: false } });
+      if (!ok && data.detail.error_code === 'USER_NOT_IN_SESSION') setForbidden(true);
+      else if (!ok && data.detail.error_code === 'USER_NOT_FOUND') setIsNotFound(true);
+      else if (ok) navigate(`/session?id=${sessionId}`, { state: { session_id: sessionId, is_pair: true, is_onboarding: false } });
     } catch (err) {
       console.error('Error preparing pair session:', err);
     }
@@ -149,6 +164,8 @@ const ModeSelection = () => {
         },
         body: JSON.stringify({ status: 'PREPARED' }),
       });
+      if (!ok && data.detail.error_code === 'USER_NOT_IN_SESSION') setForbidden(true);
+      else if (!ok && data.detail.error_code === 'USER_NOT_FOUND') setIsNotFound(true);
       console.log('Status update response:', data.status);
     } catch (err) {
       console.error('Error update session status:', err);
@@ -209,17 +226,45 @@ const ModeSelection = () => {
     setIsConfirmationModalOpen(false);
     clearSavedState();
     try {
-      await authFetch(`${import.meta.env.VITE_API_URL}/sessions/leave`, {
+      const { status, ok, data } = await authFetch(`${import.meta.env.VITE_API_URL}/sessions/leave`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         },
       });
-      
+      if (!ok && data.detail.error_code === 'USER_NOT_IN_SESSION') setForbidden(true);
+      else if (!ok && data.detail.error_code === 'USER_NOT_FOUND') setIsNotFound(true);
     } catch (err) {
       console.error('Error finishing session:', err);
     }
   };
+
+  if (isNotFound) {
+    return (
+      <div className='error'>
+        <h1 className='code'>404</h1>
+        <h3 className='text'>Страница не найдена</h3>
+      </div>
+    );
+  }
+
+  if (badRequest) {
+    return (
+      <div className="error">
+        <h1 className="code">Упс</h1>
+        <h3 className="text">Вы уже участвуете в другом подборе фильмов - завершите его прежде, чем начать новый.</h3>
+      </div>
+    )
+  }
+
+  if (forbidden) {
+    return (
+      <div className='error'>
+        <h1 className='code'>403</h1>
+        <h3 className='text'>Что-то пошло не так. Попробуйте снова.</h3>
+      </div>
+    )
+  }
 
   return (
     <div className="mode-selection-page">

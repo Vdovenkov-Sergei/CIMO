@@ -44,15 +44,14 @@ async def register_email(user_data: SUserRegisterEmail) -> dict[str, str]:
     email = user_data.email
     email_key = RedisKeys.USER_EMAIL_KEY.format(email=email)
     attempts_key = RedisKeys.ATTEMPTS_SEND_KEY.format(email=email)
-    existing_user = await UserDAO.find_by_email(email=email) or await redis_client.get(email_key)
-    if existing_user:
-        logger.warning("Email already exists.", extra={"email": email})
+    if await UserDAO.find_by_email(email=email):
+        logger.warning("Email already registered.", extra={"email": email})
         raise EmailAlreadyExistsException(email=email)
 
     hashed_password = Hashing.get_password_hash(user_data.password)
     await redis_client.setex(email_key, timedelta(seconds=Verification.MAX_TIME_PENDING), hashed_password)
     logger.debug("User email & password stored in Redis.", extra={"email": email})
-    await redis_client.setex(attempts_key, timedelta(seconds=Verification.MAX_TIME_PENDING), 0)
+    await redis_client.setex(attempts_key, timedelta(seconds=Verification.MAX_TIME_PENDING), 1)
     logger.debug("Attempts to send verification code stored in Redis.", extra={"attempts_key": attempts_key})
     await send_verification_code(email)
 

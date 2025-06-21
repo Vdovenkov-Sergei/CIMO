@@ -47,7 +47,7 @@ class UserIsNotPresentException(ApiException):
 class EmailAlreadyExistsException(ApiException):
     status_code = status.HTTP_409_CONFLICT
     error_code = "EMAIL_ALREADY_EXISTS"
-    error_message = "User with email='{email}' already exists or pending verification"
+    error_message = "User with email='{email}' already exists"
 
 
 class UsernameAlreadyExistsException(ApiException):

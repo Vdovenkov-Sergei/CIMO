@@ -7,6 +7,10 @@ import Footer from '../../components/Footer/Footer';
 import VerificationCodeForm from '../../components/VerificationCodeForm';
 import { errorMessages } from '../../utils/exceptions';
 
+const STORAGE_KEYS = {
+  END_TIME: 'verification_end_time'
+};
+
 const Verification = () => {
 
   const location = useLocation();
@@ -20,6 +24,43 @@ const Verification = () => {
   const [backendError, setBackendError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [countdown, setCountdown] = useState(120);
+  const [endTime, setEndTime] = useState(Math.floor(Date.now() / 1000 + 120));
+
+  const saveState = () => {
+    try {
+      const stateToSave = {
+        [STORAGE_KEYS.END_TIME]: endTime
+      };
+
+      Object.entries(stateToSave).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          localStorage.setItem(key, JSON.stringify(value));
+        }
+      });
+    } catch (error) {
+      console.error('Error saving state:', error);
+    }
+  };
+
+  const loadState = () => {
+    try {
+      const endTime = localStorage.getItem(STORAGE_KEYS.END_TIME);
+
+      if (endTime) {
+        setEndTime(Number(JSON.parse(endTime)));
+        console.log(endTime);
+        setCountdown(Math.floor(endTime - (Date.now() / 1000)));
+      }
+    } catch (error) {
+      console.error('Error loading state:', error);
+    }
+  };
+
+  const clearSavedState = () => {
+    Object.values(STORAGE_KEYS).forEach(key => {
+      localStorage.removeItem(key);
+    });
+  };
 
   useEffect(() => {
     if (countdown > 0) {
@@ -27,6 +68,16 @@ const Verification = () => {
       return () => clearTimeout(timer);
     }
   }, [countdown]);
+
+  useEffect(() => {
+    loadState();
+    
+    return;
+  }, []);
+  
+  useEffect(() => {
+    saveState();
+  }, [endTime]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -50,12 +101,14 @@ const Verification = () => {
 
       const data = await response.json();
       if (!response.ok) {
+        if (data.detail.error_code === 'MAX_ATTEMPTS_ENTER_CODE') setCountdown(0);
         const errorMessage = errorMessages[data.detail.error_code] || 'Неверный код подтверждения.';
         setBackendError(errorMessage);
         throw new Error(errorMessage);
       }
 
       setSuccessMessage('Код подтверждён!');
+      clearSavedState();
       setTimeout(() => {
         navigate('/nickname', { 
           state: { user_id: data.id }
@@ -92,6 +145,7 @@ const Verification = () => {
         throw new Error(errorMessage);
       }
 
+      setEndTime(Math.floor(Date.now() / 1000 + 120));
       setCountdown(120);
       setSuccessMessage('Новый код отправлен на почту.');
       setCode('');

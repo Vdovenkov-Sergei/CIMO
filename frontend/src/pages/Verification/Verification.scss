@@ -147,6 +147,12 @@ $primary-font: 'Inter', sans-serif;
         background-color: $secondary-button-hover;
       }
     }
+
+    .disabled {
+      &:hover {
+        background-color: transparent;
+      }
+    }
   }
   }
 }

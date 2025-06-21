@@ -65,6 +65,10 @@ const Nickname = () => {
     navigate('/?redirect=/waitingScreen');
   };
 
+  useEffect(() => {
+    localStorage.removeItem('verification_end_time');
+  });
+
   return (
     <div className="nickname-page">
       <HeaderReg className="header" />
