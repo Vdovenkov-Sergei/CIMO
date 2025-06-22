@@ -90,7 +90,6 @@ const Session = () => {
     setStep(prev => prev + 1);
   };
 
-  // Сохранение состояния
   const saveState = () => {
     try {
       const stateToSave = {
@@ -111,7 +110,6 @@ const Session = () => {
     }
   };
 
-  // Восстановление состояния
   const loadState = () => {
     try {
       //const storedCurrentMovieId = localStorage.getItem(STORAGE_KEYS.CURRENT_MOVIE_ID);
@@ -131,7 +129,6 @@ const Session = () => {
     }
   };
 
-  // Очистка сохраненного состояния
   const clearSavedState = () => {
     Object.values(STORAGE_KEYS).forEach(key => {
       localStorage.removeItem(key);

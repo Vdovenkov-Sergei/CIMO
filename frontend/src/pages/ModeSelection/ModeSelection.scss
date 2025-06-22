@@ -1,7 +1,6 @@
 @use '../../styles/variables' as *;
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
-// Базовые переменные
 $bg-color: #09090B;
 $text-color: #FFFFFF;
 $link-color: #A1ACFF;
@@ -20,7 +19,6 @@ $primary-font: 'Inter', sans-serif;
   background-repeat: no-repeat;
   background-attachment: fixed;
 
-  // Основной контент
   .main-content-modes {
     flex: 1;
     padding: 40px;
@@ -102,7 +100,6 @@ $primary-font: 'Inter', sans-serif;
   }
 }
 
-// Адаптив для планшетов
 @media (max-width: 1024px) {
   .mode-selection-page {
     .modes-container {
@@ -132,7 +129,6 @@ $primary-font: 'Inter', sans-serif;
   }
 }
 
-// Адаптив для мобильных
 @media (max-width: 600px) {
   .mode-selection-page {
     .main-title {

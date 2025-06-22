@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Pagination } from 'swiper/modules';
 import './Login.scss';
 import AuthForm from '../../components/AuthForm';
 import HeaderReg from '../../components/HeaderReg/HeaderReg';

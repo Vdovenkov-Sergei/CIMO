@@ -46,15 +46,6 @@ const ChangeNickname = () => {
   }, []);
 
   const handleNicknameSubmit = async (newNickname) => {
-    // if (newNickname.trim() === user.login) {
-    //   setBackendError('Этот никнейм занят.');
-    //   const timer = setTimeout(() => {
-    //     setBackendError('');
-    //   }, 3000);
-    //   setSuccessMessage('');
-    //   return;
-    // }
-
     if (/user_\d+/.test(newNickname.trim())) {
       setBackendError('Никнейм недоступен.');
       const timer = setTimeout(() => {

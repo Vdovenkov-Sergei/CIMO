@@ -2,7 +2,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 @import 'swiper/swiper-bundle.css';
 
-// Базовые переменные
 $bg-color: #09090B;
 $text-color: #FFFFFF;
 $link-color: #A1ACFF;
@@ -16,7 +15,6 @@ $primary-font: 'Inter', sans-serif;
   display: flex;
   flex-direction: column;
 
-  // Основной контент
   .main-content {
   display: flex;
   flex: 1;
@@ -52,7 +50,6 @@ $primary-font: 'Inter', sans-serif;
   }
   }
 
-  // Форма авторизации
   .auth-form {
   width: 90%;
   max-width: 400px;
@@ -152,7 +149,6 @@ $primary-font: 'Inter', sans-serif;
 
 
 
-// Малые экраны (мобильные устройства)
 @media (max-width: 600px) {
   .signup-page {
 
@@ -193,7 +189,6 @@ $primary-font: 'Inter', sans-serif;
   }
 }
 
-// Средние экраны (планшеты и узкие ноутбуки)
 @media (min-width: 600px) and (max-width: 1024px) {
   .signup-page {
     .main-content {

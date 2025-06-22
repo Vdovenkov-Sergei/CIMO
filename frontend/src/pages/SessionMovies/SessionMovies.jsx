@@ -8,7 +8,6 @@ import FinishSessionButton from '../../components/FinishSessionButton';
 import Footer from '../../components/Footer/Footer';
 import Header from '../../components/Header/Header';
 import MovieDetailsModal from '../../components/MovieDetailsModal/MovieDetailsModal';
-import RateMovieModal from '../../components/RateMovieModal/RateMovieModal';
 import { useAuthFetch } from '../../utils/useAuthFetch';
 
 const Notification = ({ movie }) => {
@@ -36,8 +35,6 @@ const SessionMovies = () => {
   const [error, setError] = useState('');
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-  const [movieToRate, setMovieToRate] = useState(null);
-  const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
   const limit = 10;
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMovie, setNotificationMovie] = useState(null);

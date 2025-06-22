@@ -1,7 +1,6 @@
 @use '../../styles/variables' as *;
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
-// Базовые переменные
 $bg-color: #09090B;
 $text-color: #FFFFFF;
 $link-color: #A1ACFF;
@@ -37,7 +36,6 @@ $primary-font: 'Inter', sans-serif;
     }
   }
 
-  // Основная часть
   .movies-main {
     flex: 1;
     padding: 40px;
@@ -244,7 +242,6 @@ $primary-font: 'Inter', sans-serif;
 
 
 
-// Адаптивность
 @media (max-width: 600px) {
   .my-movies-page {
     .navigation {
