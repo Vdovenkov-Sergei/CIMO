@@ -4,28 +4,28 @@ services:
     container_name: cimo_nginx
     ports:
       - "80:80"
-      - "443-443"
+      - "443:443"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
       - /etc/letsencrypt:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
+      - ./frontend/dist:/usr/share/nginx/html
     depends_on:
       - backend
-      - frontend
     networks:
-      - dev
+      - cimo_network
 
   db:
     image: postgres:17
     container_name: cimo_db
     env_file:
-      - ./backend/.env.${MODE}
+      - ./backend/.env.${BUILD}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - dev
+      - cimo_network
 
   redis:
     image: redis:7
@@ -33,14 +33,14 @@ services:
     volumes:
       - redis_data:/data
     networks:
-      - dev
+      - cimo_network
 
   backend:
     build:
       context: ./backend
     container_name: cimo_backend
     env_file:
-      - ./backend/.env.${MODE}
+      - ./backend/.env.${BUILD}
     ports:
       - "8000:8000"
     depends_on:
@@ -48,46 +48,46 @@ services:
       - redis
     command: ["/backend/docker/app.sh", "app"]
     networks:
-      - dev
+      - cimo_network
 
   celery:
     build:
       context: ./backend
     container_name: cimo_celery
     env_file:
-      - ./backend/.env.${MODE}
+      - ./backend/.env.${BUILD}
     depends_on:
       - redis
     command: ["/backend/docker/app.sh", "celery"]
     networks:
-      - dev
+      - cimo_network
 
   flower:
     build:
       context: ./backend
     container_name: cimo_flower
     env_file:
-      - ./backend/.env.${MODE}
+      - ./backend/.env.${BUILD}
     ports:
       - "5555:5555"
     depends_on:
       - redis
     command: ["/backend/docker/app.sh", "flower"]
     networks:
-      - dev
+      - cimo_network
 
   beat:
     build:
       context: ./backend
     container_name: cimo_beat
     env_file:
-      - ./backend/.env.${MODE}
+      - ./backend/.env.${BUILD}
     depends_on:
       - db
       - redis
     command: ["/backend/docker/app.sh", "beat"]
     networks:
-      - dev
+      - cimo_network
 
   load-data:
     build:
@@ -95,7 +95,7 @@ services:
     container_name: cimo_load_data
     command: ["/backend/docker/load.sh"]
     env_file:
-      - ./backend/.env.${MODE}
+      - ./backend/.env.${BUILD}
     depends_on:
       - db
     volumes:
@@ -103,22 +103,7 @@ services:
     profiles:
       - manual
     networks:
-      - dev
-
-  frontend:
-    build:
-      context: ./frontend
-      args:
-        MODE: ${MODE}
-    container_name: cimo_frontend
-    ports:
-      - "5173:5173"
-    stdin_open: true
-    tty: true
-    env_file:
-      - ./frontend/.env.${MODE}
-    networks:
-      - dev
+      - cimo_network
 
   certbot:
     image: certbot/certbot
@@ -126,13 +111,13 @@ services:
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
-    command: certonly --webroot --webroot-path=/var/www/certbot --email your@email.com --agree-tos --no-eff-email -d cimo-online.ru -d www.cimo-online.ru -d api.cimo-online.ru -d www.api.cimo-online.ru
+    command: certonly --webroot --webroot-path=/var/www/certbot --email cinemood.corp@gmail.com --agree-tos --no-eff-email -d cimo-online.ru -d api.cimo-online.ru
     networks:
-      - dev
+      - cimo_network
 
 volumes:
   postgres_data:
   redis_data:
 
 networks:
-  dev:
+  cimo_network:

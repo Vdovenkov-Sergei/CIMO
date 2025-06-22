@@ -1,5 +1,6 @@
 import secrets
 from datetime import timedelta
+from typing import Optional
 
 import numpy as np
 from fastapi import APIRouter, Cookie, Depends, Response
@@ -20,7 +21,7 @@ from app.recommendation.index import faiss_index
 from app.tasks.tasks import send_email_with_reset_link
 from app.users.auth import authenticate_user, check_jwt_token, check_verification_code, create_jwt_token
 from app.users.dao import UserDAO
-from app.users.dependencies import get_current_user
+from app.users.dependencies import get_cookie_params, get_current_user
 from app.users.models import User
 from app.users.schemas import (
     SUserAuth,
@@ -173,13 +174,18 @@ async def reset_password(user_data: SUserVerifyPassword) -> dict[str, str]:
 
 
 @router_auth.post("/login", response_model=dict[str, str])
-async def login_user(response: Response, user_data: SUserAuth) -> dict[str, str]:
+async def login_user(
+    response: Response,
+    user_data: SUserAuth,
+    cookie_params: dict[str, Optional[str | bool]] = Depends(get_cookie_params),
+) -> dict[str, str]:
     user = await authenticate_user(user_data.login, user_data.password)
     access_token = create_jwt_token({"sub": str(user.id)}, timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
     refresh_token = create_jwt_token({"sub": str(user.id)}, timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS))
-    response.set_cookie(Tokens.ACCESS_TOKEN, access_token, httponly=True)
+
+    response.set_cookie(Tokens.ACCESS_TOKEN, access_token, **cookie_params)
     logger.debug("Access token set in cookie.")
-    response.set_cookie(Tokens.REFRESH_TOKEN, refresh_token, httponly=True)
+    response.set_cookie(Tokens.REFRESH_TOKEN, refresh_token, **cookie_params)
     logger.debug("Refresh token set in cookie.")
 
     logger.info("User logged in.", extra={"user_id": user.id})
@@ -188,12 +194,14 @@ async def login_user(response: Response, user_data: SUserAuth) -> dict[str, str]
 
 @router_auth.post("/refresh", response_model=dict[str, str])
 async def refresh_token(
-    response: Response, refresh_token: str = Cookie(include_in_schema=False, default=None)
+    response: Response,
+    refresh_token: str = Cookie(include_in_schema=False, default=None),
+    cookie_params: dict[str, Optional[str | bool]] = Depends(get_cookie_params),
 ) -> dict[str, str]:
     payload = check_jwt_token(refresh_token)
     user_id = payload.get("sub")
     access_token = create_jwt_token({"sub": user_id}, timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
-    response.set_cookie(Tokens.ACCESS_TOKEN, access_token, httponly=True)
+    response.set_cookie(Tokens.ACCESS_TOKEN, access_token, **cookie_params)
     logger.debug("New access token set in cookie.", extra={"access_token": access_token})
 
     logger.info("Access token refreshed.", extra={"user_id": user_id})
@@ -201,10 +209,12 @@ async def refresh_token(
 
 
 @router_auth.post("/logout", response_model=dict[str, str])
-async def logout_user(response: Response, user: User = Depends(get_current_user)) -> dict[str, str]:
-    response.delete_cookie(Tokens.ACCESS_TOKEN)
+async def logout_user(
+    response: Response, user: User = Depends(get_current_user), cookie_params: dict = Depends(get_cookie_params)
+) -> dict[str, str]:
+    response.delete_cookie(Tokens.ACCESS_TOKEN, domain=cookie_params["domain"])
     logger.debug("Access token deleted from cookie.")
-    response.delete_cookie(Tokens.REFRESH_TOKEN)
+    response.delete_cookie(Tokens.REFRESH_TOKEN, domain=cookie_params["domain"])
     logger.debug("Refresh token deleted from cookie.")
 
     logger.info("User logged out.", extra={"user_id": user.id})

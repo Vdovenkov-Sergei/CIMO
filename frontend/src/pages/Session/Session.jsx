@@ -44,7 +44,7 @@ const CaretUp = () => (
 );
 
 const STORAGE_KEYS = {
-  //CURRENT_MOVIE_ID: 'session_current_movie_id',
+  CURRENT_MOVIE_ID: 'session_current_movie_id',
   SHOW_COUNTDOWN: 'session_show_countdown',
   SHOW_LIKED_MOVIES: 'session_show_liked_movies',
   START_TIME: 'session_start_time',
@@ -77,6 +77,7 @@ const Session = () => {
   const [isNotFound, setIsNotFound] = useState(false);
   const [badRequest, setBadRequest] = useState(false);
   const [forbidden, setForbidden] = useState(false);
+  const [isStateLoaded, setIsStateLoaded] = useState(false);
 
   const steps = [
     { id: 0, content: 'Нажмите на карточку, чтобы посмотреть подробную информацию о фильме.' },
@@ -93,7 +94,7 @@ const Session = () => {
   const saveState = () => {
     try {
       const stateToSave = {
-        //[STORAGE_KEYS.CURRENT_MOVIE_ID]: currentMovieId,
+        [STORAGE_KEYS.CURRENT_MOVIE_ID]: currentMovieId,
         [STORAGE_KEYS.SHOW_COUNTDOWN]: showCountdown,
         [STORAGE_KEYS.SHOW_LIKED_MOVIES]: showLikedMovies,
         [STORAGE_KEYS.START_TIME]: startTime,
@@ -112,13 +113,13 @@ const Session = () => {
 
   const loadState = () => {
     try {
-      //const storedCurrentMovieId = localStorage.getItem(STORAGE_KEYS.CURRENT_MOVIE_ID);
+      const storedCurrentMovieId = localStorage.getItem(STORAGE_KEYS.CURRENT_MOVIE_ID);
       const storedShowCountdown = localStorage.getItem(STORAGE_KEYS.SHOW_COUNTDOWN);
       const storedShowLikedMovies = localStorage.getItem(STORAGE_KEYS.SHOW_LIKED_MOVIES);
       const storedStartTime = localStorage.getItem(STORAGE_KEYS.START_TIME);
       const storedStep = localStorage.getItem(STORAGE_KEYS.STEP);
 
-      //if (storedCurrentMovieId) setCurrentMovieId(JSON.parse(storedCurrentMovieId));
+      if (storedCurrentMovieId) setCurrentMovieId(JSON.parse(storedCurrentMovieId));
       if (storedShowCountdown) setShowCountdown(JSON.parse(storedShowCountdown));
       if (storedShowLikedMovies) setShowLikedMovies(JSON.parse(storedShowLikedMovies));
       if (storedStartTime) setStartTime(Number(JSON.parse(storedStartTime)));
@@ -126,6 +127,8 @@ const Session = () => {
       console.log(step);
     } catch (error) {
       console.error('Error loading state:', error);
+    } finally {
+      setIsStateLoaded(true);
     }
   };
 
@@ -216,15 +219,16 @@ const Session = () => {
 
   useEffect(() => {
     loadState();
-    checkSessionStatus();
-
-    // fetchLikedMovies(true);
-    if (location.state?.is_onboarding) {
-      setIsOnboarding(location.state.is_onboarding);
-    }
-  
-    return;
   }, []);
+
+  useEffect(() => {
+    if (isStateLoaded) {
+      checkSessionStatus();
+      if (location.state?.is_onboarding) {
+        setIsOnboarding(location.state.is_onboarding);
+      }
+    }
+  }, [isStateLoaded]);
 
   useEffect(() => {
     saveState();
@@ -372,7 +376,7 @@ const Session = () => {
       if (!ok && data.detail.error_code === 'USER_NOT_IN_SESSION') setForbidden(true);
       else if (!ok && data.detail.error_code === 'USER_NOT_FOUND') setIsNotFound(true);
       else if (ok) {
-        if (data.movie_id) {
+        if (!currentMovieId && data.movie_id) {
           setCurrentMovieId(data.movie_id);
           fetchCurrentMovie(data.movie_id);
         }

@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, Optional
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -42,6 +42,7 @@ class Settings(BaseSettings):
     SMTP_PASS: str
 
     FRONTEND_URL: str
+    COOKIE_DOMAIN: Optional[str] = None
 
     SENTRY_DSN: str
 
