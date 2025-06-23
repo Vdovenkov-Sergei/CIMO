@@ -9,16 +9,12 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - cimo_network
 
   redis:
     image: redis:7
     container_name: cimo_redis
     volumes:
       - redis_data:/data
-    networks:
-      - cimo_network
 
   backend:
     build:
@@ -32,8 +28,6 @@ services:
       - db
       - redis
     command: ["/backend/docker/app.sh", "app"]
-    networks:
-      - cimo_network
 
   celery:
     build:
@@ -44,8 +38,6 @@ services:
     depends_on:
       - redis
     command: ["/backend/docker/app.sh", "celery"]
-    networks:
-      - cimo_network
 
   flower:
     build:
@@ -58,8 +50,6 @@ services:
     depends_on:
       - redis
     command: ["/backend/docker/app.sh", "flower"]
-    networks:
-      - cimo_network
 
   beat:
     build:
@@ -71,8 +61,6 @@ services:
       - db
       - redis
     command: ["/backend/docker/app.sh", "beat"]
-    networks:
-      - cimo_network
 
   load-data:
     build:
@@ -87,12 +75,7 @@ services:
       - ./backend/app/data:/app/data
     profiles:
       - manual
-    networks:
-      - cimo_network
 
 volumes:
   postgres_data:
   redis_data:
-
-networks:
-  cimo_network:
