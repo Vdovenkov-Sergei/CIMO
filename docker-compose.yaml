@@ -1,19 +1,4 @@
 services:
-  nginx:
-    image: nginx:alpine
-    container_name: cimo_nginx
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-      - /etc/letsencrypt:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-      - ./frontend/dist:/usr/share/nginx/html
-    depends_on:
-      - backend
-    networks:
-      - cimo_network
 
   db:
     image: postgres:17
@@ -102,16 +87,6 @@ services:
       - ./backend/app/data:/app/data
     profiles:
       - manual
-    networks:
-      - cimo_network
-
-  certbot:
-    image: certbot/certbot
-    container_name: cimo_certbot
-    volumes:
-      - /etc/letsencrypt:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-    command: certonly --webroot --webroot-path=/var/www/certbot --email cinemood.corp@gmail.com --agree-tos --no-eff-email -d cimo-online.ru -d api.cimo-online.ru
     networks:
       - cimo_network
 

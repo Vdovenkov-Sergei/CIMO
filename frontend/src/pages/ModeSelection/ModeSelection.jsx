@@ -115,7 +115,7 @@ const ModeSelection = () => {
       else if (ok) {
         const newSessionId = data.id;
         setSessionId(newSessionId);
-        setInviteLink(`http://localhost:5173/invite?id=${newSessionId}`);
+        setInviteLink(`${import.meta.env.VITE_URL}/invite?id=${newSessionId}`);
         showModalCallback();
       }
     } catch (err) {
