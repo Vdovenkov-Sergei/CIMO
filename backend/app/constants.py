@@ -29,6 +29,7 @@ class Verification:
 class Tokens:
     ACCESS_TOKEN: str = "access_token"
     REFRESH_TOKEN: str = "refresh_token"
+    ADMIN_SESSION: str = "admin_session"
 
 
 class RedisKeys:
