@@ -436,6 +436,15 @@
       overflow-x: hidden;
       scroll-behavior: smooth;
       width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      white-space: nowrap;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+
+      .movies-scroll-liked::-webkit-scrollbar {
+        display: none;
+      }
     
       .liked-movie {
         flex: 0 0 200px;
@@ -481,6 +490,15 @@
   overflow-x: hidden;
   scroll-behavior: smooth;
   width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  .movies-scroll-liked::-webkit-scrollbar {
+    display: none;
+  }
 
   .liked-movie {
     flex: 0 0 200px;

@@ -186,6 +186,7 @@ $primary-font: 'Inter', sans-serif;
     align-items: center;
     width: 100%;
     padding: 0 60px;
+
   }
   
   .movies-scroll {
@@ -196,6 +197,15 @@ $primary-font: 'Inter', sans-serif;
     margin-top: 15px;
     padding: 10px 0;
     width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .movies-scroll::-webkit-scrollbar {
+    display: none;
   }
   
   .scroll-button {
