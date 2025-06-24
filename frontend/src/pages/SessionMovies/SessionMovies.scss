@@ -16,7 +16,7 @@ $primary-font: 'Inter', sans-serif;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-attachment: fixed;
+  background-attachment: scroll;
 
   .movies-main {
     flex: 1;
@@ -47,7 +47,7 @@ $primary-font: 'Inter', sans-serif;
       justify-content: center;
       color: $additional-text-color;
       background-color: rgb(255, 255, 255, 0.02);
-      font-size: 1.2rem;
+      font-size: 18px;
       border-radius: 8px;
       margin-top: 20px;
     }
@@ -132,6 +132,10 @@ $primary-font: 'Inter', sans-serif;
         .movies-section__title h3 {
           text-align: center;
           font-size: 20px;
+        }
+
+        .empty-watch-later {
+          font-size: 16px;
         }
       }
     }
@@ -304,7 +308,6 @@ $primary-font: 'Inter', sans-serif;
   display: flex;
   overflow-x: hidden;
   scroll-behavior: smooth;
-  gap: 20px;
   padding: 10px 0;
   width: 100%;
   overflow-x: auto;

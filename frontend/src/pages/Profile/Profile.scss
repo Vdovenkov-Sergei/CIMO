@@ -16,7 +16,7 @@ $primary-font: 'Inter', sans-serif;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-attachment: fixed;
+  background-attachment: scroll;
 
   .navigation {
     display: flex;
@@ -166,6 +166,12 @@ $primary-font: 'Inter', sans-serif;
           font-size: 14px;
         }
       }
+        &:hover {
+          transform: none;
+          box-shadow: none;
+        }
+
+
     
       .profile-nav__link {
         padding: 15px;
@@ -173,6 +179,11 @@ $primary-font: 'Inter', sans-serif;
         .profile-nav__title {
           font-weight: 500;
           font-size: 16px;
+        }
+
+        &:hover {
+          transform: none;
+          box-shadow: none;
         }
         
       }

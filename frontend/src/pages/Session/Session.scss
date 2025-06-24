@@ -10,7 +10,7 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-attachment: fixed;
+  background-attachment: scroll;
   
   .main {
     flex: 1;
@@ -176,14 +176,14 @@
       justify-content: center;
       color: $additional-text-color;
       background-color: rgb(255, 255, 255, 0.02);
-      font-size: 1.2rem;
+      font-size: 18px;
       border-radius: 8px;
       margin-top: 20px;
     }
     
     .liked-movies-scroll {
       display: flex;
-      gap: 20px;
+      gap: 10px;
       overflow-x: auto;
       scrollbar-width: 10px;
       scrollbar-color: $link-color transparent;
@@ -198,14 +198,9 @@
       }
       
       .liked-movie {
-        flex: 0 0 200px;
         display: flex;
         flex-direction: column;
         border-radius: 8px;
-    
-        &:hover {
-          transform: translateY(-5px);
-        }
         
         &__poster {
           width: 100%;
@@ -229,7 +224,6 @@
 
 @media (max-width: 600px) {
   .session-container {
-    background-attachment: fixed;
     
     .movie-card-container {
       position: relative;
@@ -379,7 +373,7 @@
       }
 
       .empty-liked-movies {
-        font-size: 18px;
+        font-size: 16px;
       }
 
       .movies-scroll-container {
@@ -407,6 +401,25 @@
     .notification-text, .notification-movie-info, .notification-match {
       font-size: 14px;
     }
+    .action-buttons {
+      .action-btn {
+      
+        &:hover {
+          transform: none;
+        }
+        
+        &.dislike:hover {
+          background-color: transparent;
+        }
+        
+        &.like:hover {
+          background-color: transparent;
+        }
+      }
+    }
+    .movies-scroll-liked {
+      gap: 0px;
+    }
   }
 }
 
@@ -431,6 +444,14 @@
         
       }
     }
+
+    .action-buttons {
+      .action-btn {
+        width: 35px;
+        height: 35px;
+      }
+    }
+
     .movies-scroll-liked {
       display: flex;
       overflow-x: hidden;
@@ -441,21 +462,17 @@
       white-space: nowrap;
       scrollbar-width: none;
       -ms-overflow-style: none;
+      gap: 0px;
 
       .movies-scroll-liked::-webkit-scrollbar {
         display: none;
       }
     
       .liked-movie {
-        flex: 0 0 200px;
         display: flex;
         flex-direction: column;
         border-radius: 8px;
         transition: transform 0.3s, box-shadow 0.3s;
-    
-        &:hover {
-          transform: translateY(-5px);
-        }
         
         &__poster {
           width: 100%;
@@ -472,7 +489,7 @@
   display: flex;
   overflow-x: hidden;
   scroll-behavior: smooth;
-  gap: 20px;
+  gap: 0px;
   width: 100%;
 }
 
@@ -495,6 +512,7 @@
   white-space: nowrap;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  gap: 0px;
 
   .movies-scroll-liked::-webkit-scrollbar {
     display: none;
@@ -653,4 +671,13 @@
     width: 100%;
     max-width: 200px;
   }
+
+  .movies-scroll-liked {
+    .liked-movie {
+      &:hover {
+        transform: none;
+      }
+    }
+  }
+  
 }
