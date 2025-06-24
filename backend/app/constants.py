@@ -39,18 +39,19 @@ class RedisKeys:
     ATTEMPTS_SEND_KEY: str = "attempts:send:{email}"
     RESET_TOKEN_KEY: str = "reset:token:{token}"
 
-    USER_VECTOR_KEY: str = "vector:user:{user_id}"
-    USER_VECTOR_NORM_KEY: str = "vector:user:{user_id}:norm"
+    USER_VECTOR_KEY: str = "user:{user_id}:vector"
+    USER_VECTOR_NORM_KEY: str = "user:{user_id}:vector_norm"
     USER_RECENTLY_SEEN_KEY: str = "user:{user_id}:recently_seen"
 
     SESSION_USERS_KEY: str = "session:{session_id}:users"
     SESSION_PAIR_REC_KEY: str = "session:{session_id}:pair"
     USER_SESSION_LIKES_KEY: str = "session:{session_id}:user:{user_id}:likes"
     USER_SESSION_SWIPES_KEY: str = "session:{session_id}:user:{user_id}:swipes"
+    USER_ONBOARDING_LIST: str = "session:{session_id}:user:{user_id}:onboarding_lst"
+    
     PATTERN_SESSION_KEY: str = "session:{session_id}:*"
     PATTERN_USER_SESSION_KEY: str = "session:{session_id}:user:{user_id}:*"
 
-    USER_ONBOARDING_LIST: str = "session:{session_id}:user:{user_id}:onboarding_lst"
 
 
 class General:

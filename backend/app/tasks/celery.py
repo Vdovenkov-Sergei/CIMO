@@ -12,8 +12,8 @@ celery_app.conf.beat_schedule = {
         "task": "app.tasks.tasks.clean_completed_sessions",
         "schedule": crontab(minute=0, hour="*/6"),
     },
-    "clean-old-sessions-every-hour": {
+    "clean-old-sessions-every-8-hours": {
         "task": "app.tasks.tasks.clean_old_sessions",
-        "schedule": crontab(minute=0, hour="*"),
+        "schedule": crontab(minute=0, hour="*/8"),
     },
 }

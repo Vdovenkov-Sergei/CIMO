@@ -9,7 +9,7 @@ from typing import Any, Callable, ParamSpec, TypeVar
 from celery import shared_task
 from pydantic import EmailStr
 
-from app.chats.models import *
+from app.models import *
 from app.config import settings
 from app.logger import logger
 from app.sessions.dao import SessionDAO
