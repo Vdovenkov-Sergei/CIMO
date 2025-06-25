@@ -17,5 +17,3 @@ RUN poetry config virtualenvs.create false && \
 COPY . .
 
 RUN chmod a+x /backend/docker/*.sh || true
-
-CMD ["gunicorn", "app.main:app", "--workers", "1", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind=0.0.0.0:8000"]

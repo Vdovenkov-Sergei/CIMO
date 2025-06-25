@@ -3,6 +3,12 @@ services:
   db:
     image: postgres:17
     container_name: cimo_db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     env_file:
       - ./backend/.env.${BUILD}
     ports:
@@ -13,12 +19,18 @@ services:
   redis:
     image: redis:7
     container_name: cimo_redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
     volumes:
       - redis_data:/data
 
   backend:
     build:
       context: ./backend
+      dockerfile: Dockerfile
     container_name: cimo_backend
     env_file:
       - ./backend/.env.${BUILD}
@@ -27,6 +39,7 @@ services:
     depends_on:
       - db
       - redis
+    restart: unless-stopped
     command: ["/backend/docker/app.sh", "app"]
 
   celery:
@@ -37,6 +50,7 @@ services:
       - ./backend/.env.${BUILD}
     depends_on:
       - redis
+    restart: unless-stopped
     command: ["/backend/docker/app.sh", "celery"]
 
   flower:
@@ -49,6 +63,7 @@ services:
       - "5555:5555"
     depends_on:
       - redis
+    restart: unless-stopped
     command: ["/backend/docker/app.sh", "flower"]
 
   beat:
@@ -60,6 +75,7 @@ services:
     depends_on:
       - db
       - redis
+    restart: unless-stopped
     command: ["/backend/docker/app.sh", "beat"]
 
   load-data:
@@ -73,6 +89,7 @@ services:
       - db
     volumes:
       - ./backend/app/data:/app/data
+    restart: "no"
     profiles:
       - manual
 
