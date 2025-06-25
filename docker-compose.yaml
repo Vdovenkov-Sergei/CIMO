@@ -76,6 +76,22 @@ services:
     profiles:
       - manual
 
+  frontend-serve:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.serve
+      args:
+        BUILD: ${BUILD}
+    container_name: cimo_frontend
+    ports:
+      - "5173:5173"
+    stdin_open: true
+    tty: true
+    env_file:
+      - ./frontend/.env.${BUILD}
+    profiles:
+      - serve-mode
+
 volumes:
   postgres_data:
   redis_data:

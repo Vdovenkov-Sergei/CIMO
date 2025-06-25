@@ -1,91 +1,103 @@
 # CIMO
 
+`CIMO` is a web application for personalized movie selection. It supports both **single-user** and **pair-based** recommendation modes, allowing users to find films suitable for solo viewing or watching together with a friend, partner, or family member.
+
+<img src="./images/preview.png" alt="CIMO Interface Preview" style="border-radius: 8px; margin: 12px 0;">
+
+The application includes the following features:
+
+* Support for single and pair recommendation modes;
+* User authentication and profile management;
+* Ability to save and rate movies to improve recommendations;
+* A built-in recommendation engine (MVP);
+* Custom logic for generating pair-based movie suggestions;
+
+`CIMO` is designed to enhance the movie selection experience through data-driven, context-aware recommendations.
+
+---
+
+## Tech Stack
+
+### Backend
+
+<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;"> 
+   <img src="https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi" alt="FastAPI"> 
+   <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql" alt="PostgreSQL"> 
+   <img src="https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis" alt="Redis"> 
+   <img src="https://img.shields.io/badge/SQLAlchemy-D71F00?style=for-the-badge&logo=sqlalchemy" alt="SQLAlchemy"> 
+   <img src="https://img.shields.io/badge/Celery-37814A?style=for-the-badge&logo=celery" alt="Celery"> 
+   <img src="https://img.shields.io/badge/Pytest-0A9EDC?style=for-the-badge&logo=pytest" alt="Pytest"> 
+   <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker" alt="Docker"> 
+</div>
+
+### Frontend
+
+<div style="display: flex; flex-wrap: wrap; gap: 8px;"> 
+   <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react" alt="React"> 
+   <img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite" alt="Vite"> 
+   <img src="https://img.shields.io/badge/Sass-CC6699?style=for-the-badge&logo=sass" alt="Sass"> 
+   <img src="https://img.shields.io/badge/Framer_Motion-0055FF?style=for-the-badge&logo=framer" alt="Framer Motion"> 
+</div>
+
 ## Project Configuration
 
-To run the project correctly, you need to create a `.env` file in both the `backend` and `frontend` directories.
+To run the project, you must configure environment files for both the backend and frontend.
 
-This `.env` file should contain the necessary environment variables. For reference on which variables to include, please check the following example files:
+1. Create `.env.*` files in both `backend/` and `frontend/` directories.
+2. Use the provided example files as a reference:
+   - **Backend**: `backend/.env.example`
+   - **Frontend**: `frontend/.env.example`
+3. Replace placeholder values with actual credentials and secrets.
+4. Extract the [test data archive](https://drive.google.com/drive/folders/1R4zqDwEF2zLtH0rUzQq0GdLqKq8c2JQ9?usp=sharing) into the following path: `./backend/app/data`
 
-- Backend: `backend/.env.example`
-- Frontend: `frontend/.env.example`
-
-Make sure to replace placeholder values with your actual credentials and keys.
-
----
-
-## Backend
-
-### Creating a virtual environment
-
-To create a virtual environment via `poetry`, follow these steps:
-
-- Run `pip install poetry` to install poetry;
-- Run `poetry config virtualenvs.in-project true` to set the flag to create the `.venv` folder (by default, the environment is set to **_poetry cache_**);
-- Run `poetry install --no-root` to download dependencies (use **_poetry.lock_** and **_pyproject.toml_** files);
-- When new dependencies or dependency version updates are introduced, update all packages via `poetry update`;
-- Useful commands: `poetry check`, `poetry run`, `poetry env info`, `poetry shell`, `poetry add [--dev]`;
-
-Click [here](https://python-poetry.org/docs/) for more information about **poetry**
-
-
-### Creating migrations
-
-To create a new migration, follow these steps:
-
-- Run the command `alembic revision --autogenerate -m "<message>"` with some *message*. After that, new file is created in the folder **_migrations/versions_**.
-- To apply all current migrations, run the command `alembic upgrade head`.
-- To roll back the migration, run the command `alembic downgrade -1`.
-
-
-### Checking column properties in PostgreSQL table
-
-To check the properties of columns in a specific table in PostgreSQL, you can use the following SQL query. This query retrieves metadata information from the `information_schema.columns` system catalog:
-
-```sql
-SELECT column_name, data_type, character_maximum_length, 
-    is_nullable, column_default
-FROM information_schema.columns
-WHERE table_schema = 'public' AND table_name = 'table_name'
-ORDER BY ordinal_position;
-```
-
----
 
 ## Running with Docker
 
-### Basic Startup of All Services
+### 1. Set Environment and Use Git Bash
 
-To build and start all main containers, run command below and replace `{MODE}` with the desired environment mode:
-
-```bash
-MODE={MODE} docker compose up -d
-```
-
-This will start the following services:
-
-* `db` — PostgreSQL;
-* `redis` — Redis;
-* `backend` — Main application server (`/docs` - OpenAPI documentation, `/admin` - Admin panel);
-* `celery`, `beat`, `flower` — Workers and monitoring;
-* `frontend` — Frontend;
-
-The `load-data` container is not started automatically — it's launched manually.
-
----
-
-### Manual Data Loading
-
-The `load-data` container is configured with the `manual` profile — it doesn't run automatically to prevent reloading data on each start.
+To avoid platform-specific issues (especially on Windows), use **Git Bash** or a compatible terminal. Export the `BUILD` environment variable to define which `.env` file should be used during startup. For example:
 
 ```bash
-MODE={MODE} docker compose --profile manual up
+export BUILD=develop
 ```
 
-* The data will be loaded using an Alembic / Python script.
-* The container will be removed after execution.
+This will use `.env.develop` as the environment config for the project. By default, Docker Compose reads `.env.${BUILD}` inside each service.
 
-To show real-time logs from all running containers, you can use command below:
+### 2. Build and Load Data
 
+To build the project and automatically load test data into the database, run:
 ```bash
-MODE={MODE} docker compose logs -f
+docker compose up -d db redis
+docker compose --profile manual up load-data
 ```
+
+This will:
+
+* Build all services (`db`, `redis`, `backend`, workers, etc.);
+* Load data using the `load-data` container (only if test data files exist);
+* Stop the loader container when done;
+
+### 3. Serve the Frontend (with `serve`)
+
+To start the frontend with static server (e.g. after building via Vite):
+```bash
+docker compose --profile serve-mode up
+```
+
+This will:
+
+* Build the frontend using the `Dockerfile.serve`;
+* Serve the compiled **dist/** folder using serve;
+
+### Show Logs
+
+To inspect logs for all running containers:
+```bash
+docker compose logs -f
+```
+
+## Contact
+
+**Email**: cinemood.corp@gmail.com
+
+**Live Demo**: https://cimo-online.ru
