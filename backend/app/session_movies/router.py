@@ -26,15 +26,18 @@ async def websocket_endpoint(websocket: WebSocket, session_id: uuid.UUID) -> Non
         active_sessions[session_id] = []
     active_sessions[session_id].append(websocket)
 
-    try:
-        while True:
-            await websocket.receive_text()
+    while True:
+        try:
+            message = await websocket.receive_text()
+            if message == "ping":
+                continue
             logger.debug("WebSocket message received.", extra={"session_id": session_id})
-    except WebSocketDisconnect:
-        active_sessions[session_id].remove(websocket)
-        logger.info("WebSocket disconnected.", extra={"session_id": session_id})
-        if not active_sessions[session_id]:
-            del active_sessions[session_id]
+        except WebSocketDisconnect as err:
+            active_sessions[session_id].remove(websocket)
+            logger.info("WebSocket disconnected.", extra={"session_id": session_id, "error": str(err)})
+            if not active_sessions[session_id]:
+                del active_sessions[session_id]
+            break
 
 
 @router.post("/", response_model=dict[str, str | int])
@@ -73,8 +76,14 @@ async def swipe_session_movie(
             notification = MatchNotification(
                 movie=SMovieRead.model_validate(movie), match_time=datetime.now(UTC)
             ).model_dump_json()
-            for websocket in active_sessions.get(session.id, []):
-                await websocket.send_text(notification)
+            webconnections = active_sessions.get(session.id, []).copy()
+            for websocket in webconnections:
+                try:
+                    await websocket.send_text(notification)
+                except Exception as err:
+                    logger.warning("WebSocket dead connection.", extra={"session_id": session.id, "error": str(err)})
+                    if websocket in active_sessions[session.id]:
+                        active_sessions[session.id].remove(websocket)
 
             logger.info(
                 "Match sent to all clients.",

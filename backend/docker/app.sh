@@ -12,7 +12,8 @@ if [[ "${1}" == "app" ]]; then
     --workers $WORKERS \
     --worker-class uvicorn.workers.UvicornWorker \
     --bind=0.0.0.0:8000 \
-    --timeout 60
+    --timeout 60 \
+    --forwarded-allow-ips="*"
 
 elif [[ "${1}" == "celery" ]]; then
   celery --app=app.tasks.celery:celery_app worker \

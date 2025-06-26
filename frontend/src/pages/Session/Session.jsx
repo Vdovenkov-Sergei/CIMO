@@ -181,6 +181,16 @@ const Session = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const pingInterval = setInterval(() => {
+      if (ws.current?.readyState === WebSocket.OPEN) {
+        ws.current.send("ping");
+      }
+    }, 30000);
+
+    return () => clearInterval(pingInterval);
+  }, []);
+
   const enqueue = (item) => {
     setQueue(prevQueue => [...prevQueue, item]);
   }
