@@ -1,9 +1,16 @@
 services:
+
   db:
     image: postgres:17
     container_name: cimo_db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     env_file:
-      - ./backend/${ENV_FILE}
+      - ./backend/.env.${BUILD}
     ports:
       - "5432:5432"
     volumes:
@@ -12,18 +19,27 @@ services:
   redis:
     image: redis:7
     container_name: cimo_redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+    volumes:
+      - redis_data:/data
 
   backend:
     build:
       context: ./backend
+      dockerfile: Dockerfile
     container_name: cimo_backend
     env_file:
-      - ./backend/${ENV_FILE}
+      - ./backend/.env.${BUILD}
     ports:
       - "8000:8000"
     depends_on:
       - db
       - redis
+    restart: unless-stopped
     command: ["/backend/docker/app.sh", "app"]
 
   celery:
@@ -31,9 +47,10 @@ services:
       context: ./backend
     container_name: cimo_celery
     env_file:
-      - ./backend/${ENV_FILE}
+      - ./backend/.env.${BUILD}
     depends_on:
       - redis
+    restart: unless-stopped
     command: ["/backend/docker/app.sh", "celery"]
 
   flower:
@@ -41,11 +58,12 @@ services:
       context: ./backend
     container_name: cimo_flower
     env_file:
-      - ./backend/${ENV_FILE}
+      - ./backend/.env.${BUILD}
     ports:
       - "5555:5555"
     depends_on:
       - redis
+    restart: unless-stopped
     command: ["/backend/docker/app.sh", "flower"]
 
   beat:
@@ -53,10 +71,11 @@ services:
       context: ./backend
     container_name: cimo_beat
     env_file:
-      - ./backend/${ENV_FILE}
+      - ./backend/.env.${BUILD}
     depends_on:
       - db
       - redis
+    restart: unless-stopped
     command: ["/backend/docker/app.sh", "beat"]
 
   load-data:
@@ -65,24 +84,31 @@ services:
     container_name: cimo_load_data
     command: ["/backend/docker/load.sh"]
     env_file:
-      - ./backend/${ENV_FILE}
+      - ./backend/.env.${BUILD}
     depends_on:
       - db
     volumes:
       - ./backend/app/data:/app/data
+    restart: "no"
     profiles:
       - manual
 
-  frontend:
+  frontend-serve:
     build:
       context: ./frontend
+      dockerfile: Dockerfile.serve
+      args:
+        BUILD: ${BUILD}
     container_name: cimo_frontend
     ports:
-      - "3000:3000"
+      - "5173:5173"
     stdin_open: true
     tty: true
     env_file:
-      - ./frontend/${ENV_FILE}
+      - ./frontend/.env.${BUILD}
+    profiles:
+      - serve-mode
 
 volumes:
   postgres_data:
+  redis_data:

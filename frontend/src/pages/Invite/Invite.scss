@@ -1,4 +1,4 @@
-@import '../../styles/variables';
+@use '../../styles/variables' as *;
 
 .invite-page {
     height: 100vh;
@@ -9,11 +9,11 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-image: url('src/assets/images/background.png');
+    background-image: url('/background.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    background-attachment: fixed;
+    background-attachment: scroll;
   
     .invite-message {
       display: none;

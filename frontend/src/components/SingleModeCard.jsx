@@ -4,7 +4,7 @@ import ModalSingle from './ModalSingle/ModalSingle';
 const SingleModeCard = ({
   title = "Одиночный режим",
   description = "Данный режим позволяет осуществлять подбор фильмов под Ваше настроение и предпочтения.",
-  imageSrc = "src/assets/images/mode1.png",
+  imageSrc = "/mode1.png",
   buttonText = "Одиночная сессия",
   confirmText = "Начать",
   onStartSession,

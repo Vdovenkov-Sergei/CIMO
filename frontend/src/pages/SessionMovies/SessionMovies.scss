@@ -1,7 +1,6 @@
+@use '../../styles/variables' as *;
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-@import '../../styles/variables';
 
-// Базовые переменные
 $bg-color: #09090B;
 $text-color: #FFFFFF;
 $link-color: #A1ACFF;
@@ -13,13 +12,12 @@ $primary-font: 'Inter', sans-serif;
   font-family: $primary-font;
   display: flex;
   flex-direction: column;
-  background-image: url('src/assets/images/background.png');
+  background-image: url('/background.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-attachment: fixed;
+  background-attachment: scroll;
 
-  // Основная часть
   .movies-main {
     flex: 1;
     padding: 40px;
@@ -49,7 +47,7 @@ $primary-font: 'Inter', sans-serif;
       justify-content: center;
       color: $additional-text-color;
       background-color: rgb(255, 255, 255, 0.02);
-      font-size: 1.2rem;
+      font-size: 18px;
       border-radius: 8px;
       margin-top: 20px;
     }
@@ -127,7 +125,6 @@ $primary-font: 'Inter', sans-serif;
 
 
 
-// Адаптивность
 @media (max-width: 600px) {
   .session-movies-page {
     .movies-main {
@@ -135,6 +132,10 @@ $primary-font: 'Inter', sans-serif;
         .movies-section__title h3 {
           text-align: center;
           font-size: 20px;
+        }
+
+        .empty-watch-later {
+          font-size: 16px;
         }
       }
     }
@@ -307,9 +308,17 @@ $primary-font: 'Inter', sans-serif;
   display: flex;
   overflow-x: hidden;
   scroll-behavior: smooth;
-  gap: 20px;
   padding: 10px 0;
   width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  .movies-scroll::-webkit-scrollbar {
+    display: none;
+  }
 
   .liked-movies {
     width: 100%;

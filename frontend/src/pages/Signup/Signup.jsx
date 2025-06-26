@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Pagination } from 'swiper/modules';
 import './Signup.scss';
 import HeaderReg from '../../components/HeaderReg/HeaderReg';
 import Footer from '../../components/Footer/Footer';
 import RegisterForm from '../../components/RegisterForm';
+import { errorMessages } from '../../utils/exceptions';
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -33,15 +32,18 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.email || !formData.password || !formData.confirmPassword) {
-      setError('Все поля обязательны для заполнения');
-      setBackendError('');
-      return;
-    }
-    
     if (formData.password !== formData.confirmPassword) {
       setError('Пароли не совпадают');
       setBackendError('');
+      return;
+    }
+
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!regex.test(formData.email)) {
+      setBackendError('Некорректная почта');
+      setSuccessMessage('');
+      setError('');
       return;
     }
 
@@ -51,7 +53,7 @@ const Signup = () => {
     setSuccessMessage('');
     
     try {
-      const response = await fetch('/api/auth/register/email', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/register/email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -65,11 +67,12 @@ const Signup = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        const errorMessage = data.detail || data.message || 'Ошибка регистрации';
+        const errorMessage = errorMessages[data.detail.error_code] || 'Ошибка регистрации';
         setBackendError(errorMessage);
         throw new Error(errorMessage);
       }
 
+      localStorage.removeItem('verification_end_time');
       setSuccessMessage('Письмо отправлено. Проверьте почту.');
       
       setTimeout(() => {

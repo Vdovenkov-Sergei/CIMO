@@ -1,5 +1,4 @@
 import React from 'react';
-import clockIconUrl from '../assets/images/clock.svg';
 
 const ToggleWatchButton = ({ onClick }) => {
   return (
@@ -8,7 +7,7 @@ const ToggleWatchButton = ({ onClick }) => {
       className="movie-button movie-button--primary"
       aria-label="Добавить в 'Посмотреть позже'"
     >
-      <img src={clockIconUrl} alt="" />
+      <img src='/clock.svg' alt="" />
     </button>
   );
 };

@@ -4,10 +4,10 @@ import PairModal from './PairModal/PairModal';
 const PairModeCard = ({
   title = "Парный режим",
   description = "Парный режим помогает подобрать фильмы для совместного просмотра исходя из предпочтений в паре.",
-  imageSrc = "src/assets/images/mode2.png",
+  imageSrc = "/mode2.png",
   buttonText = "Парная сессия",
   inviteLink,
-  copyIconUrl = "src/assets/images/copy-icon.svg",
+  copyIconUrl = "/copy-icon.svg",
   onStartSession,
   onCancelSession,
   onConfirmSession

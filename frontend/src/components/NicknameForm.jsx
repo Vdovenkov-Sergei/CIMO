@@ -43,8 +43,8 @@ const NicknameForm = ({
             value={nickname}
             onChange={onNicknameChange}
             className="form__input"
-            maxLength={20}
             required
+            minLength="1"
           />
         </div>
 

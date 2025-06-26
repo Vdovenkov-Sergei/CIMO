@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Pagination } from 'swiper/modules';
 import './Login.scss';
 import AuthForm from '../../components/AuthForm';
 import HeaderReg from '../../components/HeaderReg/HeaderReg';
 import Footer from '../../components/Footer/Footer';
+import { errorMessages } from '../../utils/exceptions';
 
 const Login = () => {
   const [searchParams] = useSearchParams();
@@ -35,7 +34,7 @@ const Login = () => {
     setSuccessMessage('');
 
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -50,7 +49,7 @@ const Login = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        const errorMessage = data.detail || data.message || 'Ошибка авторизации.';
+        const errorMessage = errorMessages[data.detail.error_code] || 'Ошибка авторизации.';
         setBackendError(errorMessage);
         throw new Error(errorMessage);
       }

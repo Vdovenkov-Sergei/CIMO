@@ -10,7 +10,6 @@ import sentry_sdk
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
-# from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
@@ -77,7 +76,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
         )
         raise
 
-    faiss_index.load()
+    faiss_index.initialize()
     yield
 
     logger.info("Shutting down application...")
@@ -122,15 +121,7 @@ async def add_process_time_header(request: Request, call_next):
     return response
 
 
-"""@app.middleware("http")
-async def redirect_http_to_https(request: Request, call_next):
-    if request.url.scheme == "http":
-        new_url = request.url.replace(scheme="https")
-        return RedirectResponse(url=new_url)
-    response = await call_next(request)
-    return response
-
-
+"""
 @app.middleware("http")
 async def add_security_headers(request: Request, call_next):
     response = await call_next(request)
@@ -145,8 +136,8 @@ async def add_security_headers(request: Request, call_next):
     #! Защита от подделки запросов
     response.headers["X-Content-Type-Options"] = "nosniff"
 
-    return response"""
-
+    return response
+"""
 
 origins = [settings.FRONTEND_URL]
 app.add_middleware(

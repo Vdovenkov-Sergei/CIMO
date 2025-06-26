@@ -20,7 +20,7 @@ const MovieDetailsModal = ({ movie, onClose, onSwipeLeft, onSwipeRight }) => {
     controllerRef.current = controller;
 
     try {
-      const response = await fetch(`/api/movie/roles/${movie.id}?limit=${limit}&offset=${offset}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/movie/roles/${movie.id}?limit=${limit}&offset=${offset}`, {
         credentials: 'include',
         signal: controller.signal
       });

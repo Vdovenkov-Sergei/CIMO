@@ -1,7 +1,6 @@
+@use '../../styles/variables' as *;
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-@import '../../styles/variables';
 
-// Базовые переменные
 $bg-color: #09090B;
 $text-color: #FFFFFF;
 $link-color: #A1ACFF;
@@ -13,11 +12,11 @@ $primary-font: 'Inter', sans-serif;
   font-family: $primary-font;
   display: flex;
   flex-direction: column;
-  background-image: url('src/assets/images/background.png');
+  background-image: url('/background.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-attachment: fixed;
+  background-attachment: scroll;
   
   .profile-main-nick {
     display: flex;
@@ -136,7 +135,6 @@ $primary-font: 'Inter', sans-serif;
   }
 }
 
-// Адаптивность
 @media (max-width: 600px) {
   .change-nickname-page {
     .profile-main-nick {

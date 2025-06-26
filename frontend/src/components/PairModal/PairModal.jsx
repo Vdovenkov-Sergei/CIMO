@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import './PairModal.scss';
-import checkIconUrl from '../../../src/assets/images/check.svg';
 import CancelButton from '../CancelButton';
 import StartButton from '../StartButton';
 import CopyButton from '../CopyButton';
@@ -46,7 +45,7 @@ const PairModal = ({
           <CopyButton
             onClick={handleCopy}
             copyIconUrl={copyIconUrl}
-            checkIconUrl={checkIconUrl}
+            checkIconUrl='/check.svg'
             isCopied={isCopied}
           />
         </div>

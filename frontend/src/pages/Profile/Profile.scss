@@ -1,7 +1,6 @@
+@use '../../styles/variables' as *;
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-@import '../../styles/variables';
 
-// Базовые переменные
 $bg-color: #09090B;
 $text-color: #FFFFFF;
 $link-color: #A1ACFF;
@@ -13,11 +12,11 @@ $primary-font: 'Inter', sans-serif;
   font-family: $primary-font;
   display: flex;
   flex-direction: column;
-  background-image: url('src/assets/images/background.png');
+  background-image: url('/background.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-attachment: fixed;
+  background-attachment: scroll;
 
   .navigation {
     display: flex;
@@ -37,7 +36,6 @@ $primary-font: 'Inter', sans-serif;
     }
   }
 
-  // Основная часть профиля
   .profile-main {
     display: flex;
     flex: 1;
@@ -135,7 +133,6 @@ $primary-font: 'Inter', sans-serif;
 }
 
 
-// Адаптивность
 @media (max-width: 600px) {
   .profile-page {
     .profile-main {
@@ -169,6 +166,12 @@ $primary-font: 'Inter', sans-serif;
           font-size: 14px;
         }
       }
+        &:hover {
+          transform: none;
+          box-shadow: none;
+        }
+
+
     
       .profile-nav__link {
         padding: 15px;
@@ -176,6 +179,11 @@ $primary-font: 'Inter', sans-serif;
         .profile-nav__title {
           font-weight: 500;
           font-size: 16px;
+        }
+
+        &:hover {
+          transform: none;
+          box-shadow: none;
         }
         
       }

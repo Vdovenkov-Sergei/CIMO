@@ -1,13 +1,14 @@
 import json
-import pytest
-
 from datetime import datetime
 from typing import Any
-from httpx import AsyncClient, ASGITransport
+
+import pytest
+from httpx import ASGITransport, AsyncClient
 
 from app.chats.dao import ChatDAO
 from app.config import settings
-from app.database import Base, engine
+from app.database import Base
+from app.database import async_engine as engine
 from app.main import app as fastapi_app
 from app.messages.dao import MessageDAO
 from app.movie_roles.dao import MovieRoleDAO
